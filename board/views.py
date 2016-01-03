@@ -1,4 +1,4 @@
-from toolz.base_model_classes import BaseHandler
+from toolz.base_classes import BaseHandler
 
 
 class MainPageView(BaseHandler):

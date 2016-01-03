@@ -1,15 +1,14 @@
 #encoding: utf8
-import pymongo
-
-# connection = pymongo.Connection('127.0.0.1', 27017)
-# connection.ech.board.remove()
-
 # TODO: Разбить на отдельные приложения, оформить файл settings
 # TODO: Модератора/Администратора, какнибудь по другому оформить (в шаблоне)
 
-import tornado.ioloop
+import argparse
+import tornado
 import tornado.web
 import tornado.websocket
+from tornado.httpserver import HTTPServer
+from tornado.ioloop import IOLoop
+
 import urls
 
 settings = {
@@ -23,6 +22,17 @@ application.webSocketsPool = []
 application.password_salt = 'G98uasfjo9!j0p9kfdlkj-089'
 application.media_dir = 'media'
 
+
 if __name__ == "__main__":
-    application.listen(8000, address='127.0.0.1')
-    tornado.ioloop.IOLoop.instance().start()
+    parser = argparse.ArgumentParser(description='its ech.su!')
+    parser.add_argument('-p', '--port', type=int, dest='port', help='port')
+    args = parser.parse_args()
+
+
+    sockets = tornado.netutil.bind_sockets(args.port if args.port else 8888)
+    tornado.process.fork_processes(0)
+
+    server = HTTPServer(application)
+    server.add_sockets(sockets)
+
+    IOLoop.current().start()
