@@ -1,12 +1,16 @@
-from tornado.web import RequestHandler
+from jinja2 import Environment, PackageLoader
+
+from toolz.base_cls import BaseHandler
+
+environtment = Environment(loader=PackageLoader('board', 'templates'))
 
 
-class MainPageView(RequestHandler):
+class MainPageView(BaseHandler):
     def get(self, *args, **kwargs):
-        self.render('templates/main_page.html')
+        self.write(environtment.get_template('main_page.html').render(self.get_context()))
 
 
-class ThreadView(RequestHandler):
+class ThreadView(BaseHandler):
     def get(self, board_dir, thread_id):
         board = self.get_board(board_dir)
         thread = Thread.query.get(op_id=int(thread_id))
@@ -15,7 +19,7 @@ class ThreadView(RequestHandler):
             if board and thread else self.send_error(status_code=404)
 
 
-class BoardView(RequestHandler):
+class BoardView(BaseHandler):
     def get(self, board_dir):
         board = self.get_board(board_dir)
 

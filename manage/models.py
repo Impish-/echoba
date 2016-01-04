@@ -34,15 +34,24 @@ class Staff(Base, SessionMixin):
 
     @staticmethod
     @with_session
-    def get_auth(name, password, session=None):
-        user = session.query(Staff).filter(Staff.name == name).first()
-        return user.password == password
+    def get_auth(username, password, session=None):
+        user = session.query(Staff).filter(Staff.name == username).first()
+        return user if user.password == password else None
 
     @staticmethod
     @with_session
-    def get_or_create_user(name, password, role, session=None):
+    def create_or_update_user(name, password, role, session=None):
         user = session.query(Staff).filter(Staff.name == name).first()
-        return user if user else Staff(name, password, role).save()
+        if user:
+            user.password = password
+            user.role = role
+            return user
+        return Staff(name, password, role).save()
+
+    @staticmethod
+    @with_session
+    def get_user(username, session):
+        return session.query(Staff).filter(Staff.name == username).first()
 
 
 class Board(Base, SessionMixin):
