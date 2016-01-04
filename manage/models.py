@@ -1,66 +1,66 @@
-import hashlib
+# -*- coding: utf-8 -*-
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy_utils import PasswordType, ChoiceType
 
-from ming import schema
-from ming.odm import FieldProperty
-from ming.schema import ObjectId
+from toolz.base_models import SessionMixin
+from toolz.bd_toolz import with_session, engine
 
-from toolz.base_classes import BaseMappedClass
+Base = declarative_base()
 
 
-class Staff(BaseMappedClass):
-    class __mongometa__:
-        name = 'staff'
-        unique_indexes = [('name',)]
+class Staff(Base, SessionMixin):
+    name = Column(String, unique=True)
+    password = Column(PasswordType(
+                        schemes=[
+                            'pbkdf2_sha512',
+                            'md5_crypt',
+                        ],
+                        deprecated=['md5_crypt'],
+                    )
+    )
+    role = Column(ChoiceType([('adm', u'Admin'),
+                              ('mod', u'Moderator'),
+                             ])
+    )
 
-    _id = FieldProperty(schema.ObjectId)
-    name = FieldProperty(str)
-    role = FieldProperty(str)
-    secret_key = FieldProperty(str)
+    def __init__(self, name, password, role):
+        self.name = name
+        self.password = password
+        self.role = role
+
+    def __repr__(self):
+        return "<User('%s', '%s', %s)>" % (self.name, self.password, self.role)
 
     @staticmethod
-    def get_user(username, password):
-        auth = Staff.query.get(name=username,
-                               secret_key=hashlib.sha512(password + password_salt).hexdigest())
-        return auth
+    @with_session
+    def get_auth(name, password, session=None):
+        user = session.query(Staff).filter(Staff.name == name).first()
+        return user.password == password
 
     @staticmethod
-    def get_user_by_name(username):
-        return Staff.query.get(name=username)
+    @with_session
+    def get_or_create_user(name, password, role, session=None):
+        user = session.query(Staff).filter(Staff.name == name).first()
+        return user if user else Staff(name, password, role).save()
 
-    @staticmethod
-    def get_user_by_id(id):
-        return Staff.query.get(_id=ObjectId(id))
 
-    @staticmethod
-    def get_all_users():
-        return Staff.query.find().all()
+class Board(Base, SessionMixin):
+    name = Column(String, unique=True)
+    dir = Column(String, unique=True)
+    threads_on_page = Column(Integer)
+    default_name = Column(String, default='Anonymouse')
+    max_pages = Column(Integer)
 
-    def create_or_update_user(self, **kwargs):
-        mod_boards = kwargs.get('mod_boards', None)
-        try:
-            kwargs.pop('mod_boards')
-        except KeyError:
-            mod_boards = []
 
-        user = self.get_user_by_id(kwargs.get('user_id', [None])[0])
+class Thread(Base, SessionMixin):
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    board = Column('board_id', Integer, ForeignKey('board.id'))
+    bump_timestamp = Column(Integer)
+    bump_limited = Column(Boolean)
+    closed = Column(Boolean)
+    sticky = Column(Boolean)
 
-        if not user:
-            user = Staff()
-        if 'password' in kwargs:
-            kwargs.update({
-                'secret_key': hashlib.sha512(kwargs.get('password')[0] + password_salt).hexdigest(),
-            })
+Base.metadata.create_all(engine)
 
-        user = self.update_kwargs(user, **kwargs)
-
-        #for board in Board.get_all_boards():
-        #    if board.dir in mod_boards or kwargs.get('mod_all_boards', None):
-        #        if not user._id in board.moderators:
-         #           board.moderators.append(user._id)
-            #else:
-             #   try:
-                    #board.moderators.remove(user._id)
-             #   except ValueError:
-            #        pass
-
-        user.save()

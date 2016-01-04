@@ -28,7 +28,6 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--port', type=int, dest='port', help='port')
     args = parser.parse_args()
 
-
     sockets = tornado.netutil.bind_sockets(args.port if args.port else 8888)
     tornado.process.fork_processes(0)
 

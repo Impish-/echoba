@@ -1,11 +1,12 @@
-from toolz.base_classes import BaseHandler
+from tornado.web import RequestHandler
 
 
-class MainPageView(BaseHandler):
+class MainPageView(RequestHandler):
     def get(self, *args, **kwargs):
         self.render('templates/main_page.html')
 
-class ThreadView(BaseHandler):
+
+class ThreadView(RequestHandler):
     def get(self, board_dir, thread_id):
         board = self.get_board(board_dir)
         thread = Thread.query.get(op_id=int(thread_id))
@@ -14,7 +15,7 @@ class ThreadView(BaseHandler):
             if board and thread else self.send_error(status_code=404)
 
 
-class BoardView(BaseHandler):
+class BoardView(RequestHandler):
     def get(self, board_dir):
         board = self.get_board(board_dir)
 
