@@ -1,0 +1,30 @@
+{% extends "parts/base.html" %}
+{% block content %}
+    <div>
+        <h3 style="color: darkorange; align-items: center">Мочераторы и им сочувствующие</h3>
+
+        {% if current_user.role.value == 'Admin' %}
+            <hr style="color: darkorange"/>
+            Добавить еще одного:
+            <form method="POST" action="">
+                {% include "parts/staff_add_form.html" %}
+            </form>
+
+            <hr style="color: darkorange"/>
+        {% endif %}
+
+
+        <ul>
+            {% for user in staff_list %}
+                <li>
+                    <b>{{ user.name }}</b> -
+                    (<i>{{ user.role.value }}</i>)
+
+                    [<a href="/manage/staff/edit/{{ user.name }}/">Подробнее</a>]
+                    [<a href="/manage/staff/del/{{ user.name }}">Удалить</a>]
+
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

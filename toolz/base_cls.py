@@ -15,7 +15,7 @@ class BaseHandler(RequestHandler):
         context = {
                'current_user': self.get_current_user(),
                }
+
         if self.application.settings['xsrf_cookies']:
             context['xsrf_form_html'] = self.xsrf_form_html()
-        print(context)
         return context

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %} Ech.su {% endblock %}</title>
+    </head>
+    <body style="background-color: aliceblue; height: 100%;">
+        <div style="margin: 30px; background-color: cornsilk; height: 100%; padding: 20px">
+            <div align="center" style="text-align: center">
+                <h1 style="color: darkorange;display: inline;">МО<s>Д</s>ЧЕРКА!</h1>
+                <h2 style="color: red; display: inline;">ECH.su</h2>
+            </div>
+
+            {% include "parts/login.html" %}
+
+            {% if current_user %}
+
+                <div style=" margin-top: 50px;">
+                    <hr style="color: darkorange"/>
+                    <div style="display: inline-table; background-color: rgb(183, 245, 255); padding: 20px; border-color: darkorange; border: medium;;">
+                        <div>
+                            {% include "parts/menu.html" %}
+                        </div>
+                    </div>
+                    <div style="display: inline-table; margin-left: 20px; padding: 20px; width: 70%; height: 100%; background-color: khaki">
+                        <div>
+                            {% block content %}{% endblock%}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </body>
+</html>

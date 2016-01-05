@@ -1,13 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 {#    <a href="/manage/"> Admin </a>#}
-    <div align="center">
+    <div align="center" style="background-color: #fffffb">
         <h1>Воскресаем потихоньку</h1>
+        <h3>Все по новому, все с нуля!</h3>
         <h4>Log:</h4>
-        <li>
-            <ul>3.1.2016: Пилим модерки, авторизации, прочую хуйню, настраиваем сервера.</ul>
-        </li>
-        (<a href="mailto:adm@ech.su">admin@ech.su</a>)
+        <div style="text-align: left; padding-left: 30%">
+            <li>3.1.2016: Пилим модерки, авторизации, прочую хуйню, настраиваем сервера.</li>
+            <li>5.1.2016: Пилим же саму борду! Скоро альфа-тест, епт!</li>
+
+            <div style="margin-left: 40px; color: coral"><b>! Приветствуются добровольцы и помошники всех мастей: </b><br/></div>
+            <div style="margin-left: 90px;">
+                    <i style="color: goldenrod">>Погромисты - <a target="_blank" href="https://ru.wikipedia.org/wiki/Python"> Python</a>
+                        /<a target="_blank" href="https://ru.wikipedia.org/wiki/Tornado">Tornado</a> <b style="color: coral">(лучшие традиции)™</b><br/></b>
+                    <i style="color: goldenrod">>Верстка - <a target="_blank" href="https://ru.wikipedia.org/wiki/Jinja">Jinja</a><br/><i>
+            </div>
+
+        </div>
+        <div style="padding: 100px">
+            По всем вопросам -(<a href="mailto:adm@ech.su">admin@ech.su</a>)
+        </div>
     </div>
     {% include 'yandex_metrika.html' %}
 {% endblock %}

@@ -1,0 +1,26 @@
+{% if current_user %}
+    <div>
+        <h4 style="color: darkorange; display: inline-block">{{ current_user.role.value }},</h4>
+        <h5 style="display: inline-block; color: deeppink"> Да! Ты зашел туда!</h5><br>
+        <h5 style="margin-top: -25px; margin-left: 30px;">Тут у нас всякие штучки, модератрорские!</h5>
+    </div>
+    <ul>Персонал:
+        <li><a href="/manage/">Mod - чатик?))</a></li>
+        <li>Банхаммер - лог</li>
+        {% if current_user.role.value == 'Admin' %}
+            <li>Лог активности персонала ({{ current_user.role.value }})</li>
+            <li><a href="/manage/staff">Управление персоналом</a> ({{ current_user.role.value }})</li>
+        {% endif %}
+    </ul>
+
+    <ul>Управление сайтиком целиком:
+        <li>Настройка главной страницы</li>
+        <li>Настройка стилей</li>
+        <li>Красивые Трипкоды(для неймфагов)</li>
+        <li>какиенибудь еще настройки(походу насобираются)</li>
+    </ul>
+
+    <ul>Управление Борами:
+        <li>Бордолист</li>
+    </ul>
+{% endif %}

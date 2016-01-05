@@ -1,0 +1,12 @@
+{% for field in form %}
+    {{ field.label }} {{ field }}
+    {% for err in form.errors[field.name] %}
+        <div style="display: inline">
+            <ul style="display: inline">
+                <li><i style="color: red;">{{ err }}</i></li>
+            </ul>
+        </div>
+
+    {% endfor %}
+{% endfor %}
+<input type="submit" value="Добавить его!">

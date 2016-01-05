@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import PasswordType, ChoiceType
@@ -17,11 +18,11 @@ class Staff(Base, SessionMixin):
                             'md5_crypt',
                         ],
                         deprecated=['md5_crypt'],
-                    )
+                    ), nullable=False
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                             ])
+                             ]), nullable=False
     )
 
     def __init__(self, name, password, role):
@@ -36,22 +37,46 @@ class Staff(Base, SessionMixin):
     @with_session
     def get_auth(username, password, session=None):
         user = session.query(Staff).filter(Staff.name == username).first()
-        return user if user.password == password else None
+        try:
+            return user if user.password == password else None
+        except AttributeError:
+            return None
 
     @staticmethod
     @with_session
-    def create_or_update_user(name, password, role, session=None):
-        user = session.query(Staff).filter(Staff.name == name).first()
-        if user:
-            user.password = password
-            user.role = role
-            return user
+    def create_user(name, password, role, session=None):
+
         return Staff(name, password, role).save()
+
+
+    @staticmethod
+    @with_session
+    def update_user(name, password, role, id, session=None):
+        user = session.query(Staff).filter(Staff.id == id).first()
+        if name:
+            user.name = name
+        if password:
+            user.password = password
+        if role:
+            user.role = role
+        session.commit()
+        return user
 
     @staticmethod
     @with_session
     def get_user(username, session):
         return session.query(Staff).filter(Staff.name == username).first()
+
+    @staticmethod
+    @with_session
+    def remove_user(name, session):
+        session.query(Staff).filter(Staff.name == name).delete(synchronize_session=False)
+        session.commit()
+
+    @staticmethod
+    @with_session
+    def get_users(session):
+        return session.query(Staff).all()
 
 
 class Board(Base, SessionMixin):

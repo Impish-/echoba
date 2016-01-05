@@ -1,3 +1,5 @@
 passlib
 sqlalchemy
 tornado
+wtforms
+wtforms-tornado

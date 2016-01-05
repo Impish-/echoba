@@ -8,9 +8,12 @@
     {% if current_user %}
         <div style="float: right">
             {{ current_user.role.value }} | <b>{{ current_user.name }}</b>
+            <p><a href="/manage/">админка</a></p>
         </div>
     {% endif %}
+
     {% block content %}
     {% endblock %}
+
 </body>
 </html>
