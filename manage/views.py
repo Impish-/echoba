@@ -15,7 +15,7 @@ class ManageHandler(BaseHandler):
         self.write(env.get_template('manage.html').render(self.get_context()))
 
     def post(self):
-        user = Staff.get_auth(username=self.get_argument("login"), password=self.get_argument('password'))
+        user = Staff.get_auth(name=self.get_argument("login"), password=self.get_argument('password'))
 
         if user is None:
             return self.get()

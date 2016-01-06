@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, BOOLEAN
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, BOOLEAN, Table
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import PasswordType, ChoiceType
 
 
@@ -11,14 +11,10 @@ from toolz.bd_toolz import with_session, engine
 
 Base = declarative_base()
 
-
-class ModRights(Base):
-    __tablename__ = 'mod_rights'
-    moder = Column(Integer, ForeignKey('staff.id'), primary_key=True)
-    board = Column(Integer, ForeignKey('board.id'), primary_key=True)
-    extra_data = Column(String(50))
-    staff = relationship("Staff", back_populates="boards")
-    boards = relationship("Board", back_populates="staff")
+mod_rights = Table('association', Base.metadata,
+    Column('staff_id', Integer, ForeignKey('staff.id')),
+    Column('board_id', Integer, ForeignKey('board.id'))
+)
 
 
 class Staff(Base, SessionMixin):
@@ -36,7 +32,11 @@ class Staff(Base, SessionMixin):
                              ]), nullable=False
     )
     all_boards = Column(BOOLEAN, default=False)
-    boards = relationship("ModRights", back_populates="staff")
+    boards = relationship("Board",
+                          secondary=mod_rights,
+                          backref=backref('staff', lazy='dynamic',),
+                          passive_deletes=True,
+                          passive_updates=False)
 
     def __init__(self, name, password, role):
         self.name = name
@@ -53,8 +53,8 @@ class Staff(Base, SessionMixin):
 
     @staticmethod
     @with_session
-    def get_auth(username, password, session=None):
-        user = session.query(Staff).filter(Staff.name == username).first()
+    def get_auth(name, password, session=None):
+        user = session.query(Staff).filter(Staff.name == name).first()
         try:
             return user if user.password == password else None
         except AttributeError:
@@ -81,8 +81,8 @@ class Staff(Base, SessionMixin):
 
     @staticmethod
     @with_session
-    def get_user(username, session):
-        return session.query(Staff).filter(Staff.name == username).first()
+    def get_user(name, session):
+        return session.query(Staff).filter(Staff.name == name).first()
 
     @staticmethod
     @with_session
@@ -92,6 +92,11 @@ class Staff(Base, SessionMixin):
     @staticmethod
     @with_session
     def remove_user(name, session):
+        user = session.query(Staff).filter(Staff.name == name).first()
+        try:
+            user.boards[:] = []
+        except AttributeError:
+            pass
         session.query(Staff).filter(Staff.name == name).delete(synchronize_session=False)
         session.commit()
 
@@ -107,7 +112,9 @@ class Board(Base, SessionMixin):
     threads_on_page = Column(Integer, default=9)
     default_name = Column(String, default='Anonymouse')
     max_pages = Column(Integer, default=11)
-    staff = relationship("ModRights", back_populates="boards")
+    # staff = relationship("Staff",
+    #                      secondary=mod_rights,
+    #                      back_populates="boards")
 
     def __init__(self, name, dir):
         self.name = name
@@ -115,6 +122,22 @@ class Board(Base, SessionMixin):
 
     def __repr__(self):
         return "<User('%s', '%s')>" % (self.name, self.dir)
+
+    @with_session
+    def add_moderator(self, staff_id, session=None):
+        self.staff.append(session.query(Staff).filter(Staff.id == staff_id).first())
+        session.commit()
+
+    @staticmethod
+    @with_session
+    def create(name, dir, session=None):
+        return Board(name, dir).save()
+
+    @staticmethod
+    @with_session
+    def remove_board(name, session):
+        session.query(Board).filter(Board.name == name).delete(synchronize_session=False)
+        session.commit()
 
 Base.metadata.create_all(engine)
 
