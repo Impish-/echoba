@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 
 import re
@@ -42,6 +43,6 @@ class TestStaff(AsyncHTTPTestCase):
 
 class TestBoardModel(unittest.TestCase):
     def test_make_board(self):
-        b = Board()
+        b = Board(name=u'Бред', dir='b')
 
 

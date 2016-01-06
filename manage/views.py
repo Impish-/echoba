@@ -19,7 +19,7 @@ class ManageHandler(BaseHandler):
 
         if user is None:
             return self.get()
-        self.set_secure_cookie("username", user.name)
+        self.set_secure_cookie("user_id", '%d' % user.id)
         self.redirect("/manage")
 
 
@@ -36,7 +36,6 @@ class StaffManageHandler(BaseHandler):
     def get(self, *args, **kwargs):
         self.render_template()
 
-
     @tornado.web.authenticated
     def post(self, *args, **kwargs):
         # staff_add
@@ -46,6 +45,7 @@ class StaffManageHandler(BaseHandler):
                               password=form.password.data,
                               role=form.role.data)
             self.render_template()
+            return
         self.render_template(form=form)
 
     def get_context(self):
@@ -78,24 +78,21 @@ class EditStaffManageHandler(BaseHandler):
         user = Staff.get_user(kwargs.get('username', None))
         self.render_template(user=user)
 
-
     @tornado.web.authenticated
     def post(self, *args, **kwargs):
         user = Staff.get_user(kwargs.get('username', None))
         form = StaffEditForm(self.request.arguments)
-        print form.id.data
+
         if form.validate():
             user = Staff.update_user(name=form.username.data,
-                                      password=form.password.data,
-                                      role=form.role.data,
-                                      id=form.id.data)
-
-            self.render_template(user=user)
+                                     password=form.password.data,
+                                     role=form.role.data,
+                                     id=form.id.data)
+            return self.get(username=user.name)
         self.render_template(form=form, user=user)
 
     def get_context(self, user):
         context = super(self.__class__, self).get_context()
-        print user.role
         context.update({
             'form': StaffEditForm(username=user.name,
                                   role=user.role.code,
@@ -108,5 +105,5 @@ class LogOutHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
         if self.get_current_user():
-            self.clear_cookie("username")
+            self.clear_cookie("user_id")
         self.redirect('/manage')
