@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from toolz.bd_toolz import with_session
 
+
 class SessionMixin:
     @declared_attr
     def __tablename__(cls):
@@ -15,6 +16,7 @@ class SessionMixin:
     def session(self, session):
         return session
 
+    #!!]eqyz
     @with_session
     def save(self, session):
         session.add(self)

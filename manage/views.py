@@ -43,6 +43,7 @@ class StaffManageHandler(BaseHandler):
     @tornado.web.authenticated
     def post(self, *args, **kwargs):
         # staff_add
+        #TODO: переделать на modelform
         form = StaffAddForm(self.request.arguments)
         if form.validate():
             Staff.create_user(name=form.username.data,
