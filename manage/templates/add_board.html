@@ -1,0 +1,23 @@
+{% extends "parts/base.html" %}
+
+{% block content %}
+    <h3 style="color: coral">Запилить новую доску!</h3>
+    <div>
+        <form action="" method="post">
+            {% for field in form %}
+                <div>
+                    {{ field.label }} {{ field }}
+
+                    {% for err in form.errors[field.name] %}
+                        <div style="display: inline">
+                            <ul style="display: inline">
+                                <li><i style="color: red;">{{ err }}</i></li>
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <input type="submit">
+        </form>
+    </div>
+{% endblock %}

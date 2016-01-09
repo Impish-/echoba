@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 from psycopg2._psycopg import IntegrityError
 
-from manage.forms import StaffAddForm, StaffEditForm
-from manage.models import Staff
+from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
+from manage.models import Staff, Board
 import tornado
 from jinja2 import Environment, PackageLoader
 from toolz.base_cls import BaseHandler
 
 env = Environment(loader=PackageLoader('manage', 'templates'))
+
+class LogOutHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self, *args, **kwargs):
+        if self.get_current_user():
+            self.clear_cookie("user_id")
+        self.redirect('/manage')
 
 
 class ManageHandler(BaseHandler):
@@ -25,11 +32,7 @@ class ManageHandler(BaseHandler):
 
 class StaffManageHandler(BaseHandler):
     template = 'staff.html'
-
-    def render_template(self, **kwargs):
-        context = self.get_context()
-        context.update(kwargs)
-        self.write(env.get_template(self.template).render(context))
+    template_env = env
 
     @tornado.web.authenticated
     # staff_list
@@ -67,11 +70,7 @@ class DelStaffManagehandler(BaseHandler):
 
 class EditStaffManageHandler(BaseHandler):
     template = 'staff_edit.html'
-
-    def render_template(self, **kwargs):
-        context = self.get_context(kwargs.get('user'))
-        context.update(kwargs)
-        self.write(env.get_template(self.template).render(context))
+    template_env = env
 
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
@@ -101,9 +100,20 @@ class EditStaffManageHandler(BaseHandler):
         return context
 
 
-class LogOutHandler(BaseHandler):
-    @tornado.web.authenticated
+class AddBoardHandler(BaseHandler):
+    template_env = env
+    template = 'add_board.html'
+    form = AddBoardForm
+
     def get(self, *args, **kwargs):
-        if self.get_current_user():
-            self.clear_cookie("user_id")
-        self.redirect('/manage')
+        self.render_template(form=self.form())
+
+    def post(self, *args, **kwargs):
+        form = self.form(self.request.arguments)
+        if form.validate():
+            board = form.save()
+        return self.get()
+
+        self.render_template(form=form)
+
+

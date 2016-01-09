@@ -1,5 +1,10 @@
 passlib
-sqlalchemy
+
 tornado
 wtforms
 wtforms-tornado
+WTForms-Alchemy
+
+sqlalchemy
+sqlalchemy-defaults
+sqlalchemy_utils

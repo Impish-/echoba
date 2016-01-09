@@ -1,0 +1,51 @@
+ <form name="postform" id="postform" action="/manage" method="post" enctype="multipart/form-data">
+        {% raw xsrf_form_html() %}
+        <input type="hidden" name="action" value="add_message">
+        <input type="hidden" name="board" value="{{ board.dir }}">
+        <input type="hidden" name="reply_thread" value=""">
+        <input type="text" name="poster_name" size="28" maxlength="75" value="">
+        <input type="text" name="email" size="28" maxlength="75" value="">
+        <div>
+            <div>
+                <label for="sage">
+                <input id="sage" type="checkbox" name="sage" value="sage" style="vertical-align: middle;">(Sage)</label>
+            </div>
+            <div>
+                <input id="subject_row" type="text" name="subject" size="35" maxlength="75" accesskey="s">&nbsp;
+                <input type="submit" value="Отправить" accesskey="z">&nbsp;
+                <span id="posttypeindicator" class="extrabtns">(Новая тема)</span>
+            </div>
+            <div>
+                <textarea name="message" cols="48" rows="4" accesskey="m"></textarea>
+            </div>
+
+            <div>
+                <input type="file" name="imagefile" size="35" accesskey="f">
+            </div>
+
+            <div>
+                <input type="text" name="embed" size="28" maxlength="75" accesskey="e">&nbsp;
+                <select name="embedtype">
+                    <option value="youtube">Youtube</option>
+                </select>
+            </div>
+            <div>
+                <input type="password" name="postpassword" size="8" accesskey="p">&nbsp;(для удаления постов и файлов)
+            </div>
+            {% if current_user %}
+                <div>
+                    <input type="text" name="modpassword" size="28" maxlength="75">&nbsp;
+                    <acronym title="Display staff status (Mod/Admin)">D</acronym>:&nbsp;
+                    <input type="checkbox" name="displaystaffstatus" checked="">&nbsp;
+                    <acronym title="Lock">L</acronym>:&nbsp;
+                    <input type="checkbox" name="lockonpost">&nbsp;&nbsp;
+                    <acronym title="Sticky">S</acronym>:&nbsp;
+                    <input type="checkbox" name="stickyonpost">&nbsp;&nbsp;
+                    <acronym title="Raw HTML">RH</acronym>:&nbsp;
+                    <input type="checkbox" name="rawhtml">&nbsp;&nbsp;
+                    <acronym title="Name">N</acronym>:&nbsp;
+                    <input type="checkbox" name="usestaffname">
+                </div>
+            {% end %}
+        </div>
+    </form>

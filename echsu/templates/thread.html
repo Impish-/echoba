@@ -1,0 +1,25 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+
+</head>
+<body>
+    <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
+    {% include "post_form.html" %}
+
+
+    {% for message in cur_thread.t_messages %}
+        <div class="post">
+             <div class="post_header">
+                <span class="poster_name">{{ message.poster_name }}</span>
+                <span class="date">{{ message.date }}</span>
+                <span class="post_id">No {{ message.num }}</span>
+            </div>
+            <div>
+                {{ message.message }}
+            </div>
+
+        </div>
+    {% end %}
+
+</body>
+</html>

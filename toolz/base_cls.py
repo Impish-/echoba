@@ -1,7 +1,7 @@
 from jinja2 import Environment, PackageLoader
 from tornado.web import RequestHandler
 
-from manage.models import Staff
+from manage.models import Staff, Board
 
 
 class BaseHandler(RequestHandler):
@@ -15,6 +15,15 @@ class BaseHandler(RequestHandler):
         context = {
                'current_user': self.get_current_user(),
                }
+
+        #context precoosor nado?
+        context.update({'board_list': Board.get_all()})
+
         if self.application.settings['xsrf_cookies']:
             context['xsrf_form_html'] = self.xsrf_form_html()
         return context
+
+    def render_template(self, *args, **kwargs):
+        context = self.get_context()
+        context.update(kwargs)
+        self.write(self.template_env.get_template(self.template).render(context))

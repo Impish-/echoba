@@ -21,6 +21,10 @@
     </ul>
 
     <ul>Управление Борами:
-        <li>Бордолист</li>
+        <li><a href="/manage/board/add/">Создать доску</a> </li>
+        <b>Бордолист</b>
+        {% for board in board_list %}
+            <li><a href="">/{{ board.dir }}/ -{{ board.name }}</a></li>
+        {% endfor %}
     </ul>
 {% endif %}
