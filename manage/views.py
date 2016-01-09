@@ -100,6 +100,9 @@ class EditStaffManageHandler(BaseHandler):
         return context
 
 
+
+
+# TODO: Примерно на такой вид вьюшек(аля-жанго) перевести все
 class AddBoardHandler(BaseHandler):
     template_env = env
     template = 'add_board.html'
