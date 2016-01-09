@@ -116,6 +116,6 @@ class AddBoardHandler(BaseHandler):
         form = self.form(self.request.arguments)
         if form.validate():
             board = form.save()
-        return self.get()
+            return self.get()
 
         self.render_template(form=form)
