@@ -17,6 +17,7 @@ class BaseHandler(RequestHandler):
                }
 
         #context precoosor nado?
+        #TODO: подобие контекст процессорра (в каждом приложении?) чтобы таким хард-кодом не страдать
         context.update({'board_list': Board.get_all()})
 
         if self.application.settings['xsrf_cookies']:

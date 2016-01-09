@@ -9,7 +9,7 @@ from toolz.bd_toolz import with_session
 
 ModelForm = model_form_factory(Form)
 
-
+#TODO: Перевести на modelform
 class StaffForm(Form):
     username = StringField(u'Юзернэйм', [validators.Length(min=4, max=25,
                                                            message=u'от 4 до 25 Символов!')])
@@ -46,6 +46,7 @@ class StaffAddForm(StaffForm):
             raise ValidationError(u'Юзернэйм занят!')
 
 
+# Эталон формы!
 class AddBoardForm(ModelForm):
     class Meta:
         model = Board

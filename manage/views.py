@@ -9,6 +9,7 @@ from toolz.base_cls import BaseHandler
 
 env = Environment(loader=PackageLoader('manage', 'templates'))
 
+
 class LogOutHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
@@ -118,5 +119,3 @@ class AddBoardHandler(BaseHandler):
         return self.get()
 
         self.render_template(form=form)
-
-
