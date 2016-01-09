@@ -1,6 +1,4 @@
 #encoding: utf8
-# TODO: Разбить на отдельные приложения, оформить файл settings
-# TODO: Модератора/Администратора, какнибудь по другому оформить (в шаблоне)
 
 import argparse
 import tornado
