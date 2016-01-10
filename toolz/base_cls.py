@@ -1,3 +1,4 @@
+#encoding: utf8
 from jinja2 import Environment, PackageLoader
 from tornado.web import RequestHandler
 
