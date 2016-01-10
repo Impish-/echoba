@@ -128,6 +128,7 @@ class Board(Base, SessionMixin):
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
 
     def __init__(self, **kwargs):
+        # в случае получения id  в kwargs вытягивать из бд объект
         self.name = kwargs.get('name', None)
         self.dir = kwargs.get('dir', None)
         self.threads_on_page = kwargs.get('threads_on_page', None)
