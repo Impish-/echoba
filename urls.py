@@ -10,7 +10,6 @@ from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, Edit
 urls = [
     (r"/?$", MainPageView),
 
-    (r"/([a-z]+)/$", BoardView),
   #  (r"/([a-z]+)/(\d)/$", ThreadView),
 
     (r"/manage/?", ManageHandler),
@@ -27,4 +26,5 @@ urls = [
 
   #    (r"/ws", WebSocket),
     (r"/static/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
+    (r"/([a-z]+)/$", BoardView),
 ]
