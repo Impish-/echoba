@@ -177,6 +177,5 @@ class Board(Base, SessionMixin):
         except:
             return None
 
-
 Base.metadata.create_all(engine)
 

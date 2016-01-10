@@ -1,7 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from settings import db
+try:
+    from settings import db
+except ImportError:
+    from settings_local import db
 
 
 def get_engine():

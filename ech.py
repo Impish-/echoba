@@ -7,18 +7,15 @@ import tornado.websocket
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
+try:
+    from settings import tornado_settings
+except ImportError:
+    from settings_local import tornado_settings
+
 import urls
 
-settings = {
-    'login_url': "/manage",
-    'cookie_secret': "61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
-    'xsrf_cookies': False,
-}
-
-application = tornado.web.Application(urls.urls, **settings)
+application = tornado.web.Application(urls.urls, **tornado_settings)
 application.webSocketsPool = []
-application.password_salt = 'G98uasfjo9!j0p9kfdlkj-089'
-application.media_dir = 'media'
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='its ech.su!')
