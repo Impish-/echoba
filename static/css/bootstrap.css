@@ -6330,3 +6330,15 @@ button.close {
   }
 }
 /*# sourceMappingURL=bootstrap.css.map */
+
+
+.error-list {
+    list-style: none;
+    color: #f00;
+    margin: 0;
+    padding: 5px 0;
+}
+
+.last-element-form {
+    margin-bottom: 15px;
+}

@@ -1,12 +1,12 @@
 {% extends "parts/base.html" %}
 {% block content %}
     <div>
-        <h3 style="color: darkorange; align-items: center">Мочераторы и им сочувствующие</h3>
+        <h1 class="title">Мочераторы и им сочувствующие</h1>
 
         {% if current_user.role.value == 'Admin' %}
             <hr style="color: darkorange"/>
-            Добавить еще одного:
-            <form method="POST" action="">
+            <p>Добавить еще одного:</p>
+            <form method="POST" action="" class="form-horizontal">
                 {% include "parts/staff_add_form.html" %}
             </form>
 
@@ -14,17 +14,16 @@
         {% endif %}
 
 
-        <ul>
+        <table class="table table-hover">
             {% for user in staff_list %}
-                <li>
-                    <b>{{ user.name }}</b> -
-                    (<i>{{ user.role.value }}</i>)
+                <tr>
+                    <td><strong>{{ user.name }}</strong><td>
+                    <td>{{ user.role.value }}</td>
+                    <td><a href="/manage/staff/edit/{{ user.name }}/">Подробнее</a></td>
+                    <td><a href="/manage/staff/del/{{ user.name }}">Удалить</a></td>
 
-                    [<a href="/manage/staff/edit/{{ user.name }}/">Подробнее</a>]
-                    [<a href="/manage/staff/del/{{ user.name }}">Удалить</a>]
-
-                </li>
+                </tr>
             {% endfor %}
-        </ul>
+        </table>
     </div>
 {% endblock %}
