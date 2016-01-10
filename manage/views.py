@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from psycopg2._psycopg import IntegrityError
-
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
 from manage.models import Staff, Board
 import tornado
