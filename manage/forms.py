@@ -42,7 +42,7 @@ class StaffAddForm(StaffForm):
     confirm = PasswordField(u'Еще раз')
 
     def validate_username(form, field):
-        if Staff.get_user(username=field.data):
+        if Staff.get_user(name=field.data):
             raise ValidationError(u'Юзернэйм занят!')
 
 
