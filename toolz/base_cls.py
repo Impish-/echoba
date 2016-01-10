@@ -27,5 +27,5 @@ class BaseHandler(RequestHandler):
 
     def render_template(self, *args, **kwargs):
         context = self.get_context()
-        context.update(kwargs)
+        context.update(**kwargs)
         self.write(self.template_env.get_template(self.template).render(context))
