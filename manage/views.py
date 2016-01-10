@@ -76,8 +76,11 @@ class EditStaffManageHandler(BaseHandler):
 
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
-        user = Staff.get_user(kwargs.get('username', None))
-        self.render_template(user=user)
+        self.username = kwargs.get('username', None)
+        self.render_template(user=self.get_edit_user())
+
+    def get_edit_user(self):
+        return Staff.get_user(self.username)
 
     @tornado.web.authenticated
     def post(self, *args, **kwargs):
@@ -92,8 +95,9 @@ class EditStaffManageHandler(BaseHandler):
             return self.get(username=user.name)
         self.render_template(form=form, user=user)
 
-    def get_context(self, user):
+    def get_context(self):
         context = super(self.__class__, self).get_context()
+        user = self.get_edit_user()
         context.update({
             'form': StaffEditForm(username=user.name,
                                   role=user.role.code,
