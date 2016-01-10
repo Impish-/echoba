@@ -1,17 +1,5 @@
-<div>
-    {% if current_user %}
-        <div style="float: right; padding-top: -20px">
-            Вы вошли как <b>{{ current_user.name }}</b>, <a href="/logout">Выйти</a>
-        </div>
-    {% else %}
-        <div align="center">
-            <h4>Добро пожаловать!</h4>
-            <form action="" method="post">
-                {{ xsrf_form_html }}
-                Логин <input type="text" name="login">
-                Пароль <input type="password" name="password">
-                <input type="submit" value="Вход">
-            </form>
-        </div>
-    {% endif %}
-</div>
+{% if current_user %}
+    <ul class="nav navbar-nav navbar-right">
+        <li><a href="/logout"><strong>{{ current_user.name }}</strong>(Выйти)</a></li>
+    </ul>
+{% endif %}
