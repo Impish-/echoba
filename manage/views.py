@@ -95,7 +95,7 @@ class EditStaffManageHandler(BaseHandler):
             return self.get(username=user.name)
         self.render_template(form=form, user=user)
 
-    def get_context(self, user):
+    def get_context(self):
         context = super(self.__class__, self).get_context()
         user = self.get_user()
         context.update({
