@@ -30,3 +30,11 @@ def with_session(fn):
             session.rollback()
             raise
     return go
+
+def only_admin(fn):
+    def tmp(self, *args, **kw):
+        if self.current_user and self.current_user.role.value == u'Admin':
+            return fn(self, *args, **kw)
+        else:
+            self.send_error(status_code=403)
+    return tmp
