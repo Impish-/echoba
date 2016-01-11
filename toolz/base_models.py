@@ -19,6 +19,5 @@ class SessionMixin:
     #!!]eqyz
     @with_session
     def save(self, session):
-        session.add(self)
         session.commit()
         return self

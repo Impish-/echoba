@@ -17,7 +17,8 @@ class BaseHandler(RequestHandler):
         return Staff.get_user_by_id(user_id)
 
     def get_form(self, **kwargs):
-        return self.form(self.request.arguments)
+            return self.form(self.request.arguments)
+
 
     def get_context(self):
         context = {
@@ -27,6 +28,7 @@ class BaseHandler(RequestHandler):
         #context precoosor nado?
         #TODO: подобие контекст процессорра (в каждом приложении?) чтобы таким хард-кодом не страдать
         context.update({'board_list': Board.get_all()})
+
         if self.form:
             context.update({'form': self.get_form()})
 
@@ -55,7 +57,4 @@ class BaseHandler(RequestHandler):
     def render_template(self, *args, **kwargs):
         context = self.get_context()
         context.update(**kwargs)
-
-        context.update({'form': self.get_form()})
-
         self.write(self.template_env.get_template(self.template).render(context))

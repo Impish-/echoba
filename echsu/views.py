@@ -22,7 +22,7 @@ class BoardView(BaseHandler):
     template = 'board.html'
     template_env = template_env
     form = CreateThreadForm
-    model = Message
+    model = Thread
 
     def get(self,*args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir',None))
@@ -30,14 +30,18 @@ class BoardView(BaseHandler):
 
     #надо доаутировать
     def post(self, *args, **kwargs):
+        # Тут создается тренд
         board = Board.get_board(dir=self.path_kwargs.get('board_dir', None))
-        thread_form = self.get_form()
-        message_form = MessageForm(self.request.arguments)
-        # if not thread_form.validate():
-        #     #!
-        #     return self.render_template(board=Board.get_board(dir=self.path_kwargs.get('board_dir', None)))
 
-        thread = Thread()
+        thread_form = self.get_form()                       # гипотетически это можно...
+        message_form = MessageForm(self.request.arguments)  # запихать в одну форму
+
+        if not message_form.validate() and thread_form.validate():             # таки утрамбовать в Board класс
+            return self.render_template(board=board,
+                                        threads=board.threads.all(),
+                                        message_form=message_form)
+
+        thread = self.model()
         thread.board_id = board.id
         thread_form.populate_obj(thread)
         thread.save()
