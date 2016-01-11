@@ -65,8 +65,6 @@ class StaffManageHandler(BaseHandler):
 class DelStaffManagehandler(BaseHandler):
     @only_admin
     def get(self, *args, **kwargs):
-        if self.current_user.role.value != u'Admin':
-            self.send_error(status_code=403)
         username = kwargs.get('username', None)
         if self.current_user.name != username:
             Staff.remove_user(name=username)  # ;(
