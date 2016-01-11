@@ -15,8 +15,12 @@
                 OP
                     <span class="poster_name">{{ thread.op().poster_name }}</span>
                     <span class="post_id">No {{ thread.op().id  }}</span>
-                </div>
 
+                    <div>
+                        {{  thread.op().message }}
+                    </div>
+                </div>
+            <hr>
             {% for message in thread.messages_tail() %}
 
 
@@ -28,8 +32,8 @@
                     <div>
                         {{ message.message }}
                     </div>
-
                 </div>
+                <hr>
             {% endfor %}
         </div>
     {% endfor %}

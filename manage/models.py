@@ -17,6 +17,7 @@ mod_rights = Table('association', Base.metadata,
     Column('board_id', Integer, ForeignKey('board.id'))
 )
 
+
 class Staff(Base, SessionMixin):
     name = Column(String, unique=True)
     password = Column(PasswordType(
@@ -129,7 +130,7 @@ class Board(Base, SessionMixin):
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
     #threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
 
-
+    #TODO: выпилить, model_form.populate_obj юзать
     def __init__(self, **kwargs):
         # в случае получения id  в kwargs вытягивать из бд объект
         self.name = kwargs.get('name', None)
@@ -138,6 +139,7 @@ class Board(Base, SessionMixin):
         self.default_name = kwargs.get('default_name', None)
         self.max_pages = kwargs.get('max_pages', None)
         self.thread_bumplimit = kwargs.get('thread_bumplimit', None)
+        self.thread_tail = kwargs.get('thread_tail', None)
         self.captcha = kwargs.get('captcha', None)
 
     def __repr__(self):
@@ -199,9 +201,10 @@ class Thread(Base, SessionMixin):
     def op(self):
         return self.messages[0]
 
-    def messages_tail(self):
-        print self.board.thread_tail
-        return self.messages[:self.board.thread_tail]
+    @with_session
+    def messages_tail(self, session=None):
+        board = Board.get_board(id=self.board_id)
+        return self.messages[::len(self.messages)-board.thread_tail]
 
 
 class Message(Base, SessionMixin):
