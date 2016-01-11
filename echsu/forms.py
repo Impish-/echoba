@@ -28,6 +28,7 @@ class CreateThreadForm(ModelForm):
 class MessageForm(ModelForm):
     class Meta:
         model = Message
+        exclude = ['ip_address']
     sage = BooleanField(u'Сажа',)
     picture = FileField(u'Изображение')
 
