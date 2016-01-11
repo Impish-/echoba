@@ -91,6 +91,7 @@ class EditStaffManageHandler(BaseHandler):
                                      role=form.role.data,
                                      id=form.id.data)
             return self.get(username=user.name)
+        self.username = kwargs.get('username', None)
         self.render_template(form=form, user=user)
 
     def get_context(self):
