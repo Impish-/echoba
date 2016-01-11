@@ -126,7 +126,7 @@ class Board(Base, SessionMixin):
     default_name = Column(String, default=u'Anonymouse', label=u'Имя постера')
     max_pages = Column(Integer, default=11, label=u'Максимальное кол-во страниц')
     thread_bumplimit = Column(Integer, default=500, label=u'Бамплимит')
-    thread_tail = Column(Integer, default=5, label=u'Бамплимит')
+    thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
     #threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
 

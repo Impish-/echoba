@@ -24,7 +24,6 @@ class CreateThreadForm(ModelForm):
         return session
 
 
-
 class MessageForm(ModelForm):
     class Meta:
         model = Message

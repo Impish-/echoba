@@ -23,7 +23,7 @@
             <hr>
             {% for message in thread.messages_tail() %}
 
-                <div class="post">
+                <div class="post" style="margin-left: 50px;">
                      <div class="post_header">
                         <span class="poster_name">{{ message.poster_name }}</span>
                         <span class="post_id">No {{ message.id }}</span>
@@ -31,8 +31,9 @@
                     <div>
                         {{ message.message }}
                     </div>
+                    <hr>
                 </div>
-                <hr>
+
             {% endfor %}
         </div>
     {% endfor %}
