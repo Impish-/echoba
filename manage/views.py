@@ -64,7 +64,7 @@ class StaffManageHandler(BaseHandler):
 class DelStaffManagehandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
-        if not self.current_user.role.value is not 'Admin':
+        if self.current_user.role.value != u'Admin':
             self.send_error(status_code=403)
         username = kwargs.get('username', None)
         if self.current_user.name != username:
