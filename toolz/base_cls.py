@@ -29,7 +29,7 @@ class BaseHandler(RequestHandler):
         message = self.get_secure_cookie('flash_' + key)
         if message is None:
             return ''
-        self.clear_secure_cookie('flash_' + key)
+        self.clear_cookie('flash_' + key)
         return message if message else ''
 
     def set_flash(self, message, key='default'):
