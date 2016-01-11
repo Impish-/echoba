@@ -36,7 +36,8 @@ class StaffManageHandler(BaseHandler):
     @tornado.web.authenticated
     # staff_list
     def get(self, *args, **kwargs):
-        self.render_template()
+        del_user = self.get_flash(key='del_user')
+        self.render_template(del_message=del_user)
 
     @tornado.web.authenticated
     def post(self, *args, **kwargs):
@@ -63,8 +64,14 @@ class StaffManageHandler(BaseHandler):
 class DelStaffManagehandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
+        if not self.current_user.role.value is not 'Admin':
+            self.send_error(status_code=403)
         username = kwargs.get('username', None)
-        Staff.remove_user(name=username)  # ;(
+        if self.current_user.name != username:
+            Staff.remove_user(name=username)  # ;(
+            self.set_flash(u'Юзверя ' + username + u' больше не существует', key='del_user')
+        else:
+            self.set_flash(u'Нельзя удалить самого себя', key='del_user')
         self.redirect('/manage/staff')
 
 
