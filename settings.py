@@ -16,3 +16,6 @@
 #     'media': 'media',
 #     'password_salt': '',
 # }
+
+import os, sys
+project_path = sys.path.append(os.getcwd())

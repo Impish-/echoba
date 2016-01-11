@@ -10,7 +10,7 @@ from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, Edit
 urls = [
     (r"/?$", MainPageView),
 
-    (r"/([a-z]+)/$", BoardView),
+    (r"/(?P<board_dir>[a-z]+)/$", BoardView),
   #  (r"/([a-z]+)/(\d)/$", ThreadView),
 
     (r"/manage/?", ManageHandler),
