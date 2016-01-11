@@ -201,10 +201,8 @@ class Thread(Base, SessionMixin):
     def op(self):
         return self.messages[0]
 
-    @with_session
-    def messages_tail(self, session=None):
-        board = Board.get_board(id=self.board_id)
-        return self.messages[::len(self.messages)-board.thread_tail]
+    def messages_tail(self):
+        return self.messages[-self.board.thread_tail:]
 
 
 class Message(Base, SessionMixin):

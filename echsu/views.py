@@ -26,9 +26,6 @@ class BoardView(BaseHandler):
 
     def get(self,*args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir',None))
-        for x in board.threads.all():
-            print(x.op())
-            print(x.messages_tail())
         self.render_template(board=board, threads=board.threads.all()) if board else self.send_error(status_code=404)
 
     #надо доаутировать
@@ -40,9 +37,7 @@ class BoardView(BaseHandler):
         #     #!
         #     return self.render_template(board=Board.get_board(dir=self.path_kwargs.get('board_dir', None)))
 
-
         thread = Thread()
-
         thread.board_id = board.id
         thread_form.populate_obj(thread)
         thread.save()
