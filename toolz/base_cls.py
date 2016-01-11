@@ -1,4 +1,5 @@
 #encoding: utf8
+import types
 from jinja2 import Environment, PackageLoader
 from tornado.web import RequestHandler
 
@@ -24,6 +25,24 @@ class BaseHandler(RequestHandler):
         if self.application.settings['xsrf_cookies']:
             context['xsrf_form_html'] = self.xsrf_form_html()
         return context
+
+    def get_flash(self, key='default'):
+        message = self.get_secure_cookie('flash_' + key)
+        if message is None:
+            return ''
+        self.clear_cookie('flash_' + key)
+        return message.decode('UTF-8') if message else ''
+
+    def set_flash(self, message, key='default'):
+        tmp_mess = ''
+        if type(message) is types.UnicodeType:
+            tmp_mess = message.encode('UTF-8')
+        else:
+            tmp_mess = message
+        self.set_secure_cookie('flash_' + key, tmp_mess)
+
+    def has_flash(self, key='default'):
+        return self.get_secure_cookie(key) is not None
 
     def render_template(self, *args, **kwargs):
         context = self.get_context()
