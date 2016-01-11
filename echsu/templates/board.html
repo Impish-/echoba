@@ -6,35 +6,32 @@
     <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
     {% include "post_form.html" %}
 
-
-
-
-
+    <hr>
 
     {% for thread in threads %}
-        <div class="thread" id="thread{{ thread.op_id }}">
-            <div class="thread_header">
-                <span class="poster_name">{{ thread.op_message.poster_name }}</span>
-                <span class="date">{{ thread.op_message.date }}</span>
-                <span class="post_id">No {{ thread.op_id }}</span>
-            </div>
-            <div>
-                {{ thread.op_message.message }}
-            </div>
-            {% for message in thread.t_messages %}
+        {{ thread.message }}
+        <div class="thread" id="thread{{ thread.id }}">
+            <div class="op_post">
+                OP
+                    <span class="poster_name">{{ thread.op().poster_name }}</span>
+                    <span class="post_id">No {{ thread.op().id  }}</span>
+                </div>
+
+            {% for message in thread.messages_tail() %}
+
+
                 <div class="post">
                      <div class="post_header">
                         <span class="poster_name">{{ message.poster_name }}</span>
-                        <span class="date">{{ message.date }}</span>
-                        <span class="post_id">No {{ message.num }}</span>
+                        <span class="post_id">No {{ message.id }}</span>
                     </div>
                     <div>
                         {{ message.message }}
                     </div>
 
                 </div>
-            {% end %}
+            {% endfor %}
         </div>
-    {% end %}
+    {% endfor %}
 </body>
 </html>
