@@ -25,6 +25,19 @@ class BaseHandler(RequestHandler):
             context['xsrf_form_html'] = self.xsrf_form_html()
         return context
 
+    def get_flash(self, key='default'):
+        message = self.get_secure_cookie('flash_' + key)
+        if message is None:
+            return ''
+        self.clear_secure_cookie('flash_' + key)
+        return message if message else ''
+
+    def set_flash(self, message, key='default'):
+        self.set_secure_cookie('flash_' + key, message)
+
+    def has_flash(self, key='default'):
+        return self.get_secure_cookie(key) is not None
+
     def render_template(self, *args, **kwargs):
         context = self.get_context()
         context.update(**kwargs)
