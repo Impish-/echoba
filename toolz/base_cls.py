@@ -1,4 +1,5 @@
 #encoding: utf8
+import types
 from jinja2 import Environment, PackageLoader
 from tornado.web import RequestHandler
 
@@ -30,10 +31,15 @@ class BaseHandler(RequestHandler):
         if message is None:
             return ''
         self.clear_cookie('flash_' + key)
-        return message if message else ''
+        return message.decode('UTF-8') if message else ''
 
     def set_flash(self, message, key='default'):
-        self.set_secure_cookie('flash_' + key, message)
+        tmp_mess = ''
+        if type(message) is types.UnicodeType:
+            tmp_mess = message.encode('UTF-8')
+        else:
+            tmp_mess = message
+        self.set_secure_cookie('flash_' + key, tmp_mess)
 
     def has_flash(self, key='default'):
         return self.get_secure_cookie(key) is not None
