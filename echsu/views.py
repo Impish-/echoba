@@ -26,7 +26,7 @@ class BoardView(BaseHandler):
 
     def get(self,*args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir',None))
-        self.render_template(board=board, threads=board.threads.all()) if board else self.send_error(status_code=404)
+        self.render_template(board=board, threads=board.threads) if board else self.send_error(status_code=404)
 
     #надо доаутировать
     def post(self, *args, **kwargs):
@@ -63,11 +63,31 @@ class BoardView(BaseHandler):
 class ThreadView(BaseHandler):
     template_env = template_env
     template = 'thread.html'
+    form = MessageForm
+    form_context_name = 'message_form'
 
-    def get(self, board_dir, thread_id):
-        board = self.get_board(board_dir)
-        thread = Thread.query.get(op_id=int(thread_id))
-        thread.t_messages = self.get_messages(thread.op_id, 0)
-        self.render_template('templates/thread.html', board=board, cur_thread=thread) \
-            if board and thread else self.send_error(status_code=404)
+    def get(self, *args, **kwargs):
+        board = Board.get_board(dir=kwargs.get('board_dir', None))
+        op_message = Message.get_message(kwargs.get('id_op_message', None))
+
+
+        print board
+        self.render_template(board=board, thread=op_message.thread) \
+            if board else self.send_error(status_code=404)
+
+    def post(self, *args, **kwargs):
+        #тут создаются сообщения в тенд
+        board = Board.get_board(dir=kwargs.get('board_dir', None))
+        op_message = Message.get_message(kwargs.get('id_op_message', None))
+
+        form = self.get_form()
+        message = Message()
+        form.populate_obj(message)
+        message.thread_id = op_message.thread.id
+        message.save()
+
+        return self.render_template(board=board,
+                                    thread=op_message.thread,)
+
+
 

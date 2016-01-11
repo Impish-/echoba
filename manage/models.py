@@ -196,13 +196,17 @@ class Thread(Base, SessionMixin):
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", backref=backref('thread'),)
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-    board = relationship('Board', backref=backref('threads', lazy='dynamic',))
+    board = relationship('Board', backref=backref('threads', lazy='subquery',))
 
-    def op(self):
-        return self.messages[0]
+    @with_session
+    def op(self, session=None):
+        return session.query(Message).filter(Thread.id == self.id).first()
 
-    def messages_tail(self):
-        return self.messages[-self.board.thread_tail:]
+
+    @with_session
+    def messages_tail(self, session=None):
+        board = session.query(Board).filter(Board.id == self.board_id).first()
+        return session.query(Message).filter(Thread.id == self.id).all()[1:][-board.thread_tail:]
 
 
 class Message(Base, SessionMixin):
@@ -224,8 +228,14 @@ class Message(Base, SessionMixin):
     #mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
     ip_address = Column(IPAddressType)
 
-    def __init__(self, **kwargs):
-        pass
+
+    @staticmethod
+    @with_session
+    def get_message(id=None, session=None):
+        try:
+            return session.query(Message).filter(Message.id == id).first()
+        except:
+            return None
 
 
 class BoardPicture(Base, Image, SessionMixin):

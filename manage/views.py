@@ -126,6 +126,7 @@ class AddBoardHandler(BaseHandler):
     def post(self, *args, **kwargs):
         form = self.form(self.request.arguments)
         if form.validate():
+            # TODO: заменить на populate_obj
             board = form.save()
             return self.get()
 

@@ -7,19 +7,17 @@
     {% include "post_form.html" %}
 
 
-    {% for message in cur_thread.t_messages %}
-        <div class="post">
+    {% for message in thread.messages %}
+        <div class="post" style="border: dotted; padding: 20px">
              <div class="post_header">
                 <span class="poster_name">{{ message.poster_name }}</span>
                 <span class="date">{{ message.date }}</span>
-                <span class="post_id">No {{ message.num }}</span>
+                <span class="post_id">No {{ message.id }}</span>
             </div>
-            <div>
+            <div style="background-color: #c4e3f3">
                 {{ message.message }}
             </div>
-
         </div>
-    {% end %}
-
+    {% endfor %}
 </body>
 </html>

@@ -15,7 +15,7 @@
                 <div>OP POST</div>
                     <span class="poster_name">{{ thread.op().poster_name }}</span>
                     <span class="post_id">No {{ thread.op().id  }}</span>
-
+                    <a href="/{{ board.dir }}/{{ thread.op().id  }}/">Посмотреть тренд</a>
                     <div>
                         {{  thread.op().message }}
                     </div>
