@@ -122,7 +122,7 @@ class Board(Base, SessionMixin):
     name = Column(String, unique=True, label=u'Название')
     dir = Column(String, unique=True, label=u'Директория')
     threads_on_page = Column(Integer, default=9, label=u'Тредов на странице')
-    default_name = Column(String, default='Anonymouse', label=u'Имя постера')
+    default_name = Column(String, default=u'Anonymouse', label=u'Имя постера')
     max_pages = Column(Integer, default=11, label=u'Максимальное кол-во страниц')
     thread_bumplimit = Column(Integer, default=500, label=u'Бамплимит')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
@@ -177,6 +177,4 @@ class Board(Base, SessionMixin):
                 return session.query(Board).filter(Board.dir == dir).first()
         except:
             return None
-
-Base.metadata.create_all(engine)
 

@@ -8,3 +8,9 @@ WTForms-Alchemy
 sqlalchemy
 sqlalchemy-defaults
 sqlalchemy_utils
+SQLAlchemy-ImageAttach
+MagickWand
+
+ipaddr
+
+alembic
