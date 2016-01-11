@@ -9,6 +9,7 @@ from manage.models import Staff, Board
 class BaseHandler(RequestHandler):
     template_env = None
     form = None
+    form_context_name = None
 
     def get_current_user(self):
         user_id = self.get_secure_cookie("user_id")
@@ -30,7 +31,7 @@ class BaseHandler(RequestHandler):
         context.update({'board_list': Board.get_all()})
 
         if self.form:
-            context.update({'form': self.get_form()})
+            context.update({'form' if self.form_context_name is None else self.form_context_name: self.get_form()})
 
         if self.application.settings['xsrf_cookies']:
             context['xsrf_form_html'] = self.xsrf_form_html()
