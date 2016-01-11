@@ -7,11 +7,17 @@ from manage.models import Staff, Board
 
 
 class BaseHandler(RequestHandler):
+    template_env = None
+    form = None
+
     def get_current_user(self):
         user_id = self.get_secure_cookie("user_id")
         if not user_id:
             return None
         return Staff.get_user_by_id(user_id)
+
+    def get_form(self, **kwargs):
+        return self.form(self.request.arguments)
 
     def get_context(self):
         context = {
@@ -47,4 +53,7 @@ class BaseHandler(RequestHandler):
     def render_template(self, *args, **kwargs):
         context = self.get_context()
         context.update(**kwargs)
+
+        context.update({'form': self.get_form()})
+
         self.write(self.template_env.get_template(self.template).render(context))
