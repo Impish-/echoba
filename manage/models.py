@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table
+from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText
 from sqlalchemy_defaults import Column
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy_utils import PasswordType, ChoiceType
-
+from sqlalchemy_imageattach.entity import image_attachment, Image
+from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType
 
 from toolz.base_models import SessionMixin
 from toolz.bd_toolz import with_session, engine
@@ -125,7 +125,10 @@ class Board(Base, SessionMixin):
     default_name = Column(String, default=u'Anonymouse', label=u'Имя постера')
     max_pages = Column(Integer, default=11, label=u'Максимальное кол-во страниц')
     thread_bumplimit = Column(Integer, default=500, label=u'Бамплимит')
+    thread_tail = Column(Integer, default=5, label=u'Бамплимит')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
+    #threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
+
 
     def __init__(self, **kwargs):
         # в случае получения id  в kwargs вытягивать из бд объект
@@ -150,6 +153,13 @@ class Board(Base, SessionMixin):
         staff = session.query(Staff).filter(Staff.id == staff_id).first()
         staff.remove_mod_rights(self)
         session.commit()
+
+
+
+    # @declared_attr
+    # @with_session
+    # def threads(self, session=None):
+    #     return session.query(Thread).filter(Thread.board_id == self.id).all()
 
     @staticmethod
     @with_session
@@ -178,3 +188,45 @@ class Board(Base, SessionMixin):
         except:
             return None
 
+
+class Thread(Base, SessionMixin):
+    sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
+    closed = Column(BOOLEAN, label=u'Закрыт', default=False)
+    messages = relationship("Message", backref=backref('thread'),)
+    board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
+    board = relationship('Board', backref=backref('threads', lazy='dynamic',))
+
+    def op(self):
+        return self.messages[0]
+
+    def messages_tail(self):
+        print self.board.thread_tail
+        return self.messages[:self.board.thread_tail]
+
+
+class Message(Base, SessionMixin):
+    poster_name = Column(String, label=u'Имя')
+    email = Column(String, label=u'E-Mail')
+    header = Column(String, label=u'Заголовок')
+    message = Column(UnicodeText, label=u'Сообщение')
+    picture = image_attachment('BoardPicture')
+    password = Column(PasswordType(
+                schemes=[
+                    'pbkdf2_sha512',
+                    'md5_crypt'
+                ],
+
+                deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
+    thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
+    #
+    #mod_hash = Хэшкод модератора
+    #mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
+    ip_address = Column(IPAddressType)
+
+    def __init__(self, **kwargs):
+        pass
+
+
+class BoardPicture(Base, Image, SessionMixin):
+    message_id = Column(Integer, ForeignKey('message.id'), primary_key=True)
+    message = relationship('Message')
