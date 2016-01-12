@@ -15,9 +15,7 @@ class CreateThreadForm(ModelForm):
     class Meta:
         model = Thread
 
-    #message = ModelFieldList(FormField(MessageForm))
-
-
+    #message = ModelFieldList(FormField(MessageForm))\
     @classmethod
     @with_session
     def get_session(cls,session):
@@ -32,7 +30,6 @@ class MessageForm(ModelForm):
     image = FileField(u'Изображение')
 
     #thread = ModelFieldList(FormField(CreateThreadForm))
-
     @classmethod
     @with_session
     def get_session(cls,session):
