@@ -1,36 +1,33 @@
 {% extends "parts/base.html" %}
 {% block content %}
-    <div>
-        <ul>
-            <h3>"<i>Досье на</i> {{ user.role.value }}'a : <b style="color: darkorange">{{ user.name }}</b>"</h3>
-            <div style="display: inline-table;width: 40%">
-
-                <h4>Отредактировать {{ user.name }}</h4>
-                <form action="/manage/staff/edit/{{ user.name }}/" method="post">
-
-                    {% for field in form %}
-                        <div>
-                            {{ field.label }} {{ field }}
+    <h1><small>Досье на {{ user.role.value }}&rsquo;а: </small>{{ user.name }}</h1>
+    <div class="row">
+        <div class="col-md-7 col-sm-6">
+            <h4>Отредактировать {{ user.name }}</h4>
+            <form action="/manage/staff/edit/{{ user.name }}/" method="post" class="form-horizontal">
+                {% for field in form %}
+                    <div class="form-group">
+                        {{ field.label(class="col-sm-2") }}
+                        <div class="col-sm-6">
+                            {{ field(class="form-control") }}
+                        </div>
+                        <div class="col-sm-4">
                             {% for err in form.errors[field.name] %}
-                                <div style="display: inline">
-                                    <ul style="display: inline">
-                                        <li><i style="color: red;">{{ err }}</i></li>
-                                    </ul>
-                                </div>
+                                <ul class="error-list">
+                                    <li><i style="color: red;">{{ err }}</i></li>
+                                </ul>
                             {% endfor %}
                         </div>
-                    {% endfor %}
-                <input type="submit" value="Отредактировать!">
-                    А может ... <a href="/manage/staff/del/{{ user.name }}">Удалить</a>
-                </form>
-
-            </div>
-            <div style="display: inline-table;width: 40%">
-                тут лог последних действий супостата
-                вот такой ширины,
-                вот такой <s>глубины</s> высоты
-            </div>
-
-        </ul>
+                    </div>
+                {% endfor %}
+                <input type="submit" value="Отредактировать!" class="btn btn-default">
+                А может ... <a href="/manage/staff/del/{{ user.name }}" class="btn btn-danger">Удалить</a>
+            </form>
+        </div>
+        <div class="col-md-5 col-sm-6">
+            тут лог последних действий супостата
+            вот такой ширины,
+            вот такой <s>глубины</s> высоты
+        </div>
     </div>
 {% endblock %}

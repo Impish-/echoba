@@ -4,6 +4,7 @@ from manage.models import Staff, Board
 import tornado
 from jinja2 import Environment, PackageLoader
 from toolz.base_cls import BaseHandler
+from toolz.bd_toolz import only_admin
 
 env = Environment(loader=PackageLoader('manage', 'templates'))
 
@@ -33,13 +34,13 @@ class StaffManageHandler(BaseHandler):
     template = 'staff.html'
     template_env = env
 
-    @tornado.web.authenticated
+    @only_admin
     # staff_list
     def get(self, *args, **kwargs):
         del_user = self.get_flash(key='del_user')
         self.render_template(del_message=del_user)
 
-    @tornado.web.authenticated
+    @only_admin
     def post(self, *args, **kwargs):
         # staff_add
         #TODO: переделать на modelform
@@ -62,10 +63,8 @@ class StaffManageHandler(BaseHandler):
 
 
 class DelStaffManagehandler(BaseHandler):
-    @tornado.web.authenticated
+    @only_admin
     def get(self, *args, **kwargs):
-        if self.current_user.role.value != u'Admin':
-            self.send_error(status_code=403)
         username = kwargs.get('username', None)
         if self.current_user.name != username:
             Staff.remove_user(name=username)  # ;(
@@ -79,7 +78,7 @@ class EditStaffManageHandler(BaseHandler):
     template = 'staff_edit.html'
     template_env = env
 
-    @tornado.web.authenticated
+    @only_admin
     def get(self, *args, **kwargs):
         self.username = kwargs.get('username', None)
         self.render_template(user=self.get_user())
@@ -87,7 +86,7 @@ class EditStaffManageHandler(BaseHandler):
     def get_user(self):
         return Staff.get_user(self.username)
 
-    @tornado.web.authenticated
+    @only_admin
     def post(self, *args, **kwargs):
         user = Staff.get_user(kwargs.get('username', None))
         form = StaffEditForm(self.request.arguments)
