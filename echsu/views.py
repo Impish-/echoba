@@ -44,7 +44,7 @@ class ThreadView(BaseHandler):
         message.thread_id = op_message.thread.id
         message.add()
 
-        return self.get(*args, **kwargs)
+        return self.get()
 
 
 class BoardView(BaseHandler):
@@ -75,7 +75,6 @@ class BoardView(BaseHandler):
         thread.add()
 
         # кусок объеденить
-
         message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                           thread_id=thread.id)
         message_form.populate_obj(message)
@@ -90,7 +89,6 @@ class BoardView(BaseHandler):
                 with open("media/%s" % (fname), 'rb') as f:
                     message.picture.from_blob(f.read())
                 message.save()
-
             print message.picture
         return self.get(*args, **kwargs)
 
