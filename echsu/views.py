@@ -44,7 +44,7 @@ class ThreadView(BaseHandler):
         message.thread_id = op_message.thread.id
         message.add()
 
-        return self.get()
+        return self.get(*args, **kwargs)
 
 
 class BoardView(BaseHandler):
