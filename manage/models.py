@@ -64,7 +64,7 @@ class Staff(Base, SessionMixin):
     @staticmethod
     @with_session
     def create_user(name, password, role, session=None):
-        return Staff(name, password, role).add()
+        return Staff(name, password, role).save()
 
     @staticmethod
     @with_session
@@ -176,7 +176,7 @@ class Board(Base, SessionMixin):
     @staticmethod
     @with_session
     def get_all(session):
-       return session.query(Board).all()
+       return session.query(Board).save()
 
     @staticmethod
     @with_session
