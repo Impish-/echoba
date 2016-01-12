@@ -18,7 +18,13 @@ class SessionMixin:
 
     #!!]eqyz
     @with_session
-    def save(self, session):
+    def add(self, session):
         session.add(self)
+        session.commit()
+        return self
+
+
+    @with_session
+    def save(self, session):
         session.commit()
         return self

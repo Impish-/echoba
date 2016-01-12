@@ -23,7 +23,7 @@ class TestStaff(AsyncHTTPTestCase):
 
     def test_set_up(self):
         try:
-            self.staff = Staff.create_user(name='adm', password='123123', role='adm')
+            self.staff = Staff.create_user(name='adm', password='', role='adm')
             self.staff = Staff.create_user(name=self.test_user, password=self.test_password, role='adm')
         except:
             self.staff = Staff.get_user(name=self.test_user)

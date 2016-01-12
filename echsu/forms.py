@@ -29,7 +29,7 @@ class MessageForm(ModelForm):
         model = Message
         exclude = ['ip_address']
     sage = BooleanField(u'Сажа',)
-    picture = FileField(u'Изображение')
+    image = FileField(u'Изображение')
 
     #thread = ModelFieldList(FormField(CreateThreadForm))
 

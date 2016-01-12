@@ -194,12 +194,12 @@ class Thread(Base, SessionMixin):
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan',
-                            backref=backref('thread'),)
+                            backref=backref('thread'), )
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
 
     board = relationship('Board', lazy='subquery', cascade='all',
-                         backref=backref('threads', lazy='dynamic', cascade='all',))
+                         backref=backref('threads', lazy='dynamic', cascade='all', ))
 
     def op(self):
         return self.messages[0]
