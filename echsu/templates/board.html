@@ -8,11 +8,7 @@
     <hr>
 
 
-    {% for thread in threads %}
-        {{ thread.id }}
-        {{ thread.op().id }}
-
-
+    {% for thread in board.threads %}
         <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
             <div class="op_post" style="background-color: #bdf3d2">
                 <div>OP POST</div>
