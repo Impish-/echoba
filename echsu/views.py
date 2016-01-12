@@ -55,7 +55,7 @@ class BoardView(BaseHandler):
 
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir', None))
-        print board.threads # очень сильно колдунство (нужно чтобы треды в борду подгружались)- потом нормально сделаю
+        board.threads = board.threads
         self.render_template(board=board) if board else self.send_error(status_code=404)
 
     #надо доаутировать
