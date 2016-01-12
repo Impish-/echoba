@@ -203,6 +203,11 @@ class Thread(Base, SessionMixin):
     def messages_tail(self, session=None):
         return self.messages[1:][-self.board.thread_tail:]
 
+    @staticmethod
+    @with_session
+    def get_threads(board_id, session=None):
+        return session.query(Thread).filter(board_id).all()
+
 
 class Message(Base, SessionMixin):
     poster_name = Column(String, label=u'Имя')
@@ -234,6 +239,15 @@ class Message(Base, SessionMixin):
             return session.query(Message).filter(Message.id == id).first()
         except:
             return None
+
+
+    @staticmethod
+    @with_session
+    def get_last_messages(thread_id=None, last_message=None, session=None):
+        try:
+            return session.query(Message).filter(Message.id > last_message).all()
+        except:
+            return []
 
 
 class BoardPicture(Base, Image, SessionMixin):
