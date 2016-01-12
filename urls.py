@@ -21,6 +21,7 @@ urls = [
   #    (r"/ws", WebSocket),
 
     (r"/static/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
+
     (r"/(?P<board_dir>[a-z]+)/?$", BoardView),
     (r"/(?P<board_dir>[a-z]+)/(?P<id_op_message>\d+)/?$", ThreadView),
 ]

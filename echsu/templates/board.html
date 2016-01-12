@@ -5,24 +5,27 @@
 <body>
     <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
     {% include "post_form.html" %}
-
     <hr>
 
+
     {% for thread in threads %}
-        {{ thread.message }}
+        {{ thread.id }}
+        {{ thread.op().id }}
+
+
         <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
             <div class="op_post" style="background-color: #bdf3d2">
                 <div>OP POST</div>
                     <span class="poster_name">{{ thread.op().poster_name }}</span>
                     <span class="post_id">No {{ thread.op().id  }}</span>
                     <a href="/{{ board.dir }}/{{ thread.op().id  }}/">Посмотреть тренд</a>
-                    <div>
+                    <div style="background-color: #d9f3e6">
                         {{  thread.op().message }}
                     </div>
                 </div>
             <hr>
-            {% for message in thread.messages_tail() %}
 
+            {% for message in thread.messages_tail() %}
                 <div class="post" style="margin-left: 50px;">
                      <div class="post_header">
                         <span class="poster_name">{{ message.poster_name }}</span>
@@ -33,7 +36,6 @@
                     </div>
                     <hr>
                 </div>
-
             {% endfor %}
         </div>
     {% endfor %}

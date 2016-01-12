@@ -157,7 +157,6 @@ class Board(Base, SessionMixin):
         session.commit()
 
 
-
     # @declared_attr
     # @with_session
     # def threads(self, session=None):
@@ -196,17 +195,13 @@ class Thread(Base, SessionMixin):
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", backref=backref('thread'),)
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-    board = relationship('Board', backref=backref('threads', lazy='subquery',))
+    board = relationship('Board', backref=backref('threads', lazy='joined',))
 
-    @with_session
-    def op(self, session=None):
-        return session.query(Message).filter(Thread.id == self.id).first()
+    def op(self):
+        return self.messages[0]
 
-
-    @with_session
     def messages_tail(self, session=None):
-        board = session.query(Board).filter(Board.id == self.board_id).first()
-        return session.query(Message).filter(Thread.id == self.id).all()[1:][-board.thread_tail:]
+        return self.messages[1:][-self.board.thread_tail:]
 
 
 class Message(Base, SessionMixin):
@@ -227,6 +222,9 @@ class Message(Base, SessionMixin):
     #mod_hash = Хэшкод модератора
     #mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
     ip_address = Column(IPAddressType)
+
+    def __repr__(self):
+        return "<Message('id=%s')>" % (self.id)
 
 
     @staticmethod

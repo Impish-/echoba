@@ -6,8 +6,20 @@
     <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
     {% include "post_form.html" %}
 
+    <div class="op_post" style="border: dotted; padding: 20px; border-color: #d58512">
+         <div class="post_header">
+            <span class="poster_name">{{ thread.op().poster_name }}</span>
+            <span class="date">{{ thread.op().date }}</span>
+            <span class="post_id">No {{thread.op().id }}</span>
+        </div>
+        <div style="background-color: #c4e3f3">
+            {{ thread.op().message }}
+        </div>
+    </div>
 
-    {% for message in thread.messages %}
+
+
+    {% for message in thread.messages_tail() %}
         <div class="post" style="border: dotted; padding: 20px">
              <div class="post_header">
                 <span class="poster_name">{{ message.poster_name }}</span>

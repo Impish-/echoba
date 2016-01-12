@@ -24,8 +24,8 @@ class BoardView(BaseHandler):
     form = CreateThreadForm
     model = Thread
 
-    def get(self,*args, **kwargs):
-        board = Board.get_board(dir=self.path_kwargs.get('board_dir',None))
+    def get(self, *args, **kwargs):
+        board = Board.get_board(dir=self.path_kwargs.get('board_dir', None))
         self.render_template(board=board, threads=board.threads) if board else self.send_error(status_code=404)
 
     #надо доаутировать
@@ -69,9 +69,6 @@ class ThreadView(BaseHandler):
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=kwargs.get('board_dir', None))
         op_message = Message.get_message(kwargs.get('id_op_message', None))
-
-
-        print board
         self.render_template(board=board, thread=op_message.thread) \
             if board else self.send_error(status_code=404)
 
