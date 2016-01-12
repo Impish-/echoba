@@ -38,6 +38,7 @@ class ThreadView(BaseHandler):
         board = Board.get_board(dir=kwargs.get('board_dir', None))
         op_message = Message.get_message(kwargs.get('id_op_message', None))
 
+        print 'tt'
         form = self.get_form()
         message = Message()
         form.populate_obj(message)
