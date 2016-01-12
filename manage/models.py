@@ -210,9 +210,9 @@ class Thread(Base, SessionMixin):
 
 
 class Message(Base, SessionMixin):
-    poster_name = Column(String, label=u'Имя')
-    email = Column(String, label=u'E-Mail')
-    header = Column(String, label=u'Заголовок')
+    poster_name = Column(String, label=u'Имя', nullable=True)
+    email = Column(String, label=u'E-Mail', nullable=True)
+    header = Column(String, label=u'Заголовок', nullable=True)
     message = Column(UnicodeText, label=u'Сообщение')
     picture = image_attachment('BoardPicture')
     password = Column(PasswordType(

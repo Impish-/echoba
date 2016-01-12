@@ -18,8 +18,7 @@
     </div>
 
 
-
-    {% for message in thread.messages_tail() %}
+    {% for message in thread.messages[1:] %}
         <div class="post" style="border: dotted; padding: 20px">
              <div class="post_header">
                 <span class="poster_name">{{ message.poster_name }}</span>
