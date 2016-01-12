@@ -29,6 +29,7 @@ class ThreadView(BaseHandler):
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=kwargs.get('board_dir', None))
         op_message = Message.get_message(kwargs.get('id_op_message', None))
+
         self.render_template(board=board, thread=op_message.thread) \
             if board else self.send_error(status_code=404)
 
@@ -41,7 +42,7 @@ class ThreadView(BaseHandler):
         message = Message()
         form.populate_obj(message)
         message.thread_id = op_message.thread.id
-        message.save()
+        message.add()
 
         return self.get(*args, **kwargs)
 
