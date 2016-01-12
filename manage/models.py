@@ -165,7 +165,7 @@ class Board(Base, SessionMixin):
     @staticmethod
     @with_session
     def create(name, dir, session=None):
-        return Board(name, dir).add()
+        return Board(name=name, dir=dir).add()
 
     @staticmethod
     @with_session
@@ -176,7 +176,7 @@ class Board(Base, SessionMixin):
     @staticmethod
     @with_session
     def get_all(session):
-       return session.query(Board).save()
+       return session.query(Board).all()
 
     @staticmethod
     @with_session

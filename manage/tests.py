@@ -21,16 +21,13 @@ class TestStaff(AsyncHTTPTestCase):
         response = self.wait()
         self.assertEqual(response.code, 200)
 
-    def test_set_up(self):
+    def test_login(self):
+        from urllib import urlencode
         try:
-            self.staff = Staff.create_user(name='adm', password='', role='adm')
             self.staff = Staff.create_user(name=self.test_user, password=self.test_password, role='adm')
         except:
             self.staff = Staff.get_user(name=self.test_user)
-        self.assertIsInstance(self.staff, Staff)
 
-    def test_login(self):
-        from urllib import urlencode
         self.http_client.fetch(self.get_url('/manage'), self.stop,
                                method="POST",
                                body=urlencode(dict(login=self.test_user, password=self.test_password,)),
@@ -40,9 +37,9 @@ class TestStaff(AsyncHTTPTestCase):
         response = self.wait()
         self.assertEqual(response.code, 200)
 
-    def test_remove(self):
         Staff.remove_user(name=self.test_user)
         self.assertIsNone(Staff.get_user(name=self.test_user))
+
 
 
 class TestBoardModel(unittest.TestCase):
@@ -56,8 +53,9 @@ class TestBoardModel(unittest.TestCase):
             self.staff = Staff.get_user(name=self.test_user)
         self.assertIsInstance(self.staff, Staff)
 
-        Board.remove_board(u'Бред')
-        b = Board.create(name=u'Бред', dir='b')
+        Board.remove_board(u'Бредtest')
+
+        b = Board.create(name=u'Бредtest', dir='test')
 
         b.add_moderator(self.staff.id)
 
