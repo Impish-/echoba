@@ -193,9 +193,13 @@ class Board(Base, SessionMixin):
 class Thread(Base, SessionMixin):
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
-    messages = relationship("Message", backref=backref('thread'),)
+    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan',
+                            backref=backref('thread'),)
+
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-    board = relationship('Board', backref=backref('threads', lazy='joined',))
+
+    board = relationship('Board', lazy='subquery', cascade='all',
+                         backref=backref('threads', lazy='dynamic', cascade='all',))
 
     def op(self):
         return self.messages[0]
@@ -207,6 +211,11 @@ class Thread(Base, SessionMixin):
     @with_session
     def get_threads(board_id, session=None):
         return session.query(Thread).filter(board_id).all()
+
+    @with_session
+    def remove(self, session):
+        session.query(Thread).filter(Thread.id == self.id).delete(synchronize_session=False)
+        session.commit()
 
 
 class Message(Base, SessionMixin):
@@ -231,6 +240,16 @@ class Message(Base, SessionMixin):
     def __repr__(self):
         return "<Message('id=%s')>" % (self.id)
 
+    def thumbnail(self):
+        # Make thumbnails
+        width_150 = self.picture.generate_thumbnail(width=150)
+        height_300 = self.picture.generate_thumbnail(height=300)
+        half = self.picture.generate_thumbnail(ratio=0.5)
+        # Get their urls
+        width_150_url = width_150.locate()
+        height_300_url =height_300.locate()
+        half = half.locate()
+        return half
 
     @staticmethod
     @with_session
