@@ -61,5 +61,5 @@ class AddBoardForm(ModelForm):
         for key, field in self._fields.items():
             kwargs.update({key: self[key].data})
         obj = self.Meta.model(**kwargs)
-        obj.save()
+        obj.add()
         return obj
