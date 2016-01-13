@@ -230,7 +230,6 @@ class Message(Base, SessionMixin):
                 ],
 
                 deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
-
     thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
     #
     #mod_hash = Хэшкод модератора
@@ -270,10 +269,9 @@ class Message(Base, SessionMixin):
             return []
 
 
+
 class BoardImage(Base, Image):
     __tablename__ = 'images'
 
     message_id = Column(Integer, ForeignKey('message.id'), primary_key=True,)
     message = relationship('Message')
-
-
