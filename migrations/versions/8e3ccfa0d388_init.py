@@ -59,7 +59,7 @@ def upgrade():
     sa.Column('closed', sa.BOOLEAN(), nullable=False),
     sa.Column('board_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['board_id'], ['board.id'], ),
-    sa.PrimaryKeyConstraint('id', 'board_id'),
+    sa.PrimaryKeyConstraint('id',),
     sa.UniqueConstraint('id')
     )
     op.create_table('message',
@@ -72,7 +72,7 @@ def upgrade():
     sa.Column('thread_id', sa.Integer(), nullable=False),
     sa.Column('ip_address', sqlalchemy_utils.types.ip_address.IPAddressType(length=50), nullable=True),
     sa.ForeignKeyConstraint(['thread_id'], ['thread.id'], ),
-    sa.PrimaryKeyConstraint('id', 'thread_id'),
+    sa.PrimaryKeyConstraint('id',),
     sa.UniqueConstraint('id')
     )
     op.create_table('images',
@@ -81,10 +81,9 @@ def upgrade():
     sa.Column('mimetype', sa.String(length=255), nullable=False),
     sa.Column('original', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('message_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['message_id'], ['message.id'], ),
-    sa.PrimaryKeyConstraint('width', 'height', 'id', 'message_id')
+    sa.PrimaryKeyConstraint('width', 'height', 'message_id')
     )
     ### end Alembic commands ###
 
