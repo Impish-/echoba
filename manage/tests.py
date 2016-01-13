@@ -24,6 +24,7 @@ class TestStaff(AsyncHTTPTestCase):
     def test_login(self):
         from urllib import urlencode
         try:
+            self.staff = Staff.create_user(name='adm', password='', role='adm')
             self.staff = Staff.create_user(name=self.test_user, password=self.test_password, role='adm')
         except:
             self.staff = Staff.get_user(name=self.test_user)

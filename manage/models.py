@@ -223,7 +223,6 @@ class Message(Base, SessionMixin):
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
     message = Column(UnicodeText, label=u'Сообщение')
-    picture = image_attachment('BoardPicture')
     password = Column(PasswordType(
                 schemes=[
                     'pbkdf2_sha512',
@@ -231,11 +230,13 @@ class Message(Base, SessionMixin):
                 ],
 
                 deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
+
     thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
     #
     #mod_hash = Хэшкод модератора
     #mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
     ip_address = Column(IPAddressType)
+    image = image_attachment('BoardImage')
 
     def __repr__(self):
         return "<Message('id=%s')>" % (self.id)
@@ -269,6 +270,10 @@ class Message(Base, SessionMixin):
             return []
 
 
-class BoardPicture(Base, Image, SessionMixin):
-    message_id = Column(Integer, ForeignKey('message.id'), primary_key=True)
+class BoardImage(Base, Image):
+    __tablename__ = 'images'
+
+    message_id = Column(Integer, ForeignKey('message.id'), primary_key=True,)
     message = relationship('Message')
+
+
