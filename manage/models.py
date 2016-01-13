@@ -19,6 +19,7 @@ mod_rights = Table('association', Base.metadata,
 
 
 class Staff(Base, SessionMixin):
+    id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     password = Column(PasswordType(
                         schemes=[
@@ -120,6 +121,7 @@ class Staff(Base, SessionMixin):
 
 
 class Board(Base, SessionMixin):
+    id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, label=u'Название')
     dir = Column(String, unique=True, label=u'Директория')
     threads_on_page = Column(Integer, default=9, label=u'Тредов на странице')
@@ -191,6 +193,7 @@ class Board(Base, SessionMixin):
 
 
 class Thread(Base, SessionMixin):
+    id = Column(Integer, primary_key=True)
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan',
@@ -219,10 +222,12 @@ class Thread(Base, SessionMixin):
 
 
 class Message(Base, SessionMixin):
+    id = Column(Integer, primary_key=True)
     poster_name = Column(String, label=u'Имя', nullable=True)
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
     message = Column(UnicodeText, label=u'Сообщение')
+    picture = image_attachment('BoardImage')
     password = Column(PasswordType(
                 schemes=[
                     'pbkdf2_sha512',
@@ -235,7 +240,7 @@ class Message(Base, SessionMixin):
     #mod_hash = Хэшкод модератора
     #mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
     ip_address = Column(IPAddressType)
-    image = image_attachment('BoardImage')
+    # image = image_attachment('BoardImage')
 
     def __repr__(self):
         return "<Message('id=%s')>" % (self.id)
@@ -267,7 +272,6 @@ class Message(Base, SessionMixin):
             return session.query(Message).filter(Message.id > last_message).all()
         except:
             return []
-
 
 
 class BoardImage(Base, Image):
