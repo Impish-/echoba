@@ -223,6 +223,7 @@ class Message(Base, SessionMixin):
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
     message = Column(UnicodeText, label=u'Сообщение')
+    picture = image_attachment('BoardPicture')
     password = Column(PasswordType(
                 schemes=[
                     'pbkdf2_sha512',
@@ -230,7 +231,6 @@ class Message(Base, SessionMixin):
                 ],
 
                 deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
-
     thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
     #
     #mod_hash = Хэшкод модератора
@@ -275,5 +275,3 @@ class BoardImage(Base, Image):
 
     message_id = Column(Integer, ForeignKey('message.id'), primary_key=True,)
     message = relationship('Message')
-
-
