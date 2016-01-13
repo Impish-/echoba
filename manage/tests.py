@@ -23,8 +23,8 @@ class TestStaff(AsyncHTTPTestCase):
 
     def test_login(self):
         from urllib import urlencode
+
         try:
-            self.staff = Staff.create_user(name='adm', password='', role='adm')
             self.staff = Staff.create_user(name=self.test_user, password=self.test_password, role='adm')
         except:
             self.staff = Staff.get_user(name=self.test_user)
@@ -40,6 +40,8 @@ class TestStaff(AsyncHTTPTestCase):
 
         Staff.remove_user(name=self.test_user)
         self.assertIsNone(Staff.get_user(name=self.test_user))
+
+        #self.staff = Staff.create_user(name='adm', password='', role='adm')
 
 
 
@@ -58,13 +60,14 @@ class TestBoardModel(unittest.TestCase):
 
         b = Board.create(name=u'Бредtest', dir='test')
 
+
+
         b.add_moderator(self.staff.id)
 
-        mods = b.staff.all()
+        mods = b.staff
         print mods
 
         b.remove_moderator(self.staff.id)
-
         Staff.remove_user(name=self.test_user)
         self.assertIsNone(Staff.get_user(name=self.test_user))
 

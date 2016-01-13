@@ -18,13 +18,12 @@
 # }
 
 import os, sys
-from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore
-
+from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore, FileSystemStore
 
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
-store = HttpExposedFileSystemStore(
-            path= '%s/media/' % SITE_ROOT ,
-            prefix='static/images/'
+store = FileSystemStore(
+            path='%s/media/' % SITE_ROOT,
+            base_url='media/'
         )
 

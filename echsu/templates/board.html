@@ -12,6 +12,7 @@
         <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
             <div class="op_post" style="background-color: #bdf3d2">
                 <div>OP POST</div>
+                    <img src="{{ thread.op().img_thumb() }}">
                     <span class="poster_name">{{ thread.op().poster_name }}</span>
                     <span class="post_id">No {{ thread.op().id  }}</span>
                     <a href="/{{ board.dir }}/{{ thread.op().id  }}/">Посмотреть тренд</a>

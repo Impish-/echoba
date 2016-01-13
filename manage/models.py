@@ -1,42 +1,45 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy_imageattach.context import store_context
 from sqlalchemy_imageattach.entity import image_attachment, Image
 from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType
 
+from settings import store
 from toolz.base_models import SessionMixin
 from toolz.bd_toolz import with_session, engine
 
 Base = declarative_base()
 
 mod_rights = Table('association', Base.metadata,
-    Column('staff_id', Integer, ForeignKey('staff.id')),
-    Column('board_id', Integer, ForeignKey('board.id'))
-)
+                   Column('staff_id', Integer, ForeignKey('staff.id')),
+                   Column('board_id', Integer, ForeignKey('board.id'))
+                   )
 
 
 class Staff(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     password = Column(PasswordType(
-                        schemes=[
-                            'pbkdf2_sha512',
-                            'md5_crypt',
-                        ],
-                        deprecated=['md5_crypt'],
-                    ), nullable=False
+            schemes=[
+                'pbkdf2_sha512',
+                'md5_crypt',
+            ],
+            deprecated=['md5_crypt'],
+    ), nullable=False
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                             ]), nullable=False
-    )
+                              ]), nullable=False
+                  )
     all_boards = Column(BOOLEAN, default=False)
     boards = relationship("Board",
                           secondary=mod_rights,
-                          backref=backref('staff', lazy='dynamic',),
+                          backref=backref('staff', lazy='dynamic', ),
                           passive_deletes=True,
                           passive_updates=False)
 
@@ -47,7 +50,6 @@ class Staff(Base, SessionMixin):
 
     def __repr__(self):
         return "<User('%s', '%s', %s)>" % (self.name, self.password, self.role)
-
 
     @declared_attr
     def is_admin(self):
@@ -130,9 +132,10 @@ class Board(Base, SessionMixin):
     thread_bumplimit = Column(Integer, default=500, label=u'Бамплимит')
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
-    #threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
 
-    #TODO: выпилить, model_form.populate_obj юзать
+    # threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
+
+    # TODO: выпилить, model_form.populate_obj юзать
     def __init__(self, **kwargs):
         # в случае получения id  в kwargs вытягивать из бд объект
         self.name = kwargs.get('name', None)
@@ -158,7 +161,6 @@ class Board(Base, SessionMixin):
         staff.remove_mod_rights(self)
         session.commit()
 
-
     # @declared_attr
     # @with_session
     # def threads(self, session=None):
@@ -178,7 +180,7 @@ class Board(Base, SessionMixin):
     @staticmethod
     @with_session
     def get_all(session):
-       return session.query(Board).all()
+        return session.query(Board).all()
 
     @staticmethod
     @with_session
@@ -202,7 +204,7 @@ class Thread(Base, SessionMixin):
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
 
     board = relationship('Board', lazy='subquery', cascade='all',
-                         backref=backref('threads', lazy='dynamic', cascade='all', ))
+                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan', ))
 
     def op(self):
         return self.messages[0]
@@ -229,32 +231,39 @@ class Message(Base, SessionMixin):
     message = Column(UnicodeText, label=u'Сообщение')
     picture = image_attachment('BoardImage')
     password = Column(PasswordType(
-                schemes=[
-                    'pbkdf2_sha512',
-                    'md5_crypt'
-                ],
+            schemes=[
+                'pbkdf2_sha512',
+                'md5_crypt'
+            ],
 
-                deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
+            deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
     thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
     #
-    #mod_hash = Хэшкод модератора
-    #mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
+    # mod_hash = Хэшкод модератора
+    # mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
     ip_address = Column(IPAddressType)
+
     # image = image_attachment('BoardImage')
 
     def __repr__(self):
         return "<Message('id=%s')>" % (self.id)
 
-    def thumbnail(self):
-        # Make thumbnails
-        width_150 = self.picture.generate_thumbnail(width=150)
-        height_300 = self.picture.generate_thumbnail(height=300)
-        half = self.picture.generate_thumbnail(ratio=0.5)
-        # Get their urls
-        width_150_url = width_150.locate()
-        height_300_url =height_300.locate()
-        half = half.locate()
-        return half
+    def img_thumb(self):
+        '''
+            миниатюра(по идее в настройках борды будут задаваться размеры)
+        '''
+        with store_context(store):
+            try:
+                return self.picture.find_thumbnail(width=150).locate()
+            except NoResultFound:
+                return None
+
+    def image(self):
+        '''
+            Полноразмерное изображение
+        '''
+        with store_context(store):
+            return self.picture.locate()
 
     @staticmethod
     @with_session
@@ -263,7 +272,6 @@ class Message(Base, SessionMixin):
             return session.query(Message).filter(Message.id == id).first()
         except:
             return None
-
 
     @staticmethod
     @with_session
@@ -277,5 +285,5 @@ class Message(Base, SessionMixin):
 class BoardImage(Base, Image):
     __tablename__ = 'images'
 
-    message_id = Column(Integer, ForeignKey('message.id'), primary_key=True,)
+    message_id = Column(Integer, ForeignKey('message.id'), primary_key=True, )
     message = relationship('Message')

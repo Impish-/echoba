@@ -56,6 +56,16 @@ class BoardView(BaseHandler):
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir', None))
         board.threads = board.threads
+
+        # for thread in board.threads:
+        #     for mes in thread.messages:
+        #         with store_context(store):
+        #             try:
+        #                 mes.img = mes.picture.find_thumbnail(width=150).locate()
+        #             except:
+        #                 mes.img = mes.picture.locate()
+
+
         self.render_template(board=board) if board else self.send_error(status_code=404)
 
     #надо доаутировать
@@ -78,18 +88,15 @@ class BoardView(BaseHandler):
         message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                           thread_id=thread.id)
         message_form.populate_obj(message)
-        message.add()
 
         if self.request.files.get(message_form.image.name, None):
             image = self.request.files[message_form.image.name][0]
-            fname = image['filename']
             with store_context(store):
-                with open("media/%s" % (fname), "w") as out:
-                    out.write(image['body'])
-                with open("media/%s" % (fname), 'rb') as f:
-                    message.picture.from_blob(f.read())
-                message.save()
-            # print message.picture
+                message.picture.from_blob(image['body'])
+                message.picture.generate_thumbnail(width=150)
+                message.add()
+                t_150 = message.picture.find_thumbnail(width=150)
+
         return self.get(*args, **kwargs)
 
     def get_context(self):
