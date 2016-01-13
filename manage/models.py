@@ -65,7 +65,7 @@ class Staff(Base, SessionMixin):
     @staticmethod
     @with_session
     def create_user(name, password, role, session=None):
-        return Staff(name, password, role).save()
+        return Staff(name, password, role).add()
 
     @staticmethod
     @with_session
