@@ -8,6 +8,7 @@
 
     <div class="op_post" style="border: dotted; padding: 20px; border-color: #d58512">
          <div class="post_header">
+             <img src="{{ thread.op().img_thumb() }}">
             <span class="poster_name">{{ thread.op().poster_name }}</span>
             <span class="date">{{ thread.op().date }}</span>
             <span class="post_id">No {{thread.op().id }}</span>
@@ -21,6 +22,7 @@
     {% for message in thread.messages[1:] %}
         <div class="post" style="border: dotted; padding: 20px">
              <div class="post_header">
+                 <img src="{{ message.img_thumb() }}">
                 <span class="poster_name">{{ message.poster_name }}</span>
                 <span class="date">{{ message.date }}</span>
                 <span class="post_id">No {{ message.id }}</span>

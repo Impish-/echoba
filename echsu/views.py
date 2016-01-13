@@ -39,12 +39,21 @@ class ThreadView(BaseHandler):
         op_message = Message.get_message(kwargs.get('id_op_message', None))
 
         form = self.get_form()
-        message = Message()
-        form.populate_obj(message)
-        message.thread_id = op_message.thread.id
-        message.add()
 
-        return self.get(*args, **kwargs)
+        with store_context(store):
+            message = Message()
+            form.populate_obj(message)
+            message.thread_id = op_message.thread.id
+
+            #TODO: Потом какнибудь покрасивше сделать
+            if self.request.files.get(form.image.name, None):
+                image = self.request.files[form.image.name][0]
+                message.picture.from_blob(image['body'])
+                message.picture.generate_thumbnail(width=150)
+
+            message.add()
+
+            return self.get(*args, **kwargs)
 
 
 class BoardView(BaseHandler):
@@ -56,15 +65,6 @@ class BoardView(BaseHandler):
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir', None))
         board.threads = board.threads
-
-        # for thread in board.threads:
-        #     for mes in thread.messages:
-        #         with store_context(store):
-        #             try:
-        #                 mes.img = mes.picture.find_thumbnail(width=150).locate()
-        #             except:
-        #                 mes.img = mes.picture.locate()
-
 
         self.render_template(board=board) if board else self.send_error(status_code=404)
 
@@ -85,19 +85,22 @@ class BoardView(BaseHandler):
         thread.add()
 
         # кусок объеденить
-        message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
-                          thread_id=thread.id)
-        message_form.populate_obj(message)
+        with store_context(store):
+            message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
+                              thread_id=thread.id)
+            message_form.populate_obj(message)
 
-        if self.request.files.get(message_form.image.name, None):
-            image = self.request.files[message_form.image.name][0]
-            with store_context(store):
+
+             #TODO: Потом какнибудь покрасивше сделать
+            if self.request.files.get(message_form.image.name, None):
+                image = self.request.files[message_form.image.name][0]
+
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
-                message.add()
-                t_150 = message.picture.find_thumbnail(width=150)
 
-        return self.get(*args, **kwargs)
+            message.add()
+
+            return self.get(*args, **kwargs)
 
     def get_context(self):
         context = super(self.__class__, self).get_context()

@@ -24,6 +24,6 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 store = FileSystemStore(
             path='%s/media/' % SITE_ROOT,
-            base_url='media/'
+            base_url='/media/'
         )
 
