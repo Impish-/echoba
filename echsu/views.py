@@ -89,7 +89,7 @@ class BoardView(BaseHandler):
                 with open("media/%s" % (fname), 'rb') as f:
                     message.picture.from_blob(f.read())
                 message.save()
-            print message.picture
+            # print message.picture
         return self.get(*args, **kwargs)
 
     def get_context(self):

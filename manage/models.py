@@ -277,6 +277,5 @@ class Message(Base, SessionMixin):
 class BoardImage(Base, Image):
     __tablename__ = 'images'
 
-    id = Column(Integer, primary_key=True)
     message_id = Column(Integer, ForeignKey('message.id'), primary_key=True,)
     message = relationship('Message')
