@@ -7,12 +7,20 @@
     {% include "post_form.html" %}
     <hr>
 
+    <div class="breadcrumb">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li>/{{ board.dir }}/ - {{ board.name }}</li>
+        </ul>
+    </div>
 
     {% for thread in board.threads %}
         <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
             <div class="op_post" style="background-color: #bdf3d2">
                 <div>OP POST</div>
-                    <img src="{{ thread.op().img_thumb() }}">
+                    {% if thread.op().picture %}
+                        <img src="{{ thread.op().img_thumb() }}">
+                    {% endif %}
                     <span class="poster_name">{{ thread.op().poster_name }}</span>
                     <span class="post_id">No {{ thread.op().id  }}</span>
                     <a href="/{{ board.dir }}/{{ thread.op().id  }}/">Посмотреть тренд</a>
@@ -25,7 +33,9 @@
             {% for message in thread.messages_tail() %}
                 <div class="post" style="margin-left: 50px;">
                      <div class="post_header">
-                         <img src="{{ message.img_thumb() }}">
+                        {% if message.picture %}
+                            <img src="{{ message.img_thumb() }}">
+                        {% endif %}
                         <span class="poster_name">{{ message.poster_name }}</span>
                         <span class="post_id">No {{ message.id }}</span>
                     </div>

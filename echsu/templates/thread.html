@@ -6,9 +6,19 @@
     <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
     {% include "post_form.html" %}
 
+    <div class="breadcrumb">
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/{{ board.dir }}">/{{ board.dir }}/ - {{ board.name }}</a></li>
+            <li>{% if thread.op().header %}{{ thread.op().header }}{% else %}Тред #{{ thread.id }}{% endif %}</li>
+        </ul>
+    </div>
+
     <div class="op_post" style="border: dotted; padding: 20px; border-color: #d58512">
          <div class="post_header">
-             <img src="{{ thread.op().img_thumb() }}">
+            {% if thread.op().picture %}
+                <img src="{{ thread.op().img_thumb() }}">
+            {% endif %}
             <span class="poster_name">{{ thread.op().poster_name }}</span>
             <span class="date">{{ thread.op().date }}</span>
             <span class="post_id">No {{thread.op().id }}</span>
@@ -22,7 +32,9 @@
     {% for message in thread.messages[1:] %}
         <div class="post" style="border: dotted; padding: 20px">
              <div class="post_header">
-                 <img src="{{ message.img_thumb() }}">
+                {% if message.picture %}
+                    <img src="{{ message.img_thumb() }}">
+                {% endif %}
                 <span class="poster_name">{{ message.poster_name }}</span>
                 <span class="date">{{ message.date }}</span>
                 <span class="post_id">No {{ message.id }}</span>
