@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from psycopg2._psycopg import IntegrityError
 from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -39,7 +39,7 @@ class Staff(Base, SessionMixin):
     all_boards = Column(BOOLEAN, default=False)
     boards = relationship("Board",
                           secondary=mod_rights,
-                          backref=backref('staff', lazy='dynamic', ),
+                          backref=backref('staff', lazy='subquery', ),
                           passive_deletes=True,
                           passive_updates=False)
 
@@ -49,7 +49,7 @@ class Staff(Base, SessionMixin):
         self.role = role
 
     def __repr__(self):
-        return "<User('%s', '%s', %s)>" % (self.name, self.password, self.role)
+        return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
 
     @declared_attr
     def is_admin(self):
@@ -133,7 +133,6 @@ class Board(Base, SessionMixin):
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
 
-    # threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
 
     # TODO: выпилить, model_form.populate_obj юзать
     def __init__(self, **kwargs):
@@ -174,8 +173,11 @@ class Board(Base, SessionMixin):
     @staticmethod
     @with_session
     def remove_board(name, session):
-        session.query(Board).filter(Board.name == name).delete(synchronize_session=False)
-        session.commit()
+        try:
+            session.query(Board).filter(Board.name == name).delete(synchronize_session=False)
+            session.commit()
+        except:
+            pass
 
     @staticmethod
     @with_session
