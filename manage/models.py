@@ -198,7 +198,7 @@ class Thread(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
-    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan',
+    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
                             backref=backref('thread'), )
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
