@@ -1,0 +1,22 @@
+{% macro post_message(message, op_post=0, op_label=0, thread_link='') %}
+    <div class="{% if op_post %}op-post{% else %}post-message{% endif %} post" id="post-{{ message.id }}">
+        {% if op_label %}
+            <div class="op-label">OP POST</div>
+        {% endif %}
+        <div class="post-header">
+            {% if message.picture %}
+                <img src="{{ message.img_thumb() }}">
+            {% endif %}
+            <span class="poster_name">{{ message.poster_name }}</span>
+            <span class="post_date">{{ message.date }}</span>
+            <span class="post_id">No {{ message.id  }}</span>
+            {% if thread_link %}
+                <a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>
+            {% endif %}
+        </div>
+        <div class="post-message">
+            {{ message.message }}
+        </div>
+    </div>
+{% endmacro %}
+

@@ -212,6 +212,9 @@ class Thread(Base, SessionMixin):
     def messages_tail(self, session=None):
         return self.messages[1:][-self.board.thread_tail:]
 
+    def link(self):
+        return '/%s/%d/' % (self.board.dir, self.id)
+
     @staticmethod
     @with_session
     def get_threads(board_id, session=None):
