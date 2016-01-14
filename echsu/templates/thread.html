@@ -1,8 +1,8 @@
-<html xmlns="http://www.w3.org/1999/html">
-<head>
+{% extends 'base.html' %}
 
-</head>
-<body>
+{% block title %}/{{ board.dir }}/ - {% if thread.op().header %}{{ thread.op().header }}{% else %}Тред #{{ thread.id }}{% endif %}{% endblock %}
+
+{% block content %}
     <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
     {% include "post_form.html" %}
 
@@ -44,5 +44,4 @@
             </div>
         </div>
     {% endfor %}
-</body>
-</html>
+{% endblock %}
