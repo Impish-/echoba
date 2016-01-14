@@ -8,12 +8,10 @@
     {% include "post_form.html" %}
     <hr>
 
-    <div class="breadcrumb">
-        <ul>
-            <li><a href="/">Главная</a></li>
-            <li>/{{ board.dir }}/ - {{ board.name }}</li>
-        </ul>
-    </div>
+    <ul class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li>/{{ board.dir }}/ - {{ board.name }}</li>
+    </ul>
 
     {% for thread in board.threads %}
         <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
