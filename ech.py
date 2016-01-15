@@ -4,8 +4,12 @@ import argparse
 import tornado
 import tornado.web
 import tornado.websocket
+from sqlalchemy.orm import scoped_session, sessionmaker
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
+
+from settings import settings
+from toolz.bd_toolz import get_engine
 
 try:
     from settings import tornado_settings
@@ -14,8 +18,12 @@ except ImportError:
 
 import urls
 
-application = tornado.web.Application(urls.urls, **tornado_settings)
+settings.update(tornado_settings)
+
+application = tornado.web.Application(urls.urls, **settings)
 application.webSocketsPool = []
+application.db = scoped_session(sessionmaker(bind=get_engine()))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='its ech.su!')
