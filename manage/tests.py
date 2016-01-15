@@ -24,10 +24,10 @@ class TestStaff(AsyncHTTPTestCase):
     def test_login(self):
         from urllib import urlencode
 
-        try:
+        self.staff = Staff.get_user(name=self.test_user)
+        if not self.staff:
             self.staff = Staff.create_user(name=self.test_user, password=self.test_password, role='adm')
-        except:
-            self.staff = Staff.get_user(name=self.test_user)
+        self.assertIsInstance(self.staff, Staff)
 
         self.http_client.fetch(self.get_url('/manage'), self.stop,
                                method="POST",
@@ -38,37 +38,46 @@ class TestStaff(AsyncHTTPTestCase):
         response = self.wait()
         self.assertEqual(response.code, 200)
 
-        Staff.remove_user(name=self.test_user)
-        self.assertIsNone(Staff.get_user(name=self.test_user))
+        #Staff.remove_user(name=self.test_user)
+        #self.assertIsNone(Staff.get_user(name=self.test_user))
 
         #self.staff = Staff.create_user(name='adm', password='', role='adm')
 
 
 
-class TestBoardModel(unittest.TestCase):
+class TestBoardModel(AsyncHTTPTestCase):
     test_user = 'test_user_lol1'
     test_password = '123123123'
 
+    def get_app(self):
+        return application
+
     def test_make_board(self):
+
+        #Board.remove_board(u'Бредtest')
+
+        b = Board.get_board(dir='test')
+
+        if not b:
+            b = Board.create(name=u'Бредtest', dir='test')
+
+        self.staff = Staff.get_user(name=self.test_user)
+
+        self.assertIsInstance(b, Board)
         try:
-            self.staff = Staff.create_user(name=self.test_user, password=self.test_password, role='adm')
-        except:
-            self.staff = Staff.get_user(name=self.test_user)
-        self.assertIsInstance(self.staff, Staff)
+            b.add_moderator(staff_id=self.staff.id)
+        except AssertionError:
+            pass
 
-        Board.remove_board(u'Бредtest')
+        self.staff = self.staff
 
-        b = Board.create(name=u'Бредtest', dir='test')
+        self.assertIsInstance(b.staff[0], Staff)
 
+        b.remove_moderator(staff_id=self.staff.id)
+        self.assertIsInstance(b.staff[0], Staff)
+        #Staff.remove_user(name=self.test_user)
 
+        #self.assertIsNone(Staff.get_user(name=self.test_user))
 
-        b.add_moderator(self.staff.id)
-
-        mods = b.staff
-        print mods
-
-        b.remove_moderator(self.staff.id)
-        Staff.remove_user(name=self.test_user)
-        self.assertIsNone(Staff.get_user(name=self.test_user))
 
 
