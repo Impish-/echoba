@@ -20,7 +20,6 @@ class BaseHandler(RequestHandler):
     def get_form(self, **kwargs):
             return self.form(self.request.arguments)
 
-
     def get_context(self):
         context = {
                'current_user': self.get_current_user(),

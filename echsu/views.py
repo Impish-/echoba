@@ -29,7 +29,6 @@ class ThreadView(BaseHandler):
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=kwargs.get('board_dir', None))
         op_message = Message.get_message(kwargs.get('id_op_message', None))
-
         self.render_template(board=board, thread=op_message.thread) \
             if board else self.send_error(status_code=404)
 
@@ -37,7 +36,6 @@ class ThreadView(BaseHandler):
         #тут создаются сообщения в тенд
         board = Board.get_board(dir=kwargs.get('board_dir', None))
         op_message = Message.get_message(kwargs.get('id_op_message', None))
-
         form = self.get_form()
 
         with store_context(store):
@@ -65,8 +63,7 @@ class BoardView(BaseHandler):
     def get(self, *args, **kwargs):
         board = Board.get_board(dir=self.path_kwargs.get('board_dir', None))
         board.threads = board.threads
-
-        self.render_template(board=board) if board else self.send_error(status_code=404)
+        self.render_template(board=board, message_form=MessageForm()) if board else self.send_error(status_code=404)
 
     #надо доаутировать
     def post(self, *args, **kwargs):
@@ -76,7 +73,7 @@ class BoardView(BaseHandler):
         thread_form = self.get_form()                       # гипотетически это можно...
         message_form = MessageForm(self.request.arguments)  # запихать в одну форму
 
-        if not message_form.validate() and thread_form.validate():             # таки утрамбовать в Board класс
+        if not message_form.validate() and thread_form.validate():
             return self.render_template(board=board,
                                         message_form=message_form)
 
@@ -86,7 +83,7 @@ class BoardView(BaseHandler):
 
         # кусок объеденить
         with store_context(store):
-            message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
+            message= Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                               thread_id=thread.id)
             message_form.populate_obj(message)
 
@@ -94,18 +91,12 @@ class BoardView(BaseHandler):
              #TODO: Потом какнибудь покрасивше сделать
             if self.request.files.get(message_form.image.name, None):
                 image = self.request.files[message_form.image.name][0]
-
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
 
             message.add()
 
             return self.get(*args, **kwargs)
-
-    def get_context(self):
-        context = super(self.__class__, self).get_context()
-        context.update({'message_form': MessageForm()})
-        return context
 
 
 

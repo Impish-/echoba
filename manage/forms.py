@@ -1,49 +1,37 @@
 # -*- coding: utf-8 -*-
 from wtforms import BooleanField, validators, PasswordField, SelectField, StringField, SubmitField, ValidationError, \
-    HiddenField, IntegerField, RadioField
+    HiddenField, IntegerField, RadioField, SelectMultipleField, widgets, SelectMultipleField
+from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
 from wtforms.validators import InputRequired, EqualTo
-from wtforms_alchemy import model_form_factory
+from wtforms.widgets import HTMLString, html_params
+from wtforms_alchemy import model_form_factory, ModelFormField
+
 from wtforms_tornado import Form
 from manage.models import Staff, Board
 from toolz.bd_toolz import with_session
+from wtforms.compat import text_type
 
 ModelForm = model_form_factory(Form)
 
-#TODO: Перевести на modelform
-class StaffForm(Form):
-    username = StringField(u'Юзернэйм', [validators.Length(min=4, max=25,
-                                                           message=u'от 4 до 25 Символов!')])
-    role = SelectField(u'Роль', choices=[('mod', 'Moderator'), ('adm', 'Admin')])
 
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
-class StaffEditForm(StaffForm):
-    password = PasswordField(u'Пароль', [EqualTo('confirm',
-                                             message=u'Не совпадают ;(')
-                                     ]
-                         )
-    confirm = PasswordField(u'Еще раз')
+    def set_object(self, obj):
+        self.obj = obj
 
-    id = HiddenField(label='')
-
-    def validate_password(self, field):
-        if field.data:
-            if len(field.data) not in range(6,25):
-                raise ValidationError(u'от 6 до 25 Символов!')
-
-
-class StaffAddForm(StaffForm):
-    password = PasswordField(u'Пароль', [validators.Length(min=6, max=25,
-                                                        message=u'от 6 до 25 Символов!'),
-                                     InputRequired(message=u'Обязательно!'),
-                                     EqualTo('confirm',
-                                             message=u'Не совпадают ;(')
-                                     ]
-                         )
-    confirm = PasswordField(u'Еще раз')
-
-    def validate_username(form, field):
-        if Staff.get_user(name=field.data):
-            raise ValidationError(u'Юзернэйм занят!')
+    def iter_choices(self):
+        for value, label in self.choices:
+            print(self.coerce(value))
+            print label
+            boards = []
+            try:
+                boards = self.obj.boards
+            except AttributeError:
+                pass
+            selected = self.coerce(value) in [x.id for x in boards]
+            yield (value, label, selected)
 
 
 # Эталон формы!
@@ -53,13 +41,54 @@ class AddBoardForm(ModelForm):
 
     @classmethod
     @with_session
-    def get_session(cls,session):
+    def get_session(cls, session):
         return session
 
-    def save(self):
-        kwargs = {}
-        for key, field in self._fields.items():
-            kwargs.update({key: self[key].data})
-        obj = self.Meta.model(**kwargs)
-        obj.add()
-        return obj
+
+class StaffForm(ModelForm):
+    class Meta:
+        model = Staff
+
+    @classmethod
+    @with_session
+    def get_session(cls, session):
+        return session
+
+
+class StaffEditForm(StaffForm):
+    class Meta:
+        include_primary_keys = True
+        exclude = ['password']
+        field_args = {'name': {'validators': []}}
+        all_fields_optional = True
+
+    boards = MultiCheckboxField(u'Модерируемые доски', choices=
+                        [(x.id, x.name) for x in Board.get_all()], validators=[validators.Optional()], coerce=int)
+
+    password = PasswordField(u'Пароль', [EqualTo('confirm', message=u'Не совпадают ;(')])
+    confirm = PasswordField(u'Еще раз')
+
+    def validate_username(form, field):
+        print 'valid'
+
+    def validate_password(self, field):
+        if field.data:
+            if len(field.data) not in range(6, 25):
+                raise ValidationError(u'от 6 до 25 Символов!')
+
+    def process(self, formdata=None, obj=None, data=None, **kwargs):
+        #TODO: подумать как иначе
+        print data
+        self.boards.set_object(obj)
+        super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
+
+
+class StaffAddForm(StaffForm):
+    password = PasswordField(u'Пароль',
+                             [validators.Length(min=6, max=25, message=u'от 6 до 25 Символов!'),
+                              InputRequired(message=u'Обязательно!'),
+                              EqualTo('confirm',
+                                      message=u'Не совпадают ;(')
+                              ]
+                             )
+    confirm = PasswordField(u'Еще раз')

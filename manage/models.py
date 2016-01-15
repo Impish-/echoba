@@ -23,7 +23,7 @@ mod_rights = Table('association', Base.metadata,
 
 class Staff(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    name = Column(String, unique=True, label=u'Юзернэйм')
     password = Column(PasswordType(
             schemes=[
                 'pbkdf2_sha512',
@@ -34,20 +34,12 @@ class Staff(Base, SessionMixin):
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                              ]), nullable=False
+                              ]), nullable=False , label=u'Роль'
                   )
-    all_boards = Column(BOOLEAN, default=False)
-    boards = relationship("Board",
-                          secondary=mod_rights,
-                          backref=backref('staff', lazy='subquery', ),
-                          passive_deletes=True,
-                          passive_updates=False)
-
-    def __init__(self, name, password, role):
-        self.name = name
-        self.password = password
-        self.role = role
-
+    all_boards = Column(BOOLEAN, default=False, label=u'Все борды')
+    boards = relationship("Board", load_on_pending=True, lazy='dynamic',
+                          secondary=lambda: mod_rights,
+                          backref=backref('staff', lazy='dynamic', load_on_pending=True),)
     def __repr__(self):
         return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
 
@@ -67,7 +59,13 @@ class Staff(Base, SessionMixin):
     @staticmethod
     @with_session
     def create_user(name, password, role, session=None):
-        return Staff(name, password, role).add()
+        session.expire_on_commit = False
+        user = Staff()
+        user.name = name
+        user.password = password
+        user.role = role
+        user.add()
+        return user
 
     @staticmethod
     @with_session
@@ -117,8 +115,12 @@ class Staff(Base, SessionMixin):
         session.commit()
 
     @with_session
-    def add_mod_rights(self, board, session=None):
+    def add_mod_rights(self, board_id, session=None):
+        board = Board.get_board(id=board_id)
+        print board
         self.boards.append(board)
+        print self.boards
+        self.save()
         session.commit()
 
 
@@ -135,6 +137,7 @@ class Board(Base, SessionMixin):
 
 
     # TODO: выпилить, model_form.populate_obj юзать
+
     def __init__(self, **kwargs):
         # в случае получения id  в kwargs вытягивать из бд объект
         self.name = kwargs.get('name', None)
@@ -151,12 +154,12 @@ class Board(Base, SessionMixin):
 
     @with_session
     def add_moderator(self, staff_id, session=None):
-        self.staff.append(session.query(Staff).filter(Staff.id == staff_id).first())
+        self.staff.append(session.query(Staff).get(staff_id))
         session.commit()
 
     @with_session
     def remove_moderator(self, staff_id, session=None):
-        staff = session.query(Staff).filter(Staff.id == staff_id).first()
+        staff = session.query(Staff).get(staff_id)
         staff.remove_mod_rights(self)
         session.commit()
 
@@ -166,9 +169,12 @@ class Board(Base, SessionMixin):
     #     return session.query(Thread).filter(Thread.board_id == self.id).all()
 
     @staticmethod
-    @with_session
-    def create(name, dir, session=None):
-        return Board(name=name, dir=dir).add()
+    def create(name, dir):
+        board = Board()
+        board.name = name,
+        board.dir = dir,
+        board.add()
+        return board
 
     @staticmethod
     @with_session

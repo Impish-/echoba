@@ -11,10 +11,10 @@ class SessionMixin:
 
     id = Column(Integer, primary_key=True)
 
-    @declared_attr
-    @with_session
-    def session(self, session):
-        return session
+    # @declared_attr
+    # @with_session
+    # def session(self, session):
+    #     return session
 
     #!!]eqyz
     @with_session

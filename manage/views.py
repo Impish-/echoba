@@ -18,6 +18,10 @@ class LogOutHandler(BaseHandler):
 
 
 class ManageHandler(BaseHandler):
+    """
+    Login
+    """
+
     def get(self, *args, **kwargs):
         self.write(env.get_template('manage.html').render(self.get_context()))
 
@@ -33,6 +37,7 @@ class ManageHandler(BaseHandler):
 class StaffManageHandler(BaseHandler):
     template = 'staff.html'
     template_env = env
+    form = StaffAddForm
 
     @only_admin
     # staff_list
@@ -43,21 +48,19 @@ class StaffManageHandler(BaseHandler):
     @only_admin
     def post(self, *args, **kwargs):
         # staff_add
-        #TODO: переделать на modelform
-        form = StaffAddForm(self.request.arguments)
-        if form.validate():
-            Staff.create_user(name=form.username.data,
-                              password=form.password.data,
-                              role=form.role.data)
-            self.render_template()
-            return
-        self.render_template(form=form)
+        form = self.get_form()
+        if not form.validate():
+            return self.render_template(form=form)
+
+        staff = Staff()
+        form.populate_obj(staff)
+        staff.add()
+        self.render_template()
 
     def get_context(self):
         context = super(self.__class__, self).get_context()
         context.update({
             'staff_list': Staff.get_users(),
-            'form': StaffAddForm(),
         })
         return context
 
@@ -74,43 +77,50 @@ class DelStaffManagehandler(BaseHandler):
         self.redirect('/manage/staff')
 
 
+# TODO: ябануть get_object()
 class EditStaffManageHandler(BaseHandler):
     template = 'staff_edit.html'
     template_env = env
+    form = StaffEditForm
+    model = Staff
+
+    def put(self, *args, **kwargs):
+        print 'put'
 
     @only_admin
     def get(self, *args, **kwargs):
         self.username = kwargs.get('username', None)
-        self.render_template(user=self.get_user())
+        self.render_template(user=self.get_user()) if self.get_user() else self.write('Нету')
 
     def get_user(self):
         return Staff.get_user(self.username)
 
     @only_admin
     def post(self, *args, **kwargs):
-        user = Staff.get_user(kwargs.get('username', None))
-        form = StaffEditForm(self.request.arguments)
-
-        if form.validate():
-            user = Staff.update_user(name=form.username.data,
-                                     password=form.password.data,
-                                     role=form.role.data,
-                                     id=form.id.data)
-            return self.get(username=user.name)
         self.username = kwargs.get('username', None)
-        self.render_template(form=form, user=user)
+        user = Staff.get_user(self.username)
+        form = self.get_form()
+        if form.validate():
+            for b_id in form.boards.data:
+                user.add_mod_rights(b_id)
+            user.save()
+            user = Staff.update_user(id=form.id.data,
+                                     name=form.name.data,
+                                     password=form.password.data,
+                                     role=form.role.data,)
 
-    def get_context(self):
+
+            self.username = user.name
+            self.render_template(user=user)
+        self.render_template(user=user, form=form)
+
+    def get_context(self, **kwargs):
         context = super(self.__class__, self).get_context()
         user = self.get_user()
         context.update({
-            'form': StaffEditForm(username=user.name,
-                                  role=user.role.code,
-                                  id=user.id),
+            'form': StaffEditForm(obj=user),
         })
         return context
-
-
 
 
 # TODO: Примерно на такой вид вьюшек(аля-жанго) перевести все
@@ -118,15 +128,17 @@ class AddBoardHandler(BaseHandler):
     template_env = env
     template = 'add_board.html'
     form = AddBoardForm
+    model = Board
 
     def get(self, *args, **kwargs):
         self.render_template(form=self.form())
 
     def post(self, *args, **kwargs):
-        form = self.form(self.request.arguments)
+        form = self.get_form()
         if form.validate():
-            # TODO: заменить на populate_obj
-            board = form.save()
+            board = Board()
+            form.populate_obj(board)
+            board.add()
             return self.get()
 
         self.render_template(form=form)
