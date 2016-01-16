@@ -33,10 +33,9 @@ def combine_metadata(*args):
             t.tometadata(m)
     return m
 
-from echsu.models import Base as echsu_models
 from manage.models import Base as manage_models
 
-target_metadata = combine_metadata(echsu_models.metadata, manage_models.metadata,)
+target_metadata = combine_metadata(manage_models.metadata,)
 
 
 # other values from the config, defined by the needs of env.py,
