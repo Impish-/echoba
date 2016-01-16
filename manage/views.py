@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
+from torgen.detail import DetailHandler
+from torgen.edit import FormMixin, FormHandler, BaseFormHandler
+from tornado.web import RequestHandler
+
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
 from manage.models import Staff, Board
 import tornado
 from jinja2 import Environment, PackageLoader
-from toolz.base_cls import BaseHandler
+from toolz.base_cls import BaseMixin, FlashMixin, BaseHandler
 from toolz.bd_toolz import only_admin
 
 env = Environment(loader=PackageLoader('manage', 'templates'))
 
 
-class LogOutHandler(BaseHandler):
+class LogOutHandler(RequestHandler, BaseMixin):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
         if self.get_current_user():
@@ -18,6 +22,10 @@ class LogOutHandler(BaseHandler):
 
 
 class ManageHandler(BaseHandler):
+    """
+    Login
+    """
+
     def get(self, *args, **kwargs):
         self.write(env.get_template('manage.html').render(self.get_context()))
 
@@ -30,9 +38,10 @@ class ManageHandler(BaseHandler):
         self.redirect("/manage")
 
 
-class StaffManageHandler(BaseHandler):
+class StaffManageHandler(BaseHandler, FlashMixin):
     template = 'staff.html'
     template_env = env
+    form = StaffAddForm
 
     @only_admin
     # staff_list
@@ -43,26 +52,24 @@ class StaffManageHandler(BaseHandler):
     @only_admin
     def post(self, *args, **kwargs):
         # staff_add
-        #TODO: переделать на modelform
-        form = StaffAddForm(self.request.arguments)
-        if form.validate():
-            Staff.create_user(name=form.username.data,
-                              password=form.password.data,
-                              role=form.role.data)
-            self.render_template()
-            return
-        self.render_template(form=form)
+        form = self.get_form()
+        if not form.validate():
+            return self.render_template(form=form)
+
+        staff = Staff()
+        form.populate_obj(staff)
+        staff.add()
+        self.render_template()
 
     def get_context(self):
         context = super(self.__class__, self).get_context()
         context.update({
             'staff_list': Staff.get_users(),
-            'form': StaffAddForm(),
         })
         return context
 
 
-class DelStaffManagehandler(BaseHandler):
+class DelStaffManagehandler(BaseHandler, FlashMixin):
     @only_admin
     def get(self, *args, **kwargs):
         username = kwargs.get('username', None)
@@ -74,59 +81,61 @@ class DelStaffManagehandler(BaseHandler):
         self.redirect('/manage/staff')
 
 
-class EditStaffManageHandler(BaseHandler):
-    template = 'staff_edit.html'
-    template_env = env
+class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
+    template_name = 'staff_edit.html'
+    model = Staff
+    context_object_name = 'user'
+    form_class = StaffEditForm
 
-    @only_admin
-    def get(self, *args, **kwargs):
-        self.username = kwargs.get('username', None)
-        self.render_template(user=self.get_user())
-
-    def get_user(self):
-        return Staff.get_user(self.username)
+    def get_context_data(self, **kwargs):
+        context = super(self.__class__, self).get_context_data(**kwargs)
+        context['form'] = self.form_class(obj=self.object)
+        return context
 
     @only_admin
     def post(self, *args, **kwargs):
-        user = Staff.get_user(kwargs.get('username', None))
-        form = StaffEditForm(self.request.arguments)
+        self.kwargs = kwargs
+        self.object = self.get_object()
+        form = self.form_class(self.request.arguments, obj=self.object)
+        return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
-        if form.validate():
-            user = Staff.update_user(name=form.username.data,
-                                     password=form.password.data,
-                                     role=form.role.data,
-                                     id=form.id.data)
-            return self.get(username=user.name)
-        self.username = kwargs.get('username', None)
-        self.render_template(form=form, user=user)
+    def form_invalid(self, form):
+        context_form = self.get_context_data()
+        context_form['form'] = form
+        return self.render(context_form)
 
-    def get_context(self):
-        context = super(self.__class__, self).get_context()
-        user = self.get_user()
-        context.update({
-            'form': StaffEditForm(username=user.name,
-                                  role=user.role.code,
-                                  id=user.id),
-        })
-        return context
+    def form_valid(self, form):
+        user = self.object
+        user.name = form.name.data if form.name.data else user.name
+        user.password = form.password.data if form.password.data else user.password
+        user.role = form.role.data if form.role.data else user.role.name
+        user.all_boards = form.all_boards.data
+        user.boards[:] = []
+        for b_id in form.boards.data:
+            if b_id not in [x.id for x in user.boards]:
+                user.boards.append(self.db.query(Board).get(b_id))
+
+        self.db.commit()
+        self.db.refresh(user)
+
+        return self.render(self.get_context_data())
 
 
-
-
-# TODO: Примерно на такой вид вьюшек(аля-жанго) перевести все
 class AddBoardHandler(BaseHandler):
     template_env = env
     template = 'add_board.html'
     form = AddBoardForm
+    model = Board
 
     def get(self, *args, **kwargs):
         self.render_template(form=self.form())
 
     def post(self, *args, **kwargs):
-        form = self.form(self.request.arguments)
+        form = self.get_form()
         if form.validate():
-            # TODO: заменить на populate_obj
-            board = form.save()
+            board = Board()
+            form.populate_obj(board)
+            board.add()
             return self.get()
 
         self.render_template(form=form)

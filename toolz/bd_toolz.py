@@ -22,17 +22,22 @@ def with_session(fn):
     def go(*args, **kw):
         session = sessionmaker(bind=engine)()
         session.begin(subtransactions=True)
+
         try:
             ret = fn(session=session, *args, **kw)
             session.commit()
             return ret
         except:
             session.rollback()
+            session.close()
             raise
+        session.close()
     return go
+
 
 def only_admin(fn):
     def tmp(self, *args, **kw):
+                                #self.current_user.is_admin()
         if self.current_user and self.current_user.role.value == u'Admin':
             return fn(self, *args, **kw)
         else:

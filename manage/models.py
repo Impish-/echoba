@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from psycopg2._psycopg import IntegrityError
 from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -20,6 +20,7 @@ import pprint
 Base = declarative_base()
 
 mod_rights = Table('association', Base.metadata,
+                   Column('id', Integer, primary_key=True),
                    Column('staff_id', Integer, ForeignKey('staff.id')),
                    Column('board_id', Integer, ForeignKey('board.id'))
                    )
@@ -27,7 +28,7 @@ mod_rights = Table('association', Base.metadata,
 
 class Staff(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    name = Column(String, unique=True, label=u'Юзернэйм')
     password = Column(PasswordType(
             schemes=[
                 'pbkdf2_sha512',
@@ -38,22 +39,14 @@ class Staff(Base, SessionMixin):
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                              ]), nullable=False
+                              ]), nullable=False , label=u'Роль'
                   )
-    all_boards = Column(BOOLEAN, default=False)
-    boards = relationship("Board",
-                          secondary=mod_rights,
-                          backref=backref('staff', lazy='dynamic', ),
-                          passive_deletes=True,
-                          passive_updates=False)
-
-    def __init__(self, name, password, role):
-        self.name = name
-        self.password = password
-        self.role = role
-
+    all_boards = Column(BOOLEAN, default=False, label=u'Модератор всех досок')
+    boards = relationship("Board", load_on_pending=True,
+                          secondary=lambda: mod_rights,
+                          backref=backref('staff', lazy='dynamic', load_on_pending=True),)
     def __repr__(self):
-        return "<User('%s', '%s', %s)>" % (self.name, self.password, self.role)
+        return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
 
     @declared_attr
     def is_admin(self):
@@ -71,7 +64,13 @@ class Staff(Base, SessionMixin):
     @staticmethod
     @with_session
     def create_user(name, password, role, session=None):
-        return Staff(name, password, role).add()
+        session.expire_on_commit = False
+        user = Staff()
+        user.name = name
+        user.password = password
+        user.role = role
+        user.add()
+        return user
 
     @staticmethod
     @with_session
@@ -121,8 +120,12 @@ class Staff(Base, SessionMixin):
         session.commit()
 
     @with_session
-    def add_mod_rights(self, board, session=None):
+    def add_mod_rights(self, board_id, session=None):
+        board = Board.get_board(id=board_id)
+        print board
         self.boards.append(board)
+        print self.boards
+        self.save()
         session.commit()
 
 
@@ -137,9 +140,9 @@ class Board(Base, SessionMixin):
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
 
-    # threads = relationship('Thread', backref=backref('board', lazy='dynamic',),)
 
     # TODO: выпилить, model_form.populate_obj юзать
+
     def __init__(self, **kwargs):
         # в случае получения id  в kwargs вытягивать из бд объект
         self.name = kwargs.get('name', None)
@@ -156,12 +159,12 @@ class Board(Base, SessionMixin):
 
     @with_session
     def add_moderator(self, staff_id, session=None):
-        self.staff.append(session.query(Staff).filter(Staff.id == staff_id).first())
+        self.staff.append(session.query(Staff).get(staff_id))
         session.commit()
 
     @with_session
     def remove_moderator(self, staff_id, session=None):
-        staff = session.query(Staff).filter(Staff.id == staff_id).first()
+        staff = session.query(Staff).get(staff_id)
         staff.remove_mod_rights(self)
         session.commit()
 
@@ -171,15 +174,21 @@ class Board(Base, SessionMixin):
     #     return session.query(Thread).filter(Thread.board_id == self.id).all()
 
     @staticmethod
-    @with_session
-    def create(name, dir, session=None):
-        return Board(name=name, dir=dir).add()
+    def create(name, dir):
+        board = Board()
+        board.name = name,
+        board.dir = dir,
+        board.add()
+        return board
 
     @staticmethod
     @with_session
     def remove_board(name, session):
-        session.query(Board).filter(Board.name == name).delete(synchronize_session=False)
-        session.commit()
+        try:
+            session.query(Board).filter(Board.name == name).delete(synchronize_session=False)
+            session.commit()
+        except:
+            pass
 
     @staticmethod
     @with_session
@@ -206,7 +215,7 @@ class Thread(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
-    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan',
+    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
                             backref=backref('thread'), )
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
@@ -239,7 +248,7 @@ class Message(Base, SessionMixin):
     poster_name = Column(String, label=u'Имя', nullable=True)
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
-    message = Column(UnicodeText, label=u'Сообщение')
+    message = Column(UnicodeText, label=u'Сообщение', nullable=False)
     picture = image_attachment('BoardImage')
     password = Column(PasswordType(
             schemes=[

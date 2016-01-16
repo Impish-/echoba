@@ -23,12 +23,38 @@
 # }
 
 import os, sys
-from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore, FileSystemStore
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from sqlalchemy_imageattach.stores.fs import  FileSystemStore
+from tornado_jinja2 import Jinja2Loader
 
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+STATIC_PATH = '%s/static/' % SITE_ROOT
+MEDIA_PATH = '%s/media/' % SITE_ROOT
 
 store = FileSystemStore(
-            path='%s/media/' % SITE_ROOT,
+            path=MEDIA_PATH,
             base_url='/media/'
         )
 
+TEMPLATE_PATH = 'templates'
+
+jinja2_settings = {
+            'autoescape': True,
+            'extensions': [
+                'jinja2.ext.with_'
+            ],
+        }
+
+jinja2_environment = Environment(
+            loader=FileSystemLoader(TEMPLATE_PATH),
+            undefined=StrictUndefined,
+            **jinja2_settings
+        )
+
+jinja2loader = Jinja2Loader(TEMPLATE_PATH)
+
+settings = dict(
+            template_path=TEMPLATE_PATH,
+            static_path=STATIC_PATH,
+            template_loader=jinja2loader
+        )

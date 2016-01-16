@@ -12,8 +12,8 @@ urls = [
 
     (r"/manage/?", ManageHandler),
     (r"/manage/staff/?", StaffManageHandler),
-    (r"/manage/staff/edit/(?P<username>\w+)?/?", EditStaffManageHandler),
-    (r"/manage/staff/del/(?P<username>\w+)?/?", DelStaffManagehandler),
+    (r"/manage/staff/edit/(?P<id>\w+)?/?", EditStaffManageHandler),
+    (r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManagehandler),
 
     (r"/manage/board/add/?", AddBoardHandler),
     (r"/logout", LogOutHandler),
@@ -24,5 +24,5 @@ urls = [
     (r"/media/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "media")}),
 
     (r"/(?P<board_dir>[a-z]+)/?$", BoardView),
-    (r"/(?P<board_dir>[a-z]+)/(?P<id_op_message>\d+)/?$", ThreadView),
+    (r"/(?P<board_dir>[a-z]+)/(?P<op_message_id>\d+)/?$", ThreadView),
 ]
