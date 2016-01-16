@@ -4,6 +4,7 @@ from jinja2 import Environment, PackageLoader
 from tornado.web import RequestHandler
 
 from manage.models import Staff, Board
+from toolz.recaptcha import RecaptchaValidator
 
 
 class BaseHandler(RequestHandler):
@@ -18,7 +19,9 @@ class BaseHandler(RequestHandler):
         return Staff.get_user_by_id(user_id)
 
     def get_form(self, **kwargs):
-            return self.form(self.request.arguments)
+        if 'g-recaptcha-response' in self.request.arguments:
+            setattr(RecaptchaValidator, 'client_response', self.request.arguments['g-recaptcha-response'])
+        return self.form(self.request.arguments)
 
 
     def get_context(self):

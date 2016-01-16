@@ -12,6 +12,9 @@
         {% for field in message_form %}
             <div>
                 {{ field.label }}{{ field }}
+                {% if field.errors %}
+                    <span class="error">{{ field.errors|join(', ') }}</span>
+                {% endif %}
             </div>
         {% endfor %}
     <input type="submit">

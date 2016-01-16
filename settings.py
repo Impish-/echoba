@@ -16,6 +16,11 @@
 #     'media': 'media',
 #     'password_salt': '',
 # }
+#
+# recaptcha_settings = {
+#     'public_key': '',
+#     'private_key': ''
+# }
 
 import os, sys
 from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore, FileSystemStore

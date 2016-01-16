@@ -13,6 +13,10 @@ from settings import store
 from toolz.base_models import SessionMixin
 from toolz.bd_toolz import with_session, engine
 
+import echsu
+from toolz.recaptcha import RecaptchaField
+import pprint
+
 Base = declarative_base()
 
 mod_rights = Table('association', Base.metadata,
@@ -186,10 +190,14 @@ class Board(Base, SessionMixin):
     @with_session
     def get_board(id=None, dir=None, session=None):
         try:
+            board = None
             if id:
-                return session.query(Board).filter(Board.id == id).first()
-            if dir:
-                return session.query(Board).filter(Board.dir == dir).first()
+                board = session.query(Board).filter(Board.id == id).first()
+            elif dir:
+                board = session.query(Board).filter(Board.dir == dir).first()
+            if board.captcha:
+                setattr(echsu.forms.MessageForm, 'captcha', RecaptchaField())
+            return board
         except:
             return None
 
