@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import arrow
 from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
 from torgen.edit import FormHandler
@@ -26,7 +27,8 @@ class ThreadView(BoardDataMixin, FormHandler):
         context.update({
             'board': board,
             'thread': op_message.thread,
-            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm()
+            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(),
+            'form': [],
         })
         return context
 
@@ -78,7 +80,7 @@ class BoardView(BoardDataMixin, ListHandler):
         return context
 
     def post(self, *args, **kwargs):
-        self.kwargs=kwargs
+        self.kwargs = kwargs
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         thread_form = CreateThreadForm(self.request.arguments)  # гипотетически это можно...
         message_form = MessageForm(self.request.arguments)  # запихать в одну форму

@@ -25,7 +25,7 @@ class CreateThreadForm(ModelForm):
 class MessageForm(ModelForm):
     class Meta:
         model = Message
-        exclude = ['ip_address']
+        exclude = ['ip_address', 'datetime']
 
     op_post = False
     sage = BooleanField(u'Сажа',)
