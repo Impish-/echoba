@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from torgen.base import TemplateHandler
 from torgen.detail import DetailHandler
-from torgen.edit import FormMixin, FormHandler, BaseFormHandler
+from torgen.edit import FormMixin, FormHandler, BaseFormHandler, DeleteHandler
 from tornado.web import RequestHandler
 
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
@@ -68,16 +68,20 @@ class StaffManageHandler(BaseHandler, FlashMixin):
         return context
 
 
-class DelStaffManagehandler(BaseHandler, FlashMixin):
-    @only_admin
-    def get(self, *args, **kwargs):
-        username = kwargs.get('username', None)
-        if self.current_user.name != username:
-            Staff.remove_user(name=username)  # ;(
-            self.set_flash(u'Юзверя ' + username + u' больше не существует', key='del_user')
-        else:
-            self.set_flash(u'Нельзя удалить самого себя', key='del_user')
-        self.redirect('/manage/staff')
+class DelStaffManageHandler(BaseMixin, DeleteHandler, FlashMixin):
+    template_name = 'confirm_delete.html'
+    model = Staff
+    success_url = '/manage/staff'
+
+    # @only_admin
+    # def get(self, *args, **kwargs):
+    #     username = kwargs.get('username', None)
+    #     if self.current_user.name != username:
+    #         self.set_flash(u'Юзверя ' + username + u' больше не существует', key='del_user')
+    #     else:
+    #         self.set_flash(u'Нельзя удалить самого себя', key='del_user')
+    #         return self.redirect(self.success_url)
+    #     return super(self.__class__, self).post(args, kwargs)
 
 
 class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
