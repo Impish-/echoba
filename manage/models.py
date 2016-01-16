@@ -248,7 +248,7 @@ class Message(Base, SessionMixin):
     poster_name = Column(String, label=u'Имя', nullable=True)
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
-    message = Column(UnicodeText, label=u'Сообщение', nullable=False)
+    message = Column(UnicodeText, label=u'Сообщение', nullable=True)
     picture = image_attachment('BoardImage')
     password = Column(PasswordType(
             schemes=[

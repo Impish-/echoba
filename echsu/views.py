@@ -25,12 +25,14 @@ class ThreadView(FormHandler):
         context.update({
             'board': board,
             'thread': op_message.thread,
-            'message_form': MessageForm()
+            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm()
         })
         return context
 
     def post(self, *args, **kwargs):
+        self.kwargs=kwargs
         form = self.form_class(self.request.arguments)
+        form.image.data = self.request.files.get(form.image.name, None) is not None
         return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
     def form_invalid(self, form):
@@ -64,19 +66,23 @@ class BoardView(ListHandler):
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):
+        self.object_list = self.get_queryset()
         context = super(self.__class__, self).get_context_data(**kwargs)
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         context.update({
             'board': board,
-            'message_form': MessageForm(),
+            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(),
             'form': CreateThreadForm(),
         })
         return context
 
     def post(self, *args, **kwargs):
+        self.kwargs=kwargs
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         thread_form = CreateThreadForm(self.request.arguments)  # гипотетически это можно...
         message_form = MessageForm(self.request.arguments)  # запихать в одну форму
+        message_form.op_post = True
+        message_form.image.data = self.request.files.get(message_form.image.name, None) is not None
         if not message_form.validate() and thread_form.validate():
             return self.render(self.get_context_data(message_form=message_form))
         thread = self.model(board_id=board.id)
@@ -97,5 +103,5 @@ class BoardView(ListHandler):
             self.db.commit()
             # except:
             #     self.db.rollback()
-        return super(self.__class__, self).get(args, kwargs)
+        return super(ListHandler, self).get(args, kwargs)
 
