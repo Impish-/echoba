@@ -16,6 +16,11 @@
 #     'media': 'media',
 #     'password_salt': '',
 # }
+#
+# recaptcha_settings = {
+#     'public_key': '',
+#     'private_key': ''
+# }
 
 import os, sys
 from jinja2 import Environment, FileSystemLoader, StrictUndefined

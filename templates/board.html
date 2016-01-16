@@ -1,41 +1,36 @@
-<html xmlns="http://www.w3.org/1999/html">
-<head>
+{% extends 'base.html' %}
+{% from 'macro.html' import post_message %}
 
-</head>
-<body>
-    <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
+{% block title %}/{{ board.dir }}/ - {{ board.name }}{% endblock %}
+
+{% block content %}
+    <div class="logo">
+        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>
+    </div>
     {% include "post_form.html" %}
     <hr>
 
+    <ul class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li>/{{ board.dir }}/ - {{ board.name }}</li>
+    </ul>
 
     {% for thread in board.threads %}
-        <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
-            <div class="op_post" style="background-color: #bdf3d2">
-                <div>OP POST</div>
-                    <img src="{{ thread.op().img_thumb() }}">
-                    <span class="poster_name">{{ thread.op().poster_name }}</span>
-                    <span class="post_id">No {{ thread.op().id  }}</span>
-                    <a href="/{{ board.dir }}/{{ thread.op().id  }}/">Посмотреть тренд</a>
-                    <div style="background-color: #d9f3e6">
-                        {{  thread.op().message }}
-                    </div>
-                </div>
-            <hr>
+        <div class="thread" id="thread{{ thread.id }}">
+
+            {{ post_message(
+                        message=thread.op(),
+                        op_post=1,
+                        op_label=1,
+                        thread_link=thread.link()
+            ) }}
 
             {% for message in thread.messages_tail() %}
-                <div class="post" style="margin-left: 50px;">
-                     <div class="post_header">
-                         <img src="{{ message.img_thumb() }}">
-                        <span class="poster_name">{{ message.poster_name }}</span>
-                        <span class="post_id">No {{ message.id }}</span>
-                    </div>
-                    <div>
-                        {{ message.message }}
-                    </div>
-                    <hr>
-                </div>
+                {{ post_message(
+                        message=message
+                ) }}
             {% endfor %}
         </div>
+        <hr>
     {% endfor %}
-</body>
-</html>
+{% endblock %}
