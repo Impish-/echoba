@@ -37,20 +37,16 @@ class AddBoardForm(ModelForm):
     class Meta:
         model = Board
 
-    @classmethod
-    @with_session
-    def get_session(cls, session):
-        return session
 
 
 class StaffForm(ModelForm):
     class Meta:
         model = Staff
 
-    @classmethod
-    @with_session
-    def get_session(cls, session):
-        return session
+    # @classmethod
+    # @with_session
+    # def get_session(cls, session):
+    #     return session
 
 
 class StaffEditForm(StaffForm):
