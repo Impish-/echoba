@@ -31,7 +31,6 @@ def with_session(fn):
             session.rollback()
             session.close()
             raise
-
         session.close()
     return go
 

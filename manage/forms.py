@@ -23,8 +23,6 @@ class MultiCheckboxField(SelectMultipleField):
 
     def iter_choices(self):
         for value, label in self.choices:
-            print(self.coerce(value))
-            print label
             boards = []
             try:
                 boards = self.obj.boards
@@ -57,19 +55,16 @@ class StaffForm(ModelForm):
 
 class StaffEditForm(StaffForm):
     class Meta:
-        include_primary_keys = True
-        exclude = ['password']
-        field_args = {'name': {'validators': []}}
-        all_fields_optional = True
+        exclude = ['password', 'name']
 
     boards = MultiCheckboxField(u'Модерируемые доски', choices=
                         [(x.id, x.name) for x in Board.get_all()], validators=[validators.Optional()], coerce=int)
 
+    name = StringField(u'Юзернэйм', [validators.Length(min=4, max=25,
+                                                           message=u'от 4 до 25 Символов!')])
+
     password = PasswordField(u'Пароль', [EqualTo('confirm', message=u'Не совпадают ;(')])
     confirm = PasswordField(u'Еще раз')
-
-    def validate_username(form, field):
-        print 'valid'
 
     def validate_password(self, field):
         if field.data:
@@ -78,7 +73,6 @@ class StaffEditForm(StaffForm):
 
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         #TODO: подумать как иначе
-        print data
         self.boards.set_object(obj)
         super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 

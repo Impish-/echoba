@@ -36,8 +36,8 @@ class Staff(Base, SessionMixin):
                               ('mod', u'Moderator'),
                               ]), nullable=False , label=u'Роль'
                   )
-    all_boards = Column(BOOLEAN, default=False, label=u'Все борды')
-    boards = relationship("Board", load_on_pending=True, lazy='dynamic',
+    all_boards = Column(BOOLEAN, default=False, label=u'Модератор всех досок')
+    boards = relationship("Board", load_on_pending=True,
                           secondary=lambda: mod_rights,
                           backref=backref('staff', lazy='dynamic', load_on_pending=True),)
     def __repr__(self):

@@ -12,8 +12,8 @@ urls = [
 
     (r"/manage/?", ManageHandler),
     (r"/manage/staff/?", StaffManageHandler),
-    (r"/manage/staff/edit/(?P<username>\w+)?/?", EditStaffManageHandler),
-    (r"/manage/staff/del/(?P<username>\w+)?/?", DelStaffManagehandler),
+    (r"/manage/staff/edit/(?P<id>\w+)?/?", EditStaffManageHandler),
+    (r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManagehandler),
 
     (r"/manage/board/add/?", AddBoardHandler),
     (r"/logout", LogOutHandler),
