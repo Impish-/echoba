@@ -12,8 +12,6 @@ from jinja2 import Environment, PackageLoader
 from toolz.base_cls import BaseMixin, FlashMixin, FormMixin
 from toolz.bd_toolz import only_admin
 
-env = Environment(loader=PackageLoader('manage', 'templates'))
-
 
 class ManageHandler(BaseMixin, TemplateHandler):
     template_name = 'manage.html'
