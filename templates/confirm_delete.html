@@ -1,0 +1,10 @@
+{% extends 'parts/manage_base.html' %}
+
+{% block content %}
+    <form action="" method="post">
+    <p>Действительно удалить <b>{{ object.name }}</b>?</p>
+    <input type="submit" value="ДА!" /> <a href="javascript:history.back()">Нет</a>
+    </form>
+
+{% endblock %}
+

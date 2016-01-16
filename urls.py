@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 from tornado import web
 import os
+from tornado.web import url
+
 from echsu.views import MainPageView, ThreadView
 
 from echsu.views import BoardView
 from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, EditStaffManageHandler, \
-    DelStaffManagehandler, AddBoardHandler
+    DelStaffManageHandler, AddBoardHandler
 
 urls = [
     (r"/?$", MainPageView),
 
-    (r"/manage/?", ManageHandler),
+    (r"/manage/?", ManageHandler,),
     (r"/manage/staff/?", StaffManageHandler),
     (r"/manage/staff/edit/(?P<id>\w+)?/?", EditStaffManageHandler),
-    (r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManagehandler),
+    (r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManageHandler),
 
     (r"/manage/board/add/?", AddBoardHandler),
     (r"/logout", LogOutHandler),
