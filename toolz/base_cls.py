@@ -65,6 +65,11 @@ class BaseMixin(object):
             return None
 
     def get_context_data(self, **kwargs):
+
+        kwargs.update({
+            'board_list': self.db.query(Board).all()
+        })
+
         kwargs['current_user'] = self.get_current_user()
         if self.application.settings['xsrf_cookies']:
             kwargs['xsrf_form_html'] = self.xsrf_form_html()
@@ -73,12 +78,12 @@ class BaseMixin(object):
 
 class HardCodeVarsMixin(object):
     def get_context_data(self, **kwargs):
-        return {
-            'board_list': self.db.query(Board).all()
-        }
+        context = {}
+
+        return context
 
 
-class BoardDataMixin(BaseMixin, HardCodeVarsMixin):
+class BoardDataMixin(BaseMixin) :
     """
     lll
     """

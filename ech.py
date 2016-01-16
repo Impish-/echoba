@@ -30,10 +30,15 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--port', type=int, dest='port', help='port')
     args = parser.parse_args()
 
-    sockets = tornado.netutil.bind_sockets(args.port if args.port else 8888)
-    tornado.process.fork_processes(0)
-
     server = HTTPServer(application)
-    server.add_sockets(sockets)
-
+    server.bind(args.port if args.port else 8888)
+    server.start(0)  # Forks multiple sub-processes
     IOLoop.current().start()
+
+    # sockets = tornado.netutil.bind_sockets()
+    # tornado.process.fork_processes(0)
+    #
+    # server = HTTPServer(application)
+    # server.add_sockets(sockets)
+    #
+    # IOLoop.current().start()
