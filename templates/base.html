@@ -1,19 +1,27 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %} Ech.su {% endblock %}</title>
+    <title>{% block title %}{% endblock %} - Ech.su</title>
+    <link rel="stylesheet" href="/static/css/img_global.css">
+    <link rel="stylesheet" href="/static/css/photon.css">
 </head>
-<body>
-    {% if current_user %}
-        <div style="float: right">
-            {{ current_user.role.value }} | <b>{{ current_user.name }}</b>
-            <p><a href="/manage/">админка</a></p>
-        </div>
-    {% endif %}
+<body id="frame">
+    <div class="main-wrapper">
+        <div class="container-fluid">
+            {% if current_user %}
+                <div style="float: right">
+                    {{ current_user.role.value }} | <b>{{ current_user.name }}</b>
+                    <p><a href="/manage/">админка</a></p>
+                </div>
+            {% endif %}
 
-    {% block content %}
-    {% endblock %}
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    {# Тут футер будет? #}
 
 </body>
 </html>

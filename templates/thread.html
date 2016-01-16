@@ -1,36 +1,28 @@
-<html xmlns="http://www.w3.org/1999/html">
-<head>
+{% extends 'base.html' %}
+{% from 'macro.html' import post_message %}
 
-</head>
-<body>
-    <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
+{% block title %}/{{ board.dir }}/ - {% if thread.op().header %}{{ thread.op().header }}{% else %}Тред #{{ thread.id }}{% endif %}{% endblock %}
+
+{% block content %}
+    <div class="logo">
+        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>
+    </div>
     {% include "post_form.html" %}
 
-    <div class="op_post" style="border: dotted; padding: 20px; border-color: #d58512">
-         <div class="post_header">
-             <img src="{{ thread.op().img_thumb() }}">
-            <span class="poster_name">{{ thread.op().poster_name }}</span>
-            <span class="date">{{ thread.op().date }}</span>
-            <span class="post_id">No {{thread.op().id }}</span>
-        </div>
-        <div style="background-color: #c4e3f3">
-            {{ thread.op().message }}
-        </div>
-    </div>
+    <ul class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/{{ board.dir }}">/{{ board.dir }}/ - {{ board.name }}</a></li>
+        <li>{% if thread.op().header %}{{ thread.op().header }}{% else %}Тред #{{ thread.id }}{% endif %}</li>
+    </ul>
 
+    {{ post_message(
+                message=thread.op(),
+                op_post=1
+    )}}
 
     {% for message in thread.messages[1:] %}
-        <div class="post" style="border: dotted; padding: 20px">
-             <div class="post_header">
-                 <img src="{{ message.img_thumb() }}">
-                <span class="poster_name">{{ message.poster_name }}</span>
-                <span class="date">{{ message.date }}</span>
-                <span class="post_id">No {{ message.id }}</span>
-            </div>
-            <div style="background-color: #c4e3f3">
-                {{ message.message }}
-            </div>
-        </div>
+        {{ post_message(
+                    message=message
+        ) }}
     {% endfor %}
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% macro post_message(message, op_post=0, op_label=0, thread_link='') %}
+    <div class="postnode" id="post-{{ message.id }}">
+        {% if not op_post %}
+            <table><tr><td class="doubledash">&gt;&gt;</td><td id="reply{{ message.id }}" class="reply">
+        {% endif %}
+
+        <label for="check-post-{{ message.id }}">
+            <input type="checkbox" value="{{ message.id }}" name="post[]" id="check-post-{{ message.id }}" />
+            <span class="postername">{{ message.poster_name }}</span>
+            {{ message.date }}
+        </label>
+
+        <span class="reflink">
+            <a onclick="return hightlight('{{ message.id }}')" href="#">№</a>
+            <a onclick="return insert('>>{{ message.id }}\n');" href="#">{{ message.id }}</a>
+        </span>
+
+        {% if op_label %}
+            <span class="op-label">OP POST</span>
+        {% endif %}
+
+        {% if thread_link %}
+            [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
+        {% endif %}
+
+        <br>
+
+        {% if message.picture %}
+            <span class="filesize">
+                Файл
+                <a href="http://www.google.ry/searchbyimage?image_url=http://ech.su{{ message.image() }}" target="_blank" title="Искать в google">[G]</a>
+                <a href="http://www.tineye.com/search/?url=http://ech.su{{ message.image() }}" target="_blank" title="Искать на tineye">[T]</a>
+                :
+                <a href="{{ message.image() }}" target="_blank">name</a>
+            </span>
+            
+            <br>
+
+            <a href="{{ message.image() }}" target="_blank">
+                <span id="thumb{{ message.id }}"><img src="{{ message.img_thumb() }}" class="thumb"></span>
+            </a>
+
+            <br>
+        {% endif %}
+
+        </div>
+        <blockquote>
+            <div class="postmessage">{{ message.message }}</div>
+        </blockquote>
+
+        {% if not op_post %}
+            </td></tr></table>
+        {% endif %}
+    </div>
+{% endmacro %}
