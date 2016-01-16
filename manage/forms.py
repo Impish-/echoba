@@ -11,42 +11,29 @@ from manage.models import Staff, Board
 from toolz.bd_toolz import with_session
 from wtforms.compat import text_type
 
+from toolz.fields import MultiCheckboxField
+
 ModelForm = model_form_factory(Form)
-
-
-class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
-
-    def set_object(self, obj):
-        self.obj = obj
-
-    def iter_choices(self):
-        for value, label in self.choices:
-            boards = []
-            try:
-                boards = self.obj.boards
-            except AttributeError:
-                pass
-            selected = self.coerce(value) in [x.id for x in boards]
-            yield (value, label, selected)
-
 
 # Эталон формы!
 class AddBoardForm(ModelForm):
     class Meta:
         model = Board
 
+    @classmethod
+    @with_session
+    def get_session(cls, session):
+        return session
 
 
 class StaffForm(ModelForm):
     class Meta:
         model = Staff
 
-    # @classmethod
-    # @with_session
-    # def get_session(cls, session):
-    #     return session
+    @classmethod
+    @with_session
+    def get_session(cls, session):
+        return session
 
 
 class StaffEditForm(StaffForm):
