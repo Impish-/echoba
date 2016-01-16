@@ -114,28 +114,34 @@ class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
         for b_id in form.boards.data:
             if b_id not in [x.id for x in user.boards]:
                 user.boards.append(self.db.query(Board).get(b_id))
-
         self.db.commit()
         self.db.refresh(user)
 
         return self.render(self.get_context_data())
 
 
-class AddBoardHandler(BaseHandler):
-    template_env = env
-    template = 'add_board.html'
-    form = AddBoardForm
+class AddBoardHandler(BaseMixin, FormHandler):
+    template_name = 'add_board.html'
+    form_class = AddBoardForm
     model = Board
+    success_url = '/manage'
 
-    def get(self, *args, **kwargs):
-        self.render_template(form=self.form())
+    def get_success_url(self):
+        return self.redirect(self.success_url)
 
     def post(self, *args, **kwargs):
-        form = self.get_form()
-        if form.validate():
-            board = Board()
-            form.populate_obj(board)
-            board.add()
-            return self.get()
+        self.kwargs = kwargs
+        form = self.form_class(self.request.arguments)
+        return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
-        self.render_template(form=form)
+    def form_invalid(self, form):
+        context_form = self.get_context_data()
+        context_form['form'] = form
+        return self.render(context_form)
+
+    def form_valid(self, form):
+        board = self.model()
+        form.populate_obj(board)
+        self.db.add(board)
+        self.db.commit()
+        return self.get_success_url()
