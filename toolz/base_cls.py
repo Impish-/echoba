@@ -70,3 +70,17 @@ class BaseMixin(object):
             kwargs['xsrf_form_html'] = self.xsrf_form_html()
         return super(BaseMixin, self).get_context_data(**kwargs)
 
+
+class HardCodeVarsMixin(object):
+    def get_context_data(self, **kwargs):
+        return {
+            'board_list': self.db.query(Board).all()
+        }
+
+
+class BoardDataMixin(BaseMixin, HardCodeVarsMixin):
+    """
+    lll
+    """
+    pass
+

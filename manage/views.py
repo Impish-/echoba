@@ -9,11 +9,11 @@ from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
 from manage.models import Staff, Board
 import tornado
 from jinja2 import Environment, PackageLoader
-from toolz.base_cls import BaseMixin, FlashMixin, FormMixin
+from toolz.base_cls import BaseMixin, FlashMixin, FormMixin, BoardDataMixin
 from toolz.bd_toolz import only_admin
 
 
-class ManageHandler(BaseMixin, TemplateHandler):
+class ManageHandler(BoardDataMixin, TemplateHandler):
     template_name = 'manage.html'
 
     def post(self):
@@ -25,7 +25,7 @@ class ManageHandler(BaseMixin, TemplateHandler):
         self.redirect("/manage")
 
 
-class LogOutHandler(BaseMixin, tornado.web.RequestHandler):
+class LogOutHandler(BoardDataMixin, tornado.web.RequestHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
         if self.get_current_user():
@@ -33,7 +33,7 @@ class LogOutHandler(BaseMixin, tornado.web.RequestHandler):
         self.redirect('/manage')
 
 
-class StaffManageHandler(BaseMixin, ListHandler, FormMixin):
+class StaffManageHandler(BoardDataMixin, ListHandler, FormMixin):
     template_name = 'staff.html'
     form_class = StaffAddForm
     model = Staff
@@ -52,7 +52,7 @@ class StaffManageHandler(BaseMixin, ListHandler, FormMixin):
         return super(self.__class__, self).form_valid(form)
 
 
-class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
+class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
     template_name = 'staff_edit.html'
     model = Staff
     context_object_name = 'user'
@@ -78,13 +78,13 @@ class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
         return super(self.__class__, self).form_valid(form)
 
 
-class DelStaffManageHandler(BaseMixin, DeleteHandler, FlashMixin):
+class DelStaffManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Staff
     success_url = '/manage/staff'
 
 
-class AddBoardHandler(BaseMixin, FormHandler):
+class AddBoardHandler(BoardDataMixin, FormHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board
