@@ -1,6 +1,6 @@
 from wtforms import SelectMultipleField
 
-from toolz import widgets
+from wtforms import widgets
 from toolz.widgets import DivWidget
 
 

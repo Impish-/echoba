@@ -16,6 +16,7 @@ from toolz.bd_toolz import with_session, engine
 Base = declarative_base()
 
 mod_rights = Table('association', Base.metadata,
+                   Column('id', Integer, primary_key=True),
                    Column('staff_id', Integer, ForeignKey('staff.id')),
                    Column('board_id', Integer, ForeignKey('board.id'))
                    )
@@ -236,7 +237,7 @@ class Message(Base, SessionMixin):
     poster_name = Column(String, label=u'Имя', nullable=True)
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
-    message = Column(UnicodeText, label=u'Сообщение')
+    message = Column(UnicodeText, label=u'Сообщение', nullable=False)
     picture = image_attachment('BoardImage')
     password = Column(PasswordType(
             schemes=[

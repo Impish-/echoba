@@ -100,7 +100,9 @@ class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
         return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
     def form_invalid(self, form):
-        return self.render(self.get_context_data(message_form=form))
+        context_form = self.get_context_data()
+        context_form['form'] = form
+        return self.render(context_form)
 
     def form_valid(self, form):
         user = self.object
@@ -115,6 +117,7 @@ class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
 
         self.db.commit()
         self.db.refresh(user)
+
         return self.render(self.get_context_data())
 
 

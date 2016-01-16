@@ -12,7 +12,7 @@
                             {{ field(class="form-control") }}
                         </div>
                         <div class="col-sm-4">
-                            {% for err in form.errors[field.name] %}
+                            {% for err in field.errors %}
                                 <ul class="error-list">
                                     <li><i style="color: red;">{{ err }}</i></li>
                                 </ul>
