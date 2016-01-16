@@ -70,12 +70,8 @@ class BoardView(ListHandler):
             'board': board,
             'message_form': MessageForm(),
             'form': CreateThreadForm(),
-            'create_thread': True,
         })
         return context
-
-    def form_valid(self):
-        return self.render(self.get_context_data())
 
     def post(self, *args, **kwargs):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
@@ -101,5 +97,5 @@ class BoardView(ListHandler):
             self.db.commit()
             # except:
             #     self.db.rollback()
+        return super(self.__class__, self).get(args, kwargs)
 
-        return self.form_valid()
