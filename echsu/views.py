@@ -7,13 +7,14 @@ from torgen.list import ListHandler
 from echsu.forms import MessageForm, CreateThreadForm
 from manage.models import Board, Message, Thread
 from settings import store
+from toolz.base_cls import BoardDataMixin
 
 
-class MainPageView(TemplateHandler):
+class MainPageView(BoardDataMixin, TemplateHandler):
     template_name = 'main_page.html'
 
 
-class ThreadView(FormHandler):
+class ThreadView(BoardDataMixin, FormHandler):
     template_name = 'thread.html'
     form_class = MessageForm
 
@@ -54,7 +55,7 @@ class ThreadView(FormHandler):
         return self.render(self.get_context_data())
 
 
-class BoardView(ListHandler):
+class BoardView(BoardDataMixin, ListHandler):
     template_name = 'board.html'
     context_object_name = 'threads'
     paginate_by = 10
