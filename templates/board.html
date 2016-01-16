@@ -4,7 +4,9 @@
 {% block title %}/{{ board.dir }}/ - {{ board.name }}{% endblock %}
 
 {% block content %}
-    <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
+    <div class="logo">
+        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>
+    </div>
     {% include "post_form.html" %}
     <hr>
 
@@ -14,7 +16,7 @@
     </ul>
 
     {% for thread in board.threads %}
-        <div class="thread" id="thread{{ thread.id }}" style="background-color: #c4e3f3">
+        <div class="thread" id="thread{{ thread.id }}">
 
             {{ post_message(
                         message=thread.op(),
@@ -29,5 +31,6 @@
                 ) }}
             {% endfor %}
         </div>
+        <hr>
     {% endfor %}
 {% endblock %}

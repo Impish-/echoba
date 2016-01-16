@@ -4,7 +4,9 @@
 {% block title %}/{{ board.dir }}/ - {% if thread.op().header %}{{ thread.op().header }}{% else %}Тред #{{ thread.id }}{% endif %}{% endblock %}
 
 {% block content %}
-    <h1>/{{ board.dir }}/ - {{ board.name }}</h1>
+    <div class="logo">
+        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</h1>
+    </div>
     {% include "post_form.html" %}
 
     <ul class="breadcrumb">
