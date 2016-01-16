@@ -96,7 +96,7 @@ class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
     def post(self, *args, **kwargs):
         self.kwargs = kwargs
         self.object = self.get_object()
-        form = self.form_class(self.request.arguments)
+        form = self.form_class(self.request.arguments, obj=self.object)
         return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
     def form_invalid(self, form):
