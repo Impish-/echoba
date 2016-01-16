@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from torgen.base import TemplateHandler
 from torgen.detail import DetailHandler
-from torgen.edit import FormMixin, FormHandler, BaseFormHandler
+from torgen.edit import FormMixin, FormHandler, BaseFormHandler, DeleteHandler
 from tornado.web import RequestHandler
 
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
@@ -13,7 +14,7 @@ from toolz.bd_toolz import only_admin
 env = Environment(loader=PackageLoader('manage', 'templates'))
 
 
-class LogOutHandler(RequestHandler, BaseMixin):
+class LogOutHandler(BaseMixin, tornado.web.RequestHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
         if self.get_current_user():
@@ -21,17 +22,15 @@ class LogOutHandler(RequestHandler, BaseMixin):
         self.redirect('/manage')
 
 
-class ManageHandler(BaseHandler):
+class ManageHandler(BaseMixin, TemplateHandler):
     """
-    Login
+        Login
     """
-
-    def get(self, *args, **kwargs):
-        self.write(env.get_template('manage.html').render(self.get_context()))
+    template_name = 'manage.html'
 
     def post(self):
-        user = Staff.get_auth(name=self.get_argument("login"), password=self.get_argument('password'))
-
+        user = self.db.query(Staff).filter(Staff.name == self.get_argument("login"),
+                                           Staff.password == self.get_argument('password')).first()
         if user is None:
             return self.get()
         self.set_secure_cookie("user_id", '%d' % user.id)
@@ -69,16 +68,20 @@ class StaffManageHandler(BaseHandler, FlashMixin):
         return context
 
 
-class DelStaffManagehandler(BaseHandler, FlashMixin):
-    @only_admin
-    def get(self, *args, **kwargs):
-        username = kwargs.get('username', None)
-        if self.current_user.name != username:
-            Staff.remove_user(name=username)  # ;(
-            self.set_flash(u'Юзверя ' + username + u' больше не существует', key='del_user')
-        else:
-            self.set_flash(u'Нельзя удалить самого себя', key='del_user')
-        self.redirect('/manage/staff')
+class DelStaffManageHandler(BaseMixin, DeleteHandler, FlashMixin):
+    template_name = 'confirm_delete.html'
+    model = Staff
+    success_url = '/manage/staff'
+
+    # @only_admin
+    # def get(self, *args, **kwargs):
+    #     username = kwargs.get('username', None)
+    #     if self.current_user.name != username:
+    #         self.set_flash(u'Юзверя ' + username + u' больше не существует', key='del_user')
+    #     else:
+    #         self.set_flash(u'Нельзя удалить самого себя', key='del_user')
+    #         return self.redirect(self.success_url)
+    #     return super(self.__class__, self).post(args, kwargs)
 
 
 class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
