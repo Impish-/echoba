@@ -233,7 +233,7 @@ class Thread(Base, SessionMixin):
         return self.messages[1:][-self.board.thread_tail:]
 
     def link(self):
-         return '/%s/%d/' % (self.board.dir, self.op().id)
+        return '/%s/%d/' % (self.board.dir, self.op().id)
 
     @staticmethod
     @with_session
