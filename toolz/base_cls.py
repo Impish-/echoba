@@ -36,7 +36,7 @@ class FormMixin(FormMixin_torgen):
         return self.render(self.get(**self.kwargs))
 
     def form_invalid(self, form):
-        context_form = super(self.__class__, self).get_context_data(**self.kwargs)
+        context_form = super(self.__class__, self).get_context_data(**self.kwargs if self.kwargs else {})
         context_form['form'] = form
         return self.render(context_form)
 
