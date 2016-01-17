@@ -18,14 +18,17 @@
                             message=thread.op(),
                             op_post=1,
                             op_label=1,
-                            thread_link=thread.link()
+                            thread_link=thread.link(),
+                            is_admin=current_user
                 ) }}
             </div>
 
             <div class="replies">
                 {% for message in thread.messages_tail() %}
                     {{ post_message(
-                            message=message
+                            message=message,
+                            thread_link=thread.link(),
+                            is_admin=current_user
                     ) }}
                 {% endfor %}
             </div>

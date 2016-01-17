@@ -1,5 +1,5 @@
-{% macro post_message(message, op_post=0, op_label=0, thread_link='') %}
-    <div class="postnode" id="post-{{ message.id }}">
+{% macro post_message(message, op_post=0, op_label=0, thread_link='', is_admin=None) %}
+    <div class="postnode" id="{{ message.id }}">
         {% if not op_post %}
             <table><tr><td class="doubledash">&gt;&gt;</td><td id="reply{{ message.id }}" class="reply">
         {% endif %}
@@ -19,16 +19,19 @@
         </label>
 
         <span class="reflink">
-            <a onclick="return hightlight('{{ message.id }}')" href="#">№</a>
-            <a onclick="return insert('>>{{ message.id }}\n');" href="#">{{ message.id }}</a>
+            <a onclick="return hightlight('{{ message.id }}')" href="{{ thread_link }}#{{ message.id }}">№</a>
+            <a onclick="return insert('>>{{ message.id }}\n');" href="{{ thread_link }}#i{{ message.id }}">{{ message.id }}</a>
         </span>
 
         {% if op_label %}
             <span class="op-label">OP POST</span>
         {% endif %}
 
-        {% if thread_link %}
+        {% if op_label %}
             [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
+        {% endif %}
+        {% if is_admin %}
+            [<a href="/manage/message/del/{{ message.id }}" target="_blank">Удалить</a>]
         {% endif %}
 
         <br>

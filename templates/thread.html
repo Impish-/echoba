@@ -15,14 +15,19 @@
     {% include "post_form.html" %}
 
     <div class="thread">
+        <hr>
         {{ post_message(
                     message=thread.op(),
-                    op_post=1
+                    op_post=1,
+                    thread_link=thread.link(),
+                    is_admin=current_user
         )}}
 
         {% for message in thread.messages[1:] %}
             {{ post_message(
-                        message=message
+                        message=message,
+                        thread_link=thread.link(),
+                        is_admin=current_user
             ) }}
         {% endfor %}
     </div>

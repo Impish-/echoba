@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+{% macro print_navbar(list) -%}
+    <div class="navbar">
+        [
+        {% for board_item in list -%}
+            <a href="/{{ board_item.dir }}/" title="{{ board_item.name }}">{{ board_item.dir }}</a>
+            {% if not loop.last %}
+                /
+            {% endif %}
+        {%- endfor %}
+        ]
+    </div>
+{%- endmacro %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,19 +27,13 @@
                 [{{ current_user.name}} ({{ current_user.role.value }})]
             {% endif %}
         </div>
-        {% if board_list %}
-            <div class="navbar">
-                [
-                {% for board_item in board_list %}
-                    <a href="/{{ board_item.dir }}/" title="{{ board_item.name }}">{{ board_item.dir }}</a>
-                {% endfor %}
-                ]
-            </div>
-        {% endif %}
+        {{ print_navbar(board_list) }}
         <div class="container-fluid">
             {% block content %}
             {% endblock %}
         </div>
+        <hr>
+        {{ print_navbar(board_list) }}
     </div>
 
     {# Тут футер будет? #}

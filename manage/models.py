@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, DateTime, BigInteger
+from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, DateTime, BigInteger, event
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -220,7 +220,7 @@ class Thread(Base, SessionMixin):
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
-                            backref=backref('thread'))
+                            backref=backref('thread'), primaryjoin="and_(Message.deleted==False, Message.thread_id==Thread.id)")
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
 
@@ -228,6 +228,7 @@ class Thread(Base, SessionMixin):
                          backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan'))
 
     bumped = Column(BigInteger)
+    deleted = Column(BOOLEAN, default=False)
 
     def op(self):
         return self.messages[0]
@@ -267,6 +268,7 @@ class Message(Base, SessionMixin):
 
     ip_address = Column(IPAddressType)
     datetime = Column(ArrowType, default=arrow.utcnow())
+    deleted = Column(BOOLEAN, default=False)
 
     # image = image_attachment('BoardImage')
 
