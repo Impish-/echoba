@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText
+from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, DateTime, BigInteger
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -217,12 +217,14 @@ class Thread(Base, SessionMixin):
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
-                            backref=backref('thread'), )
+                            backref=backref('thread'))
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
 
-    board = relationship('Board', lazy='subquery', cascade='all', load_on_pending=True,
-                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan', load_on_pending=True))
+    board = relationship('Board', lazy='subquery', cascade='all',
+                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan'))
+
+    bumped = Column(BigInteger)
 
     def op(self):
         return self.messages[0]
@@ -232,10 +234,6 @@ class Thread(Base, SessionMixin):
 
     def link(self):
         return '/%s/%d/' % (self.board.dir, self.id)
-
-    @hybrid_property
-    def timestamp(self):
-        self.messages[-1].datetime.timestamp
 
     @staticmethod
     @with_session

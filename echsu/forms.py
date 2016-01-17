@@ -14,7 +14,7 @@ ModelForm = model_form_factory(Form)
 class CreateThreadForm(ModelForm):
     class Meta:
         model = Thread
-
+        exclude = ['bumped']
     #message = ModelFieldList(FormField(MessageForm))\
     @classmethod
     @with_session
