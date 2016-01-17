@@ -298,8 +298,11 @@ class Message(Base, SessionMixin):
         replaced_data = (
             ('&lt;', r'<', 0),
             ('&gt;', r'>', 0),
-            ('<br>', r'\n', 0),
+            ('<br>\n', r'\n', 0),
+            ('', r'\r', 0),
             ('&quot;', r'"', 0),
+            ('\g<begin><span class="unkfunc">&gt;\g<var></span>\g<end>', r'(?P<begin>^|<br>|\n)&gt;(?P<var>.*?)(?P<end><br>|$)', re.I),
+            ('<a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>', r'^(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
             ('<b>\g<var></b>', r'\[b](?P<var>.*?)\[/b]', re.I),
             ('<b>\g<var></b>', r'\*\*(?P<var>.*?)\*\*', re.I),
             ('<b>\g<var></b>', r'__(?P<var>.*?)__', re.I),
