@@ -33,7 +33,19 @@ class FormMixin(FormMixin_torgen):
         return context
 
     def form_valid(self, form):
-        return self.render(self.get(**self.kwargs))
+        print self.__dict__
+        try:
+            self.object = self.get_object()
+        except AttributeError:
+            self.object = self.model()
+            self.db.add(self.object)
+
+        form.populate_obj(self.object)
+        self.db.commit()
+        try:
+            return self.redirect(self.get_success_url())
+        except:
+            pass
 
     def form_invalid(self, form):
         context_form = super(self.__class__, self).get_context_data(**self.kwargs if self.kwargs else {})
