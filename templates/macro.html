@@ -12,7 +12,7 @@
             <span class="postername">{{ message.poster_name }}</span>
             {% if message.datetime %}
                 <i>
-                    запощенно {{ message.datetime.format('DD.MM.YYYY HH:mm') }}
+                    запощено {{ message.datetime.format('DD.MM.YYYY HH:mm') }}
                     ({{ message.datetime.humanize(locale='ru') }})
                 </i>
             {% endif %}
