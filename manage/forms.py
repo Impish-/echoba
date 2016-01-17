@@ -15,7 +15,7 @@ from toolz.fields import MultiCheckboxField
 
 ModelForm = model_form_factory(Form)
 
-# Эталон формы!
+
 class AddBoardForm(ModelForm):
     class Meta:
         model = Board
@@ -24,6 +24,13 @@ class AddBoardForm(ModelForm):
     @with_session
     def get_session(cls, session):
         return session
+
+
+class EditBoardForm(AddBoardForm):
+    def process(self, formdata=None, obj=None, data=None, **kwargs):
+        self.dir.validators = []
+        self.name.validators = []
+        super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 
 
 class StaffForm(ModelForm):
@@ -57,6 +64,7 @@ class StaffEditForm(StaffForm):
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         #TODO: подумать как иначе
         self.boards.set_object(obj)
+        self.name.validators = []
         super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 
 
