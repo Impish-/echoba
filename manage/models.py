@@ -237,7 +237,8 @@ class Thread(Base, SessionMixin):
         return self.messages[1:][-self.board.thread_tail:]
 
     def left(self):
-        return len(self.messages)-(self.board.thread_tail + 1)
+        left = len(self.messages)-(self.board.thread_tail + 1)
+        return left if left > 0 else None
 
     def link(self):
         return '/%s/%d/' % (self.board.dir, self.op().id)
