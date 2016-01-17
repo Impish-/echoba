@@ -25,7 +25,9 @@ class ManageHandler(BoardDataMixin, TemplateHandler):
         self.redirect("/manage")
 
 
-class LogOutHandler(BoardDataMixin, tornado.web.RequestHandler):
+class LogOutHandler(BoardDataMixin, TemplateHandler):
+    template_name = 'manage.html'
+
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
         if self.get_current_user():
