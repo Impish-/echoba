@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from tornado import web
 import os
-from tornado.web import url
+from tornado.web import URLSpec as url
 
 from echsu.views import MainPageView, ThreadView
 
 from echsu.views import BoardView
 from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, EditStaffManageHandler, \
     DelStaffManageHandler, AddBoardHandler
+
 
 urls = [
     url(r"/?$", MainPageView, name='main_page'),

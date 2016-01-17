@@ -67,7 +67,7 @@ class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
         op_message = self.db.query(Message).\
             filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
         self.make_message(form=form, thread_id=op_message.thread.id)
-        return self.render(self.get_context_data())
+        return self.redirect(self.reverse_url('thread', self.path_kwargs.get('board_dir', None), op_message.id))
 
 
 class BoardView(BoardDataMixin, ListHandler, MessageAdding):
@@ -110,5 +110,5 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         self.db.commit()
         self.db.refresh(thread)
         self.make_message(form=message_form, thread_id=thread.id)
-        return super(ListHandler, self).get(args, kwargs)
+        return self.redirect(self.reverse_url('board', board.dir))
 
