@@ -18,7 +18,27 @@ class MainPageView(BoardDataMixin, TemplateHandler):
     template_name = 'main_page.html'
 
 
-class ThreadView(BoardDataMixin, FormHandler):
+class MessageAdding(object):
+    def make_message(self, form=None, thread_id=None):
+         with store_context(store):
+            message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
+                              thread_id=thread_id)
+            form.populate_obj(message)
+            message.thread_id = thread_id
+            if self.request.files.get(form.image.name, None):
+                image = self.request.files[form.image.name][0]
+                message.picture.from_blob(image['body'])
+                message.picture.generate_thumbnail(width=150)
+            self.db.add(message)
+            self.db.commit()
+            self.db.refresh(message)
+            message.thread.bumped = int(round(time.time() * 1000))
+            message.before_added()
+            self.db.commit()
+            return message
+
+
+class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
     template_name = 'thread.html'
     form_class = MessageForm
 
@@ -47,24 +67,11 @@ class ThreadView(BoardDataMixin, FormHandler):
     def form_valid(self, form):
         op_message = self.db.query(Message).\
             filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
-        with store_context(store):
-            message = Message()
-            form.populate_obj(message)
-            message.thread_id = op_message.thread.id
-            if self.request.files.get(form.image.name, None):
-                image = self.request.files[form.image.name][0]
-                message.picture.from_blob(image['body'])
-                message.picture.generate_thumbnail(width=150)
-            self.db.add(message)
-            if not form.sage.data:
-                op_message.thread.bumped =int(round(time.time() * 1000))
-            message.before_added()
-            self.db.add(message)
-            self.db.commit()
+        self.make_message(form=form, thread_id=op_message.thread.id)
         return self.render(self.get_context_data())
 
 
-class BoardView(BoardDataMixin, ListHandler):
+class BoardView(BoardDataMixin, ListHandler, MessageAdding):
     template_name = 'board.html'
     context_object_name = 'threads'
     model = Thread
@@ -80,13 +87,8 @@ class BoardView(BoardDataMixin, ListHandler):
         self.object_list = self.get_queryset()
         context = super(self.__class__, self).get_context_data(**kwargs)
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
-
-        board_obj = {
-            'dir': board.dir,
-            'name': board.name,
-            'threads': context.pop('threads')
-        }
-
+        board_obj = board.__dict__
+        board_obj['threads'] = context.pop('threads')
         context.update({
             'board': board_obj,
             'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(),
@@ -103,26 +105,11 @@ class BoardView(BoardDataMixin, ListHandler):
         message_form.image.data = self.request.files.get(message_form.image.name, None) is not None
         if not message_form.validate() and thread_form.validate():
             return self.render(self.get_context_data(message_form=message_form))
-
         thread = self.model(board_id=board.id)
         thread_form.populate_obj(thread)
         self.db.add(thread)
         self.db.commit()
         self.db.refresh(thread)
-        # try:
-        with store_context(store):
-            message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
-                              thread_id=thread.id)
-            message_form.populate_obj(message)
-            if self.request.files.get(message_form.image.name, None):
-                image = self.request.files[message_form.image.name][0]
-                message.picture.from_blob(image['body'])
-                message.picture.generate_thumbnail(width=150)
-            thread.bumped = int(round(time.time() * 1000))
-            message.before_added()
-            self.db.add(message)
-            self.db.commit()
-            # except:
-            #     self.db.rollback()
+        self.make_message(form=message_form, thread_id=thread.id)
         return super(ListHandler, self).get(args, kwargs)
 
