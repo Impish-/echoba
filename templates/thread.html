@@ -14,19 +14,22 @@
 
     {% include "post_form.html" %}
 
-    {{ post_message(
-                message=thread.op(),
-                op_post=1
-    )}}
-
-    {% for message in thread.messages[1:] %}
+    <div class="thread">
         {{ post_message(
-                    message=message
-        ) }}
-    {% endfor %}
+                    message=thread.op(),
+                    op_post=1
+        )}}
 
-    <hr>
+        {% for message in thread.messages[1:] %}
+            {{ post_message(
+                        message=message
+            ) }}
+        {% endfor %}
+    </div>
 
-    [<a href="/{{ board.dir }}/">Вернуться</a>]
-    [<a href="#top">Наверх</a>]
+    <div class="thread-bottom">
+        <hr>
+        [<a href="/{{ board.dir }}/">Вернуться</a>]
+        [<a href="#top">Наверх</a>]
+    </div>
 {% endblock %}
