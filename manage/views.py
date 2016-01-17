@@ -5,7 +5,7 @@ from torgen.edit import FormHandler, DeleteHandler
 from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
-from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
+from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm
 from manage.models import Staff, Board, Message, Thread, BoardImage
 import tornado
 from jinja2 import Environment, PackageLoader
@@ -44,11 +44,9 @@ class StaffManageHandler(BoardDataMixin, ListHandler, FormMixin):
     model = Staff
     context_object_name = 'staff_list'
 
-    def form_invalid(self, form):
+    def post(self, *args, **kwargs):
         self.object_list = self.get_queryset()
-        context_form = self.get_context_data(**self.kwargs)
-        context_form['form'] = form
-        return super(ListHandler, self).render(context_form)
+        return super(self.__class__,self).post(args, kwargs)
 
     def form_valid(self, form):
         staff = Staff()
@@ -63,21 +61,15 @@ class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
     context_object_name = 'user'
     form_class = StaffEditForm
 
-    def form_invalid(self, form):
-        context_form = super(self.__class__, self).get_context_data(**self.kwargs)
-        context_form['form'] = form
-        return self.render(context_form)
-
     def form_valid(self, form):
         user = self.object
-        user.name = form.name.data if form.name.data else user.name
-        user.password = form.password.data if form.password.data else user.password
-        user.role = form.role.data if form.role.data else user.role.name
         user.all_boards = form.all_boards.data
         user.boards[:] = []
         for b_id in form.boards.data:
             if b_id not in [x.id for x in user.boards]:
                 user.boards.append(self.db.query(Board).get(b_id))
+        form._fields.pop('boards')
+        form.populate_obj(user)
         self.db.commit()
         self.db.refresh(user)
         return super(self.__class__, self).form_valid(form)
@@ -145,3 +137,16 @@ class AddBoardHandler(BoardDataMixin, FormHandler):
         self.db.add(board)
         self.db.commit()
         return self.get_success_url()
+
+
+class EditBoardHandler(BoardDataMixin, DetailHandler, FormMixin):
+    template_name = 'board_edit.html'
+    model = Board
+    context_object_name = 'user'
+    form_class = EditBoardForm
+
+    def form_valid(self, form):
+        form.populate_obj(self.object)
+        self.db.commit()
+        self.db.refresh(self.object)
+        return self.redirect(self.reverse_url('board_edit', self.object.id))
