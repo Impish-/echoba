@@ -18,6 +18,8 @@ import arrow
 import re
 from toolz.recaptcha import RecaptchaField
 
+from tripcode import tripcode
+
 
 Base = declarative_base()
 
@@ -325,6 +327,8 @@ class Message(Base, SessionMixin):
 
     def before_added(self):
         self.message = self._formated_message(self.message)
+        if len(self.poster_name) > 1 and self.poster_name[0] in (u'#', u'!'):
+            self.poster_name = u'!' + tripcode(self.poster_name[1:])
 
     @staticmethod
     @with_session
