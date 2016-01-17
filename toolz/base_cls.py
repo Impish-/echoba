@@ -11,8 +11,11 @@ from toolz.recaptcha import RecaptchaValidator
 class FormMixin(FormMixin_torgen):
     """
         Таки кошерный Form Mixin,
-         Прилепляем формочку к любому Class Base Handler'у
-         и наслаждаемся формочкой
+        Прилепляем формочку к любому Class Base Handler'у
+        и наслаждаемся формочкой!
+        хуй знает велосипед или нет,но в торгене:
+            1)FormHandler - корявый
+            2)Можно замешивать в любой(из проверенных) торгеновский Handler
     """
     def post(self, *args, **kwargs):
         super(FormMixin, self).post(*args, **kwargs)

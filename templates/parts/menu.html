@@ -8,11 +8,11 @@
     </div>
     <h4>Персонал:</h4>
     <ul class="nav nav-pills nav-stacked">
-        <li><a href="/manage">Mod - чатик?))</a></li>
+        <li><a href="{{ reverse_url('manage') }}">Mod - чатик?))</a></li>
         <li><a href="#">Банхаммер - лог</a></li>
         {% if current_user.role.value == 'Admin' %}
             <li><a href="#">Лог активности персонала</a></li>
-            <li><a href="/manage/staff">Управление персоналом</a></li>
+            <li><a href="{{ reverse_url('staff_list') }}">Управление персоналом</a></li>
         {% endif %}
     </ul>
 
@@ -26,10 +26,13 @@
 
     <h4>Управление Бордами:</h4>
     <ul class="nav nav-pills nav-stacked">
-        <li><a href="/manage/board/add/">Создать доску</a> </li>
+        <li><a href="{{ reverse_url('board_add') }}">Создать доску</a> </li>
         <li><strong>Бордолист</strong></li>
         {% for board in board_list %}
-            <li><a href="/{{ board.dir }}">/{{ board.dir }}/ -{{ board.name }}</a></li>
+            <li>
+                <a href="{{ reverse_url('board', board.dir ) }}">/{{ board.dir  }}/ -{{ board.name }}</a> -
+                <a href="{{ reverse_url('board_edit', board.id) }}">редактировать</a>
+            </li>
         {% endfor %}
     </ul>
 {% endif %}

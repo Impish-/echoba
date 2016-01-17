@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from torgen.base import TemplateHandler
 from torgen.detail import DetailHandler
-from torgen.edit import FormHandler, DeleteHandler
+from torgen.edit import FormHandler, DeleteHandler, ProcessFormHandler
 from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
@@ -48,11 +48,8 @@ class StaffManageHandler(BoardDataMixin, ListHandler, FormMixin):
         self.object_list = self.get_queryset()
         return super(self.__class__,self).post(args, kwargs)
 
-    def form_valid(self, form):
-        staff = Staff()
-        form.populate_obj(staff)
-        staff.add()
-        return super(self.__class__, self).form_valid(form)
+    def get_success_url(self):
+        return self.reverse_url('staff_list')
 
 
 class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
@@ -60,6 +57,9 @@ class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
     model = Staff
     context_object_name = 'user'
     form_class = StaffEditForm
+
+    def get_success_url(self):
+        return self.redirect(self.reverse_url('edit_staff', self.object.id))
 
     def form_valid(self, form):
         user = self.object
@@ -112,7 +112,7 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
             self.redirect(self.success_url)
 
 
-class AddBoardHandler(BoardDataMixin, FormHandler):
+class AddBoardHandler(BoardDataMixin, FormMixin, TemplateHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board
@@ -121,23 +121,6 @@ class AddBoardHandler(BoardDataMixin, FormHandler):
     def get_success_url(self):
         return self.redirect(self.success_url)
 
-    def post(self, *args, **kwargs):
-        self.kwargs = kwargs
-        form = self.form_class(self.request.arguments)
-        return self.form_valid(form) if form.validate() else self.form_invalid(form)
-
-    def form_invalid(self, form):
-        context_form = self.get_context_data()
-        context_form['form'] = form
-        return self.render(context_form)
-
-    def form_valid(self, form):
-        board = self.model()
-        form.populate_obj(board)
-        self.db.add(board)
-        self.db.commit()
-        return self.get_success_url()
-
 
 class EditBoardHandler(BoardDataMixin, DetailHandler, FormMixin):
     template_name = 'board_edit.html'
@@ -145,8 +128,5 @@ class EditBoardHandler(BoardDataMixin, DetailHandler, FormMixin):
     context_object_name = 'user'
     form_class = EditBoardForm
 
-    def form_valid(self, form):
-        form.populate_obj(self.object)
-        self.db.commit()
-        self.db.refresh(self.object)
+    def get_success_url(self):
         return self.redirect(self.reverse_url('board_edit', self.object.id))
