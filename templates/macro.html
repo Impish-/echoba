@@ -63,3 +63,9 @@
         {% endif %}
     </div>
 {% endmacro %}
+
+{% macro form_errors(field) %}
+    {% if field.errors %}
+        <span class="errors">{{ field.errors|join(', ') }}</span>
+    {% endif %}
+{% endmacro %}

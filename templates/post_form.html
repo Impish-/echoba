@@ -1,10 +1,11 @@
+{% from 'macro.html' import form_errors %}
 <hr>
 <div class="postarea">
     <form id="postform" method="post" enctype="multipart/form-data">
         <table class="postform">
             {% if current_user %}
-                <tr>
-                    {% for field in form %}
+                {% for field in form %}
+                    <tr>
                             <td class="postblock">{{ field.label }}</td>
                             <td>
                                 {{ field }}
@@ -12,23 +13,76 @@
                                     <span class="error">{{ field.errors|join(', ') }}</span>
                                 {% endif %}
                             </td>
-                    {% endfor %}
-                </tr>
+                    </tr>
+                {% endfor %}
             {% endif %}
 
-            {% for field in message_form %}
-                <tr>
-                    <td class="postblock">{{ field.label }}</td>
-                    <td>
-                        {{ field }}
-                        {% if field.errors %}
-                            <span class="error">{{ field.errors|join(', ') }}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
             <tr>
-                <td collspan="2"><input type="submit" value="Отправить"></td>
+                <td class="postblock">{{ message_form.sage.label }}</td>
+                <td>
+                    {{ message_form.sage }}
+                    {{ form_errors(message_form.sage) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="postblock">{{ message_form.poster_name.label }}</td>
+                <td>
+                    {{ message_form.poster_name(
+                                                maxlength="75",
+                                                size="28"
+                    ) }}
+                    {{ form_errors(message_form.poster_name) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="postblock">{{ message_form.email.label }}</td>
+                <td>
+                    {{ message_form.email(
+                                        maxlength="75",
+                                        size="28"
+                    ) }}
+                    {{ form_errors(message_form.email) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="postblock">{{ message_form.header.label }}</td>
+                <td>
+                    {{ message_form.header(
+                                            maxlength="75",
+                                            size="35"
+                    ) }}
+                    <input type="submit" value="Отправить">
+                    {{ form_errors(message_form.header) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="postblock">{{ message_form.message.label }}</td>
+                <td>
+                    {{ message_form.message(
+                                            rows="4",
+                                            cols="48"
+                    ) }}
+                    {{ form_errors(message_form.message) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="postblock">{{ message_form.image.label }}</td>
+                <td>
+                    {{ message_form.image(
+                                            size="35"
+                    ) }}
+                    {{ form_errors(message_form.image) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="postblock">{{ message_form.password.label }}</td>
+                <td>
+                    {{ message_form.password(
+                                            size="8"
+                    ) }}
+                    (для удаления поста)
+                    {{ form_errors(message_form.poster_name) }}
+                </td>
             </tr>
         </table>
     </form>

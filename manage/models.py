@@ -259,7 +259,7 @@ class Message(Base, SessionMixin):
                 'md5_crypt'
             ],
 
-            deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
+            deprecated=['md5_crypt']), label=u'Пароль')
     thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
 
     ip_address = Column(IPAddressType)
