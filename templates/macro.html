@@ -6,8 +6,16 @@
 
         <label for="check-post-{{ message.id }}">
             <input type="checkbox" value="{{ message.id }}" name="post[]" id="check-post-{{ message.id }}" />
+            {% if message.header %}
+                <span class="filetitle">{{ message.header }}</span>
+            {% endif %}
             <span class="postername">{{ message.poster_name }}</span>
-            {{ message.date }}
+            {% if message.datetime %}
+                <i>
+                    запощенно {{ message.datetime.format('DD.MM.YYYY HH:mm') }}
+                    ({{ message.datetime.humanize(locale='ru') }})
+                </i>
+            {% endif %}
         </label>
 
         <span class="reflink">
@@ -21,13 +29,6 @@
 
         {% if thread_link %}
             [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
-        {% endif %}
-
-        {% if message.datetime %}
-            <i>
-                запощенно{{ message.datetime.format('YYYY-MM-DD HH:mm') }}
-                ({{ message.datetime.humanize(locale='ru') }})
-            </i>
         {% endif %}
 
         <br>
