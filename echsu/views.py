@@ -78,6 +78,11 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
 
     def get_queryset(self):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
+        try:
+            assert board is not None
+        except AssertionError:
+            self.send_error(status_code=404)
+
         self.paginate_by = board.threads_on_page
         self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id,
                                                                                         Thread.deleted == False)
