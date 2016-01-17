@@ -26,5 +26,6 @@ urls = [
     (r"/media/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "media")}),
 
     (r"/(?P<board_dir>[a-z]+)/?$", BoardView),
+    (r"/(?P<board_dir>[a-z]+)/page_(?P<page>\d+)/?$", BoardView),
     (r"/(?P<board_dir>[a-z]+)/(?P<op_message_id>\d+)/?$", ThreadView),
 ]

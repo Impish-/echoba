@@ -55,7 +55,6 @@ class ThreadView(BoardDataMixin, FormHandler):
                 image = self.request.files[form.image.name][0]
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
-
             self.db.add(message)
             if not form.sage.data:
                 op_message.thread.bumped =int(round(time.time() * 1000))
@@ -67,11 +66,12 @@ class ThreadView(BoardDataMixin, FormHandler):
 class BoardView(BoardDataMixin, ListHandler):
     template_name = 'board.html'
     context_object_name = 'threads'
-    paginate_by = 10
     model = Thread
+    page_kwarg = 'page'
 
     def get_queryset(self):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
+        self.paginate_by = board.threads_on_page
         self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id)
         return super(self.__class__, self).get_queryset()
 
