@@ -11,7 +11,7 @@ from torgen.list import ListHandler
 from echsu.forms import MessageForm, CreateThreadForm
 from manage.models import Board, Message, Thread
 from settings import store
-from toolz.base_cls import BoardDataMixin
+from toolz.base_cls import BoardDataMixin, FormMixin
 
 
 class MainPageView(BoardDataMixin, TemplateHandler):
@@ -38,7 +38,7 @@ class MessageAdding(object):
             return message
 
 
-class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
+class ThreadView(BoardDataMixin, FormMixin, MessageAdding, TemplateHandler):
     template_name = 'thread.html'
     form_class = MessageForm
 
@@ -54,12 +54,6 @@ class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
         })
         return context
 
-    def post(self, *args, **kwargs):
-        self.kwargs = kwargs
-        form = self.form_class(self.request.arguments)
-        form.image.data = self.request.files.get(form.image.name, None) is not None
-        return self.form_valid(form) if form.validate() else self.form_invalid(form)
-
     def form_invalid(self, form):
         return self.render(self.get_context_data(message_form=form))
 
@@ -70,11 +64,12 @@ class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
         return self.redirect(self.reverse_url('thread', self.path_kwargs.get('board_dir', None), op_message.id))
 
 
-class BoardView(BoardDataMixin, ListHandler, MessageAdding):
+class BoardView(BoardDataMixin, ListHandler, MessageAdding, FormMixin):
     template_name = 'board.html'
     context_object_name = 'threads'
     model = Thread
     page_kwarg = 'page'
+    form_class = CreateThreadForm
 
     def get_queryset(self):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
@@ -84,12 +79,11 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
             self.send_error(status_code=404)
 
         self.paginate_by = board.threads_on_page
-        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id,
-                                                                                        Thread.deleted == False)
+        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).\
+            filter(Thread.board_id == board.id, Thread.deleted == False)
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):
-        self.object_list = self.get_queryset()
         context = super(self.__class__, self).get_context_data(**kwargs)
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         board_obj = board.__dict__
@@ -97,23 +91,23 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         context.update({
             'board': board_obj,
             'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(),
-            'form': CreateThreadForm(),
         })
         return context
 
-    def post(self, *args, **kwargs):
-        self.kwargs = kwargs
+    def form_valid(self, form):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
-        thread_form = CreateThreadForm(self.request.arguments)  # гипотетически это можно...
-        message_form = MessageForm(self.request.arguments)  # запихать в одну форму
+        message_form = MessageForm(self.request.arguments)
         message_form.op_post = True
         message_form.image.data = self.request.files.get(message_form.image.name, None) is not None
-        if not message_form.validate() and thread_form.validate():
+        if not message_form.validate() and form.validate():
             return self.render(self.get_context_data(message_form=message_form))
         thread = self.model(board_id=board.id)
-        thread_form.populate_obj(thread)
+        form.populate_obj(thread)
         self.db.add(thread)
         self.db.commit()
         self.db.refresh(thread)
         self.make_message(form=message_form, thread_id=thread.id)
-        return self.redirect(self.reverse_url('board', board.dir))
+        self.redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return self.reverse_url('board', self.path_kwargs.get('board_dir', None))
