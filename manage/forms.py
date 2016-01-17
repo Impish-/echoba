@@ -45,13 +45,10 @@ class StaffForm(ModelForm):
 
 class StaffEditForm(StaffForm):
     class Meta:
-        exclude = ['password', 'name']
+        exclude = ['password',]
 
     boards = MultiCheckboxField(u'Модерируемые доски', choices=
                         [(x.id, x.name) for x in Board.get_all()], validators=[validators.Optional()], coerce=int)
-
-    name = StringField(u'Юзернэйм', [validators.Length(min=4, max=25,
-                                                           message=u'от 4 до 25 Символов!')])
 
     password = PasswordField(u'Пароль', [EqualTo('confirm', message=u'Не совпадают ;(')])
     confirm = PasswordField(u'Еще раз')
