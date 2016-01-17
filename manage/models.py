@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
-from psycopg2._psycopg import IntegrityError
-from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText
+from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, DateTime, BigInteger
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_imageattach.context import store_context
 from sqlalchemy_imageattach.entity import image_attachment, Image
-from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType
+from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType, ArrowType
 
 from settings import store
 from toolz.base_models import SessionMixin
-from toolz.bd_toolz import with_session, engine
+from toolz.bd_toolz import with_session
 
 import echsu
+import arrow
 from toolz.recaptcha import RecaptchaField
-import pprint
+
 
 Base = declarative_base()
 
@@ -216,12 +217,14 @@ class Thread(Base, SessionMixin):
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
-                            backref=backref('thread'), )
+                            backref=backref('thread'))
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
 
     board = relationship('Board', lazy='subquery', cascade='all',
-                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan', ))
+                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan'))
+
+    bumped = Column(BigInteger)
 
     def op(self):
         return self.messages[0]
@@ -248,7 +251,7 @@ class Message(Base, SessionMixin):
     poster_name = Column(String, label=u'Имя', nullable=True)
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
-    message = Column(UnicodeText, label=u'Сообщение', nullable=False)
+    message = Column(UnicodeText, label=u'Сообщение', nullable=True)
     picture = image_attachment('BoardImage')
     password = Column(PasswordType(
             schemes=[
@@ -258,10 +261,9 @@ class Message(Base, SessionMixin):
 
             deprecated=['md5_crypt']), label=u'Пароль(для удаления поста)')
     thread_id = Column(Integer, ForeignKey('thread.id'), primary_key=True)
-    #
-    # mod_hash = Хэшкод модератора
-    # mad_action = список действий модератора(подписаться,создать прикрепленный/закрытый тред, row_html, другая еба)
+
     ip_address = Column(IPAddressType)
+    datetime = Column(ArrowType, default=arrow.utcnow())
 
     # image = image_attachment('BoardImage')
 

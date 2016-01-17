@@ -1,31 +1,19 @@
 # -*- coding: utf-8 -*-
 from torgen.base import TemplateHandler
 from torgen.detail import DetailHandler
-from torgen.edit import FormMixin, FormHandler, BaseFormHandler, DeleteHandler
+from torgen.edit import FormHandler, DeleteHandler
+from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
 from manage.models import Staff, Board
 import tornado
 from jinja2 import Environment, PackageLoader
-from toolz.base_cls import BaseMixin, FlashMixin, BaseHandler
+from toolz.base_cls import BaseMixin, FlashMixin, FormMixin, BoardDataMixin
 from toolz.bd_toolz import only_admin
 
-env = Environment(loader=PackageLoader('manage', 'templates'))
 
-
-class LogOutHandler(BaseMixin, tornado.web.RequestHandler):
-    @tornado.web.authenticated
-    def get(self, *args, **kwargs):
-        if self.get_current_user():
-            self.clear_cookie("user_id")
-        self.redirect('/manage')
-
-
-class ManageHandler(BaseMixin, TemplateHandler):
-    """
-        Login
-    """
+class ManageHandler(BoardDataMixin, TemplateHandler):
     template_name = 'manage.html'
 
     def post(self):
@@ -37,73 +25,41 @@ class ManageHandler(BaseMixin, TemplateHandler):
         self.redirect("/manage")
 
 
-class StaffManageHandler(BaseHandler, FlashMixin):
-    template = 'staff.html'
-    template_env = env
-    form = StaffAddForm
-
-    @only_admin
-    # staff_list
+class LogOutHandler(BoardDataMixin, tornado.web.RequestHandler):
+    @tornado.web.authenticated
     def get(self, *args, **kwargs):
-        del_user = self.get_flash(key='del_user')
-        self.render_template(del_message=del_user)
+        if self.get_current_user():
+            self.clear_cookie("user_id")
+        self.redirect('/manage')
 
-    @only_admin
-    def post(self, *args, **kwargs):
-        # staff_add
-        form = self.get_form()
-        if not form.validate():
-            return self.render_template(form=form)
 
+class StaffManageHandler(BoardDataMixin, ListHandler, FormMixin):
+    template_name = 'staff.html'
+    form_class = StaffAddForm
+    model = Staff
+    context_object_name = 'staff_list'
+
+    def form_invalid(self, form):
+        self.object_list = self.get_queryset()
+        context_form = self.get_context_data(**self.kwargs)
+        context_form['form'] = form
+        return super(ListHandler, self).render(context_form)
+
+    def form_valid(self, form):
         staff = Staff()
         form.populate_obj(staff)
         staff.add()
-        self.render_template()
-
-    def get_context(self):
-        context = super(self.__class__, self).get_context()
-        context.update({
-            'staff_list': Staff.get_users(),
-        })
-        return context
+        return super(self.__class__, self).form_valid(form)
 
 
-class DelStaffManageHandler(BaseMixin, DeleteHandler, FlashMixin):
-    template_name = 'confirm_delete.html'
-    model = Staff
-    success_url = '/manage/staff'
-
-    # @only_admin
-    # def get(self, *args, **kwargs):
-    #     username = kwargs.get('username', None)
-    #     if self.current_user.name != username:
-    #         self.set_flash(u'Юзверя ' + username + u' больше не существует', key='del_user')
-    #     else:
-    #         self.set_flash(u'Нельзя удалить самого себя', key='del_user')
-    #         return self.redirect(self.success_url)
-    #     return super(self.__class__, self).post(args, kwargs)
-
-
-class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
+class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
     template_name = 'staff_edit.html'
     model = Staff
     context_object_name = 'user'
     form_class = StaffEditForm
 
-    def get_context_data(self, **kwargs):
-        context = super(self.__class__, self).get_context_data(**kwargs)
-        context['form'] = self.form_class(obj=self.object)
-        return context
-
-    @only_admin
-    def post(self, *args, **kwargs):
-        self.kwargs = kwargs
-        self.object = self.get_object()
-        form = self.form_class(self.request.arguments, obj=self.object)
-        return self.form_valid(form) if form.validate() else self.form_invalid(form)
-
     def form_invalid(self, form):
-        context_form = self.get_context_data()
+        context_form = super(self.__class__, self).get_context_data(**self.kwargs)
         context_form['form'] = form
         return self.render(context_form)
 
@@ -119,11 +75,16 @@ class EditStaffManageHandler(BaseMixin, DetailHandler, FormMixin):
                 user.boards.append(self.db.query(Board).get(b_id))
         self.db.commit()
         self.db.refresh(user)
+        return super(self.__class__, self).form_valid(form)
 
-        return self.render(self.get_context_data())
+
+class DelStaffManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
+    template_name = 'confirm_delete.html'
+    model = Staff
+    success_url = '/manage/staff'
 
 
-class AddBoardHandler(BaseMixin, FormHandler):
+class AddBoardHandler(BoardDataMixin, FormHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board

@@ -10,21 +10,22 @@ from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, Edit
     DelStaffManageHandler, AddBoardHandler
 
 urls = [
-    (r"/?$", MainPageView),
+    url(r"/?$", MainPageView, name='main_page'),
 
-    (r"/manage/?", ManageHandler,),
-    (r"/manage/staff/?", StaffManageHandler),
-    (r"/manage/staff/edit/(?P<id>\w+)?/?", EditStaffManageHandler),
-    (r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManageHandler),
+    url(r"/manage/?", ManageHandler, name='manage'),
+    url(r"/manage/staff/?", StaffManageHandler, name='staff_list'),
+    url(r"/manage/staff/edit/(?P<id>\w+)?/?", EditStaffManageHandler, name='edit_staff'),
+    url(r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManageHandler, name='delete_staff'),
 
-    (r"/manage/board/add/?", AddBoardHandler),
-    (r"/logout", LogOutHandler),
+    url(r"/manage/board/add/?", AddBoardHandler, name='board_add'),
+    url(r"/logout", LogOutHandler, name='logout'),
 
   #    (r"/ws", WebSocket),
 
-    (r"/static/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
-    (r"/media/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "media")}),
+    url(r"/static/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
+    url(r"/media/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "media")}),
 
-    (r"/(?P<board_dir>[a-z]+)/?$", BoardView),
-    (r"/(?P<board_dir>[a-z]+)/(?P<op_message_id>\d+)/?$", ThreadView),
+    url(r"/(?P<board_dir>[a-z]+)/?$", BoardView, name='board'),
+    url(r"/(?P<board_dir>[a-z]+)/page_(?P<page>\d+)/?$", BoardView, name='board_page'),
+    url(r"/(?P<board_dir>[a-z]+)/(?P<op_message_id>\d+)/?$", ThreadView, name='thread'),
 ]
