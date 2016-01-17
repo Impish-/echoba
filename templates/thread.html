@@ -7,13 +7,12 @@
     <div class="logo">
         <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>
     </div>
-    {% include "post_form.html" %}
+    
+    <hr>
 
-    <ul class="breadcrumb">
-        <li><a href="/">Главная</a></li>
-        <li><a href="/{{ board.dir }}">/{{ board.dir }}/ - {{ board.name }}</a></li>
-        <li>{% if thread.op().header %}{{ thread.op().header }}{% else %}Тред #{{ thread.id }}{% endif %}</li>
-    </ul>
+    [<a href="/{{ board.dir }}/">Вернуться</a>]
+
+    {% include "post_form.html" %}
 
     {{ post_message(
                 message=thread.op(),
@@ -25,4 +24,9 @@
                     message=message
         ) }}
     {% endfor %}
+
+    <hr>
+
+    [<a href="/{{ board.dir }}/">Вернуться</a>]
+    [<a href="#top">Наверх</a>]
 {% endblock %}

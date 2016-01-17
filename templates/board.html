@@ -10,11 +10,6 @@
     {% include "post_form.html" %}
     <hr>
 
-    <ul class="breadcrumb">
-        <li><a href="/">Главная</a></li>
-        <li>/{{ board.dir }}/ - {{ board.name }}</li>
-    </ul>
-
     {% for thread in board.threads %}
         <div class="thread" id="thread{{ thread.id }}">
 

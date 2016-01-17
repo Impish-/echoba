@@ -285,7 +285,13 @@ class Message(Base, SessionMixin):
             Полноразмерное изображение
         '''
         with store_context(store):
-            return self.picture.locate()
+            locate = self.picture.locate()
+            return {
+                'locate': locate,
+                'name': locate.split('/')[-1].split('?')[0],
+                'width': self.picture.original.width,
+                'height': self.picture.original.height
+            }
 
     @staticmethod
     @with_session
