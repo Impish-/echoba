@@ -40,15 +40,23 @@
             <table>
                 <tr>
                     <td>
+                        {% if page_obj.has_previous() %}
+                            <a href="{{ reverse_url('board_page', board.dir, page_obj.previous_page_number()) }}">&larr;Назад</a>
+                        {% endif %}
+
                         {% for page in range(1, paginator.num_pages + 1) %}
                             [
                                 {% if page_obj.number != page %}
-                                    <a href="/{{ board.dir }}/page_{{ page }}">{{page}}</a>
+                                    <a href="{{ reverse_url('board_page', board.dir, page) }}">{{page}}</a>
                                 {% else %}
                                     {{ page }}
                                 {% endif %}
                             ]
                         {% endfor %}
+
+                        {% if page_obj.has_next() %}
+                             <a href="{{ reverse_url('board_page', board.dir, page_obj.next_page_number()) }}">Вперед&rarr;</a>
+                        {% endif %}
                     </td>
                 </tr>
             </table>
