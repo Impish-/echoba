@@ -8,6 +8,15 @@
 </head>
 <body id="frame">
     <div class="main-wrapper">
+        {% if board_list %}
+            <div class="navbar">
+                [
+                {% for board_item in board_list %}
+                    <a href="/{{ board_item.dir }}/" title="{{ board_item.name }}">{{ board_item.dir }}</a>
+                {% endfor %}
+                ]
+            </div>
+        {% endif %}
         <div class="container-fluid">
             {% if current_user %}
                 <div style="float: right">
