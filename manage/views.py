@@ -17,9 +17,8 @@ class ManageHandler(BoardDataMixin, TemplateHandler):
     template_name = 'manage.html'
 
     def post(self):
-        user = self.db.query(Staff).filter(Staff.name == self.get_argument("login"),
-                                           Staff.password == self.get_argument('password')).first()
-        if user is None:
+        user = self.db.query(Staff).filter(Staff.name == self.get_argument("login")).first()
+        if user.password == self.get_argument('password', None) is None:
             return self.get()
         self.set_secure_cookie("user_id", '%d' % user.id)
         self.redirect("/manage")
