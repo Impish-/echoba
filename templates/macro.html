@@ -1,5 +1,5 @@
 {% macro post_message(message, op_post=0, op_label=0, thread_link='', is_admin=None) %}
-    <div class="postnode" id="post-{{ message.id }}">
+    <div class="postnode" id="{{ message.id }}">
         {% if not op_post %}
             <table><tr><td class="doubledash">&gt;&gt;</td><td id="reply{{ message.id }}" class="reply">
         {% endif %}
