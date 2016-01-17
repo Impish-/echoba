@@ -58,6 +58,12 @@ class StaffEditForm(StaffForm):
             if len(field.data) not in range(6, 25):
                 raise ValidationError(u'от 6 до 25 Символов!')
 
+    def validate_name(self, field):
+        session = self.get_session()
+        q = session.query(Staff).filter(Staff.name == field.data, Staff.id != self._obj.id)
+        if session.query(q.exists()):
+            raise ValidationError(u'Занято кем-то другим!')
+
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         #TODO: подумать как иначе
         self.boards.set_object(obj)
