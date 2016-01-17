@@ -35,6 +35,11 @@ class FormMixin(FormMixin_torgen):
     def form_valid(self, form):
         return self.render(self.get(**self.kwargs))
 
+    def form_invalid(self, form):
+        context_form = super(self.__class__, self).get_context_data(**self.kwargs)
+        context_form['form'] = form
+        return self.render(context_form)
+
 
 class FlashMixin(object):
     def get_flash(self, key='default'):
@@ -67,7 +72,7 @@ class BaseMixin(object):
     def get_context_data(self, **kwargs):
 
         kwargs.update({
-            'board_list': self.db.query(Board).all()
+            'board_list': self.db.query(Board).order_by(Board.dir).all()
         })
 
         kwargs['current_user'] = self.get_current_user()
