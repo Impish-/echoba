@@ -29,11 +29,11 @@ class MessageAdding(object):
                 image = self.request.files[form.image.name][0]
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
+            message.before_added()
             self.db.add(message)
             self.db.commit()
             self.db.refresh(message)
             message.thread.bumped = int(round(time.time() * 1000))
-            message.before_added()
             self.db.commit()
             return message
 
@@ -46,7 +46,6 @@ class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         op_message = self.db.query(Message).filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
         context = super(self.__class__, self).get_context_data(**kwargs)
-
         context.update({
             'board': board,
             'thread': op_message.thread,
