@@ -27,5 +27,5 @@ urls = [
 
     url(r"/(?P<board_dir>[a-zA-Z1-9-]+)/?$", BoardView, name='board'),
     url(r"/(?P<board_dir>[a-zA-Z1-9-]+)/page_(?P<page>\d+)/?$", BoardView, name='board_page'),
-    url(r"/(?P<board_dir>\[a-zA-Z1-9-]+)/(?P<op_message_id>\d+)/?$", ThreadView, name='thread'),
+    url(r"/(?P<board_dir>[a-zA-Z1-9-]+)/(?P<op_message_id>\d+)/?$", ThreadView, name='thread'),
 ]
