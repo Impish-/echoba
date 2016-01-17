@@ -15,6 +15,7 @@ from toolz.bd_toolz import with_session
 
 import echsu
 import arrow
+import re
 from toolz.recaptcha import RecaptchaField
 
 
@@ -292,6 +293,35 @@ class Message(Base, SessionMixin):
                 'width': self.picture.original.width,
                 'height': self.picture.original.height
             }
+
+    def _formated_message(self, message):
+        replaced_data = (
+            ('&lt;', r'<', 0),
+            ('&gt;', r'>', 0),
+            ('<br>', r'\n', 0),
+            ('&quot;', r'"', 0),
+            ('<b>\g<var></b>', r'\[b](?P<var>.*?)\[/b]', re.I),
+            ('<b>\g<var></b>', r'\*\*(?P<var>.*?)\*\*', re.I),
+            ('<b>\g<var></b>', r'__(?P<var>.*?)__', re.I),
+            ('<i>\g<var></i>', r'\[i](?P<var>.*?)\[/i]', re.I),
+            ('<i>\g<var></i>', r'\*(?P<var>.*?)\*', re.I),
+            ('<i>\g<var></i>', r'_(?P<var>.*?)_', re.I),
+            ('<u>\g<var></u>', r'\[u](?P<var>.*?)\[/u]', re.I),
+            ('<sup>\g<var></sup>', r'\[sup](?P<var>.*?)\[/sup]', re.I),
+            ('<sub>\g<var></sub>', r'\[sub](?P<var>.*?)\[/sub]', re.I),
+            ('<del>\g<var></del>', r'\[s](?P<var>.*?)\[/s]', re.I),
+            ('<del>\g<var></del>', r'\^(?P<var>.*?)\^', re.I),
+            ('<pre>\g<var></pre>', r'\[code](?P<var>.*?)\[/code]', re.I),
+            ('<pre>\g<var></pre>', r'```(?P<var>.*?)```', re.I),
+            ('<span class="spoiler">\g<var></span>', r'\[spoiler](?P<var>.*?)\[/spoiler]', re.I),
+            ('<span class="spoiler">\g<var></span>', r'\%\%(?P<var>.*?)\%\%', re.I),
+        )
+        for (r, p, f) in replaced_data:
+            message = re.sub(p, r, message, flags=f)
+        return message
+
+    def before_added(self):
+        self.message = self._formated_message(self.message)
 
     @staticmethod
     @with_session

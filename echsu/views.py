@@ -58,6 +58,7 @@ class ThreadView(BoardDataMixin, FormHandler):
             self.db.add(message)
             if not form.sage.data:
                 op_message.thread.bumped =int(round(time.time() * 1000))
+            message.before_added()
             self.db.add(message)
             self.db.commit()
         return self.render(self.get_context_data())
@@ -118,6 +119,7 @@ class BoardView(BoardDataMixin, ListHandler):
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
             thread.bumped = int(round(time.time() * 1000))
+            message.before_added()
             self.db.add(message)
             self.db.commit()
             # except:

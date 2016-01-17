@@ -104,6 +104,9 @@ width: 600px;
 	color: black;
 	background-color: black;
 }
+.spoiler:hover {
+    color: #fff;
+}
 
 .extrabtns {
 	vertical-align: middle;

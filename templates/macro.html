@@ -55,7 +55,7 @@
 
         </div>
         <blockquote>
-            <div class="postmessage">{{ message.message }}</div>
+            <div class="postmessage">{{ message.message|safe }}</div>
         </blockquote>
 
         {% if not op_post %}
