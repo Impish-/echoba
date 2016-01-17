@@ -20,7 +20,6 @@ from toolz.recaptcha import RecaptchaField
 
 from tripcode import tripcode
 
-
 Base = declarative_base()
 
 mod_rights = Table('association', Base.metadata,
@@ -43,12 +42,13 @@ class Staff(Base, SessionMixin):
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                              ]), nullable=False , label=u'Роль'
+                              ]), nullable=False, label=u'Роль'
                   )
     all_boards = Column(BOOLEAN, default=False, label=u'Модератор всех досок')
     boards = relationship("Board", load_on_pending=True,
                           secondary=lambda: mod_rights,
-                          backref=backref('staff', lazy='dynamic', load_on_pending=True),)
+                          backref=backref('staff', lazy='dynamic', load_on_pending=True), )
+
     def __repr__(self):
         return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
 
@@ -133,6 +133,11 @@ class Staff(Base, SessionMixin):
         session.commit()
 
 
+class Section(Base, SessionMixin):
+    name = Column(String, unique=True, label=u'Название Раздела')
+    # board_id = Column(Section, ForeignKey('section.id'))
+
+
 class Board(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, label=u'Название')
@@ -143,20 +148,10 @@ class Board(Base, SessionMixin):
     thread_bumplimit = Column(Integer, default=500, label=u'Бамплимит')
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
+    section = relationship('Section', lazy='dynamic',
+                           backref=backref('boards', ))
+    section_id = Column(Integer, ForeignKey('section.id'))
 
-
-    # TODO: выпилить, model_form.populate_obj юзать
-
-    def __init__(self, **kwargs):
-        # в случае получения id  в kwargs вытягивать из бд объект
-        self.name = kwargs.get('name', None)
-        self.dir = kwargs.get('dir', None)
-        self.threads_on_page = kwargs.get('threads_on_page', None)
-        self.default_name = kwargs.get('default_name', None)
-        self.max_pages = kwargs.get('max_pages', None)
-        self.thread_bumplimit = kwargs.get('thread_bumplimit', None)
-        self.thread_tail = kwargs.get('thread_tail', None)
-        self.captcha = kwargs.get('captcha', None)
 
     def __repr__(self):
         return "<Board('%s')>" % (self.dir)
@@ -220,7 +215,8 @@ class Thread(Base, SessionMixin):
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
     messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
-                            backref=backref('thread'), primaryjoin="and_(Message.deleted==False, Message.thread_id==Thread.id)")
+                            backref=backref('thread'),
+                            primaryjoin="and_(Message.deleted==False, Message.thread_id==Thread.id)")
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
 
@@ -237,7 +233,7 @@ class Thread(Base, SessionMixin):
         return self.messages[1:][-self.board.thread_tail:]
 
     def left(self):
-        left = len(self.messages)-(self.board.thread_tail + 1)
+        left = len(self.messages) - (self.board.thread_tail + 1)
         return left if left > 0 else None
 
     def link(self):
@@ -309,8 +305,10 @@ class Message(Base, SessionMixin):
             ('<br>\n', r'\n', 0),
             ('', r'\r', 0),
             ('&quot;', r'"', 0),
-            ('\g<begin><span class="unkfunc">&gt;\g<var></span>\g<end>', r'(?P<begin>^|<br>|\n)&gt;(?P<var>.*?)(?P<end><br>|$)', re.I),
-            ('<a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>', r'^(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
+            ('\g<begin><span class="unkfunc">&gt;\g<var></span>\g<end>',
+             r'(?P<begin>^|<br>|\n)&gt;(?P<var>.*?)(?P<end><br>|$)', re.I),
+            ('<a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>',
+             r'^(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
             ('<b>\g<var></b>', r'\[b](?P<var>.*?)\[/b]', re.I),
             ('<b>\g<var></b>', r'\*\*(?P<var>.*?)\*\*', re.I),
             ('<b>\g<var></b>', r'__(?P<var>.*?)__', re.I),
