@@ -35,15 +35,15 @@
         {% if message.picture %}
             <span class="filesize">
                 Файл
-                <a href="http://www.google.ry/searchbyimage?image_url=http://ech.su{{ message.image }}" target="_blank" title="Искать в google">[G]</a>
-                <a href="http://www.tineye.com/search/?url=http://ech.su{{ message.image }}" target="_blank" title="Искать на tineye">[T]</a>
+                <a href="http://www.google.ry/searchbyimage?image_url=http://ech.su{{ message.image()}}" target="_blank" title="Искать в google">[G]</a>
+                <a href="http://www.tineye.com/search/?url=http://ech.su{{ message.image() }}" target="_blank" title="Искать на tineye">[T]</a>
                 :
-                <a href="{{ message.image }}" target="_blank">name</a>
+                <a href="{{ message.image() }}" target="_blank">name</a>
             </span>
             
             <br>
 
-            <a href="{{ message.image }}" target="_blank">
+            <a href="{{ message.image() }}" target="_blank">
                 <span id="thumb{{ message.id }}"><img src="{{ message.img_thumb() }}" class="thumb"></span>
             </a>
 
