@@ -1,14 +1,14 @@
 """two field deleted
 
-Revision ID: c69d2601a400
-Revises: 48127c4db6f5
-Create Date: 2016-01-17 22:40:50.295040
+Revision ID: 715fb3135c3b
+Revises: 58222badb54b
+Create Date: 2016-01-17 23:07:31.290485
 
 """
 
 # revision identifiers, used by Alembic.
-revision = 'c69d2601a400'
-down_revision = '48127c4db6f5'
+revision = '715fb3135c3b'
+down_revision = '58222badb54b'
 branch_labels = None
 depends_on = None
 
