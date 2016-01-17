@@ -20,7 +20,7 @@ class MainPageView(BoardDataMixin, TemplateHandler):
 
 class MessageAdding(object):
     def make_message(self, form=None, thread_id=None):
-         with store_context(store):
+        with store_context(store):
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                               thread_id=thread_id)
             form.populate_obj(message)
@@ -64,7 +64,7 @@ class ThreadView(BoardDataMixin, FormHandler, MessageAdding):
         return self.render(self.get_context_data(message_form=form))
 
     def form_valid(self, form):
-        op_message = self.db.query(Message).\
+        op_message = self.db.query(Message). \
             filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
         self.make_message(form=form, thread_id=op_message.thread.id)
         return self.redirect(self.reverse_url('thread', self.path_kwargs.get('board_dir', None), op_message.id))
@@ -79,7 +79,8 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
     def get_queryset(self):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         self.paginate_by = board.threads_on_page
-        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id, Thread.deleted==False)
+        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id,
+                                                                                        Thread.deleted == False)
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):
@@ -111,4 +112,3 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         self.db.refresh(thread)
         self.make_message(form=message_form, thread_id=thread.id)
         return self.redirect(self.reverse_url('board', board.dir))
-
