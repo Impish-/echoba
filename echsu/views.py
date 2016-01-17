@@ -73,7 +73,7 @@ class BoardView(BoardDataMixin, ListHandler):
     def get_queryset(self):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         self.paginate_by = board.threads_on_page
-        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id)
+        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).filter(Thread.board_id == board.id, Thread.deleted==False)
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):

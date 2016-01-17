@@ -1,4 +1,4 @@
-{% macro post_message(message, op_post=0, op_label=0, thread_link='') %}
+{% macro post_message(message, op_post=0, op_label=0, thread_link='', is_admin=None) %}
     <div class="postnode" id="post-{{ message.id }}">
         {% if not op_post %}
             <table><tr><td class="doubledash">&gt;&gt;</td><td id="reply{{ message.id }}" class="reply">
@@ -29,6 +29,9 @@
 
         {% if thread_link %}
             [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
+        {% endif %}
+        {% if is_admin %}
+            [<a href="/manage/message/del/{{ message.id }}" target="_blank">Удалить</a>]
         {% endif %}
 
         <br>

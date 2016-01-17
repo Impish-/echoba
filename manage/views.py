@@ -6,11 +6,13 @@ from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm
-from manage.models import Staff, Board
+from manage.models import Staff, Board, Message, Thread
 import tornado
 from jinja2 import Environment, PackageLoader
 from toolz.base_cls import BaseMixin, FlashMixin, FormMixin, BoardDataMixin
 from toolz.bd_toolz import only_admin
+from sqlalchemy_imageattach.context import store_context
+from settings import store
 
 
 class ManageHandler(BoardDataMixin, TemplateHandler):
@@ -84,6 +86,23 @@ class DelStaffManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Staff
     success_url = '/manage/staff'
+
+
+class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
+    template_name = 'confirm_delete.html'
+    model = Message
+    success_url = '/manage/'
+
+    def post(self, *args, **kwargs):
+        with store_context(store):
+            message = self.db.query(Message).filter(Message.id==kwargs.get('id', 0)).first()
+            if message and message.id == message.thread.op().id:
+                message.thread.deleted = True
+                self.db.query(Message).filter(Message.thread_id==message.thread_id).update({'deleted': True})
+            else:
+                message.deleted = True
+            self.db.commit()
+            self.redirect(self.success_url)
 
 
 class AddBoardHandler(BoardDataMixin, FormHandler):
