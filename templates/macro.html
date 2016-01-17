@@ -19,15 +19,15 @@
         </label>
 
         <span class="reflink">
-            <a onclick="return hightlight('{{ message.id }}')" href="#">№</a>
-            <a onclick="return insert('>>{{ message.id }}\n');" href="#">{{ message.id }}</a>
+            <a onclick="return hightlight('{{ message.id }}')" href="{{ thread_link }}#{{ message.id }}">№</a>
+            <a onclick="return insert('>>{{ message.id }}\n');" href="{{ thread_link }}#i{{ message.id }}">{{ message.id }}</a>
         </span>
 
         {% if op_label %}
             <span class="op-label">OP POST</span>
         {% endif %}
 
-        {% if thread_link %}
+        {% if op_label %}
             [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
         {% endif %}
         {% if is_admin %}

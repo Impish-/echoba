@@ -27,6 +27,7 @@
                 {% for message in thread.messages_tail() %}
                     {{ post_message(
                             message=message,
+                            thread_link=thread.link(),
                             is_admin=current_user
                     ) }}
                 {% endfor %}
