@@ -36,7 +36,6 @@ class FormMixin(FormMixin_torgen):
         return context
 
     def form_valid(self, form):
-        print self.__dict__
         try:
             self.object = self.get_object()
         except AttributeError:
