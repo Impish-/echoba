@@ -280,7 +280,7 @@ class Message(Base, SessionMixin):
             except NoResultFound:
                 return None
 
-    def image(self):
+    def image_info(self):
         '''
             Полноразмерное изображение
         '''

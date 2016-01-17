@@ -33,7 +33,7 @@
         <br>
 
         {% if message.picture %}
-            {% set image = message.image() %}
+            {% set image = message.image_info() %}
             <span class="filesize">
                 Файл
                 <a href="http://www.google.ry/searchbyimage?image_url=http://ech.su{{ image.locate }}" target="_blank" title="Искать в google">[G]</a>
