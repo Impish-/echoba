@@ -60,8 +60,8 @@ class StaffEditForm(StaffForm):
 
     def validate_name(self, field):
         session = self.get_session()
-        q = session.query(Staff).filter(Staff.name == field.data, Staff.id != self._obj.id)
-        if session.query(q.exists()):
+        try_get_staff = session.query(Staff).filter(Staff.name == field.data, Staff.id != self._obj.id).first()
+        if try_get_staff:
             raise ValidationError(u'Занято кем-то другим!')
 
     def process(self, formdata=None, obj=None, data=None, **kwargs):
