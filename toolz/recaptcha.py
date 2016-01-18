@@ -46,7 +46,10 @@ class RecaptchaValidator(object):
     def __call__(self, form, field):
         client_response = ''
         if self.client_response is not None:
-            client_response = self.client_response[0]
+            try:
+                client_response = self.client_response[0]
+            except IndexError:
+                raise ValidationError(field.gettext(self.message))
 
         response = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', urllib.urlencode({
             'secret': recaptcha_settings['private_key'],

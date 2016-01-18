@@ -16,7 +16,7 @@ class CreateThreadForm(ModelForm):
     class Meta:
         model = Thread
         exclude = ['bumped']
-    #message = ModelFieldList(FormField(MessageForm))\
+
     @classmethod
     @with_session
     def get_session(cls,session):
@@ -27,33 +27,25 @@ class MessageForm(ModelForm):
     class Meta:
         model = Message
         exclude = ['ip_address', 'datetime']
-
-    op_post = False
     sage = BooleanField(u'Сажа',)
     image = FileField(u'Изображение')
-    captcha = RecaptchaField(u'Капча')
+    # captcha = RecaptchaField(u'Капча')
 
     def validate_image(self, field):
         if self.op_post:
-            if not self.image.data:
+            if not self.image_attached:
                 self.image.errors = [u'Для создания треда, прицепи картинку',]
                 return False
-        if not self.image.data and not self.message.data:
+
+        if not self.image_attached and len(self.message.data) < 1:
             self.message.errors = [u'Тут ничего нет!',]
-            return False
+            raise ValueError(u'Пустое сообщение')
         return True
 
-    #thread = ModelFieldList(FormField(CreateThreadForm))
+
+
     @classmethod
     @with_session
-    def get_session(cls,session):
+    def get_session(cls, session):
         return session
 
-    def process(self, formdata=None, obj=None, data=None, **kwargs):
-        try:
-            board = kwargs.get('board', None)
-            if not board.captcha:
-                del(self.captcha)
-        except AttributeError:
-            pass
-        super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)

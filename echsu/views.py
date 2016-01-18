@@ -10,6 +10,7 @@ from echsu.forms import MessageForm, CreateThreadForm
 from manage.models import Board, Message, Thread
 from settings import store
 from toolz.base_cls import BoardDataMixin, FormMixin
+from toolz.recaptcha import RecaptchaField
 
 
 class MainPageView(BoardDataMixin, TemplateHandler):
@@ -17,6 +18,9 @@ class MainPageView(BoardDataMixin, TemplateHandler):
 
 
 class MessageAdding(FormMixin):
+    form_class = MessageForm
+    form_context_name = 'message_form'
+
     def make_message(self, form=None, thread_id=None):
         with store_context(store):
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
@@ -38,31 +42,40 @@ class MessageAdding(FormMixin):
     def get_board(self):
         return self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
 
-    def get_form_kwargs(self):
-        kwargs = super(MessageAdding, self).get_form_kwargs()
-        kwargs.update({
-            'board': self.get_board(),
-        })
-        return kwargs
+    def get_form(self, form_class):
+        board = self.get_board()
+        try:
+            if board.captcha:
+                setattr(form_class, 'captcha', RecaptchaField(u'Капча'))
+            else:
+                delattr(form_class, 'captcha')
+        except AttributeError:
+            pass
+        form = self.form_class(**self.get_form_kwargs())
+        return form
+
+    def post(self, *args, **kwargs):
+        self.form_class.image_attached = self.request.files.get('image', None) is not None
+        self.form_class.op_post = self.__class__ is BoardView
+        return super(MessageAdding, self).post(args, kwargs)
+
+    def form_invalid(self, form):
+        context = self.get_context_data(message_form=form)
+        context[self.form_context_name] = form
+        return self.render(context)
 
 
 class ThreadView(BoardDataMixin, MessageAdding, TemplateHandler):
     template_name = 'thread.html'
-    form_class = MessageForm
-    form_context_name = 'message_form'
 
     def get_context_data(self, **kwargs):
-        board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
         op_message = self.db.query(Message).filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
         context = super(self.__class__, self).get_context_data(**kwargs)
         context.update({
-            'board': board,
+            'board': self.get_board(),
             'thread': op_message.thread,
         })
         return context
-
-    def form_invalid(self, form):
-        return self.render(self.get_context_data(message_form=form))
 
     def form_valid(self, form):
         op_message = self.db.query(Message). \
@@ -71,53 +84,39 @@ class ThreadView(BoardDataMixin, MessageAdding, TemplateHandler):
         return self.redirect(self.reverse_url('thread', self.path_kwargs.get('board_dir', None), op_message.id))
 
 
-class BoardView(BoardDataMixin, ListHandler, MessageAdding, FormMixin):
+class BoardView(BoardDataMixin, ListHandler, MessageAdding):
     template_name = 'board.html'
-    context_object_name = 'threads'
+    context_object_name = 'threads'  # board.threads
     model = Thread
     page_kwarg = 'page'
-    form_class = CreateThreadForm
 
     def get_queryset(self):
-        board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
+        board = self.get_board()
         try:
             assert board is not None
         except AssertionError:
             self.send_error(status_code=404)
-
         self.paginate_by = board.threads_on_page
-        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()).\
+        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()). \
             filter(Thread.board_id == board.id, Thread.deleted == False)
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
-        board = self.get_board()
-        board_obj = board.__dict__
-
-        board_obj['threads'] = context.pop('threads')
-        context.update({
-            'board': board_obj,
-            'message_form': kwargs.get('message_form')
-            if kwargs.get('message_form', None) else
-            MessageForm(board=board,re_captcha=self.request.arguments.get('g-recaptcha-response', None) ),
-        })
+        context['board'] = self.get_board().__dict__
+        context['board']['threads'] = context.pop('threads')
         return context
 
     def form_valid(self, form):
         board = self.get_board()
-        message_form = MessageForm(self.request.arguments, board=board)
-        message_form.op_post = True
-        message_form.image.data = self.request.files.get(message_form.image.name, None) is not None
-        if not message_form.validate() and form.validate():
-            return self.render(self.get_context_data(message_form=message_form))
+        thread_form = CreateThreadForm(self.request.arguments, board=board)
         thread = self.model(board_id=board.id)
-        form.populate_obj(thread)
+        thread_form.populate_obj(thread)
         self.db.add(thread)
         self.db.commit()
         self.db.refresh(thread)
-        self.make_message(form=message_form, thread_id=thread.id)
+        self.make_message(form=form, thread_id=thread.id)
         self.redirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.reverse_url('board', self.path_kwargs.get('board_dir', None))
+        return self.reverse_url('board', self.get_board().dir)

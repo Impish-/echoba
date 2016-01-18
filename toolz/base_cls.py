@@ -32,13 +32,13 @@ class FormMixin(FormMixin_torgen):
         except AttributeError:
             pass
 
-        form = self.form_class(self.request.arguments, obj=self.object)
+        form = self.form_class(self.request.arguments, **self.get_form_kwargs())
         return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
     def get_form_kwargs(self):
         kwargs = super(FormMixin, self).get_form_kwargs()
         try:
-            kwargs['obj'] = obj=self.object
+            kwargs['obj'] = self.object
         except AttributeError:
             pass
         return kwargs
