@@ -30,6 +30,7 @@ class RecaptchaWidget(object):
             <div class="g-recaptcha" data-sitekey="%s"></div>
             ''' % (recaptcha_settings['public_key'],)
 
+
 class RecaptchaValidator(object):
     '''
         Validates a reCaptcha
