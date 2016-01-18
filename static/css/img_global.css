@@ -161,3 +161,4 @@ text-align: left;
 }
 div.closer {line-height: 8px;width: 12px;height: 12px;padding: 1px;border: 1px solid gray;cursor: pointer;position: absolute;top: 3px;right: 3px;font-family: Georgia;font-weight: bold;font-size: 14px;color: gray;text-align: center;background: #EEE;border-image: initial;}
 .replieslist {font-size: 11px;}
+.errors {font-size: small; color: #f00;}

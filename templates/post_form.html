@@ -89,6 +89,7 @@
                     <td class="postblock">{{ message_form.captcha.label }}</td>
                     <td>
                         {{ message_form.captcha }}
+                        {{ form_errors(message_form.captcha) }}
                     </td>
                 </tr>
             {% endif %}
