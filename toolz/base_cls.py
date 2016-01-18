@@ -9,6 +9,7 @@ from toolz.recaptcha import RecaptchaValidator
 
 
 class FormMixin(FormMixin_torgen):
+    form_context_name = None
     """
         Таки кошерный Form Mixin,
         Прилепляем формочку к любому Class Base Handler'у
@@ -32,12 +33,17 @@ class FormMixin(FormMixin_torgen):
         form = self.form_class(self.request.arguments, obj=self.object)
         return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(FormMixin, self).get_form_kwargs()
+        try:
+            kwargs['obj'] = obj=self.object
+        except AttributeError:
+            pass
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super(FormMixin, self).get_context_data(**kwargs)
-        try:
-            context['form'] = self.form_class(obj=self.object)
-        except AttributeError:
-            context['form'] = self.form_class()
+        context[self.form_context_name if self.form_context_name else 'form'] = self.get_form(self.form_class)
         return context
 
     def form_valid(self, form):
