@@ -7,7 +7,7 @@ from wtforms_tornado import Form
 
 from manage.models import Thread, Message
 from toolz.bd_toolz import with_session
-from toolz.recaptcha import RecaptchaField
+from toolz.recaptcha import RecaptchaField, RecaptchaValidator
 
 ModelForm = model_form_factory(Form)
 
@@ -31,7 +31,7 @@ class MessageForm(ModelForm):
     op_post = False
     sage = BooleanField(u'Сажа',)
     image = FileField(u'Изображение')
-    captcha = RecaptchaField(u'Капча')
+    captcha = RecaptchaField(u'Капча', validators=[RecaptchaValidator()])
 
     def validate_image(self, field):
         if self.op_post:
