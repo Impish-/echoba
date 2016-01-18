@@ -33,7 +33,7 @@ class MessageForm(ModelForm):
     image = FileField(u'Изображение')
     captcha = RecaptchaField(u'Капча')
 
-    def validate(self):
+    def validate_image(self, field):
         if self.op_post:
             if not self.image.data:
                 self.image.errors = [u'Для создания треда, прицепи картинку',]
