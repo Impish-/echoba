@@ -68,9 +68,9 @@ class RecaptchaValidator(object):
         field.recaptcha_error = 'incorrect-captcha-sol'
         raise ValidationError(field.gettext(self.message))
 
+
 class RecaptchaField(Field):
     widget = RecaptchaWidget()
-
     recaptcha_error = None
 
     def __init__(self, label='', validators=None, **kwargs):

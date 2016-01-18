@@ -203,8 +203,6 @@ class Board(Base, SessionMixin):
                 board = session.query(Board).filter(Board.id == id).first()
             elif dir:
                 board = session.query(Board).filter(Board.dir == dir).first()
-            if board.captcha:
-                setattr(echsu.forms.MessageForm, 'captcha', RecaptchaField())
             return board
         except:
             return None
