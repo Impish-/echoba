@@ -1,22 +1,24 @@
 #encoding: utf8
 import types
-from jinja2 import Environment, PackageLoader
 from torgen.edit import FormMixin as FormMixin_torgen
-from tornado.web import RequestHandler
 
 from manage.models import Staff, Board
-from toolz.recaptcha import RecaptchaValidator
 
 
 class FormMixin(FormMixin_torgen):
-    form_context_name = None
+    form_context_name = 'form'
     """
         Таки кошерный Form Mixin,
         Прилепляем формочку к любому Class Base Handler'у
         и наслаждаемся формочкой!
-        хуй знает велосипед или нет,но в торгене:
-            1)FormHandler - корявый
-            2)Можно замешивать в любой(из проверенных) торгеновский Handler
+        хуй знает велосипед или нет,но:
+            1)В торгене FormHandler - корявый
+            2)Это можно замешивать в любой(из проверенных) торгеновский Handler
+
+        Чтобы заюзать вместо FormHandlera,
+                замешиваем вместе с торгеновским TemplateHandler:
+                class YouBestHandler(FormMixin, TemplateHandler):
+                    ...
     """
     def post(self, *args, **kwargs):
         super(FormMixin, self).post(*args, **kwargs)
@@ -62,7 +64,7 @@ class FormMixin(FormMixin_torgen):
 
     def form_invalid(self, form):
         context_form = super(self.__class__, self).get_context_data(**self.kwargs if self.kwargs else {})
-        context_form['form'] = form
+        context_form[self.form_context_name if self.form_context_name else 'form'] = form
         return self.render(context_form)
 
 
@@ -113,7 +115,7 @@ class HardCodeVarsMixin(object):
         return context
 
 
-class BoardDataMixin(BaseMixin) :
+class BoardDataMixin(BaseMixin):
     """
     lll
     """

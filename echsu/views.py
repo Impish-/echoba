@@ -2,10 +2,8 @@
 import arrow
 import time
 
-from sqlalchemy import desc
 from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
-from torgen.edit import FormHandler
 from torgen.list import ListHandler
 
 from echsu.forms import MessageForm, CreateThreadForm
@@ -18,7 +16,7 @@ class MainPageView(BoardDataMixin, TemplateHandler):
     template_name = 'main_page.html'
 
 
-class MessageAdding(object):
+class MessageAdding(FormMixin):
     def make_message(self, form=None, thread_id=None):
         with store_context(store):
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
@@ -37,10 +35,21 @@ class MessageAdding(object):
             self.db.commit()
             return message
 
+    def get_board(self):
+        return self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
 
-class ThreadView(BoardDataMixin, FormMixin, MessageAdding, TemplateHandler):
+    def get_form_kwargs(self):
+        kwargs = super(MessageAdding, self).get_form_kwargs()
+        kwargs.update({
+            'board': self.get_board(),
+        })
+        return kwargs
+
+
+class ThreadView(BoardDataMixin, MessageAdding, TemplateHandler):
     template_name = 'thread.html'
     form_class = MessageForm
+    form_context_name = 'message_form'
 
     def get_context_data(self, **kwargs):
         board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
@@ -49,8 +58,6 @@ class ThreadView(BoardDataMixin, FormMixin, MessageAdding, TemplateHandler):
         context.update({
             'board': board,
             'thread': op_message.thread,
-            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(board=board),
-            'form': [],
         })
         return context
 
@@ -83,9 +90,6 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding, FormMixin):
             filter(Thread.board_id == board.id, Thread.deleted == False)
         return super(self.__class__, self).get_queryset()
 
-    def get_board(self):
-        return self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
-
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
         board = self.get_board()
@@ -94,7 +98,9 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding, FormMixin):
         board_obj['threads'] = context.pop('threads')
         context.update({
             'board': board_obj,
-            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(board=board),
+            'message_form': kwargs.get('message_form')
+            if kwargs.get('message_form', None) else
+            MessageForm(board=board,re_captcha=self.request.arguments.get('g-recaptcha-response', None) ),
         })
         return context
 
