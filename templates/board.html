@@ -21,12 +21,12 @@
                             thread_link=thread.link(),
                             is_admin=current_user
                 ) }}
-                {% if thread.left() %}
-                    <i>пропущенно {{ thread.left() }} сообщений </i>
-                {% endif %}
             </div>
 
             <div class="replies">
+                {% if thread.left() %}
+                    <span class="omittedposts">пропущенно {{ thread.left() }} сообщений </span>
+                {% endif %}
                 {% for message in thread.messages_tail() %}
                     {{ post_message(
                             message=message,
