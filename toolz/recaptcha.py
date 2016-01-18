@@ -45,6 +45,10 @@ class RecaptchaValidator(object):
 
     def __call__(self, form, field):
         client_response = ''
+
+        if field.client_response is not None:
+            client_response = field.client_response
+
         if self.client_response is not None:
             client_response = self.client_response[0]
 
@@ -73,6 +77,8 @@ class RecaptchaValidator(object):
 class RecaptchaField(Field):
     widget = RecaptchaWidget()
     recaptcha_error = None
+
+    client_response = None
 
     def __init__(self, label='', validators=None, **kwargs):
         validators = validators or [RecaptchaValidator()]
