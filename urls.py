@@ -7,7 +7,7 @@ from echsu.views import MainPageView, ThreadView
 
 from echsu.views import BoardView
 from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, EditStaffManageHandler, \
-    DelStaffManageHandler, AddBoardHandler, DelMessageManageHandler, EditBoardHandler
+    DelStaffManageHandler, AddBoardHandler, DelMessageManageHandler, EditBoardHandler, MessageListHandler
 
 urls = [
     url(r"/?$", MainPageView, name='main_page'),
@@ -18,6 +18,8 @@ urls = [
     url(r"/manage/staff/del/(?P<id>\w+)?/?", DelStaffManageHandler, name='delete_staff'),
 
     url(r'/manage/message/del/(?P<id>\d+)', DelMessageManageHandler, name='delete_message'),
+    url(r'/manage/message/list/?$', MessageListHandler, name='message_list'),
+    url(r'/manage/message/list/page=(?P<page>\d+)$', MessageListHandler, name='message_list_page'),
 
     url(r"/manage/board/add/?", AddBoardHandler, name='board_add'),
     url(r"/manage/board/edit/(?P<id>\w+)/?", EditBoardHandler, name='board_edit'),

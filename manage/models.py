@@ -279,7 +279,7 @@ class Message(Base, SessionMixin):
     # image = image_attachment('BoardImage')
 
     def __repr__(self):
-        return "<Message('id=%s')>" % (self.id)
+        return "<Message: %s>" % (self.id)
 
     def img_thumb(self):
         '''

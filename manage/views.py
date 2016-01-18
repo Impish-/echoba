@@ -112,6 +112,19 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
             self.redirect(self.success_url)
 
 
+class MessageListHandler(BoardDataMixin, ListHandler):
+    template_name = 'messages_list.html'
+    model = Message
+    paginate_by = 30
+    context_object_name = 'messages_list'
+
+    def get_queryset(self):
+        #Потом Фильтры запилить
+        # if self.get_current_user().all_boards:
+        return self.db.query(self.model).order_by(Message.id.desc()).all()
+
+
+
 class AddBoardHandler(BoardDataMixin, FormMixin, TemplateHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm

@@ -25,13 +25,14 @@
     </ul>
 
     <h4>Управление Бордами:</h4>
+        <a href="{{ reverse_url('message_list') }}">Последние сообщения</a>
     <ul class="nav nav-pills nav-stacked">
         <li><a href="{{ reverse_url('board_add') }}">Создать доску</a> </li>
         <li><strong>Бордолист</strong></li>
         {% for board in board_list %}
             <li>
                 <a href="{{ reverse_url('board', board.dir ) }}">/{{ board.dir  }}/ -{{ board.name }}</a> -
-                <a href="{{ reverse_url('board_edit', board.id) }}">редактировать</a>
+                <a href="{{ reverse_url('board_edit', board.id) }}">РЕД</a>
             </li>
         {% endfor %}
     </ul>
