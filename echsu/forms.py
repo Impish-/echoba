@@ -31,7 +31,7 @@ class MessageForm(ModelForm):
     op_post = False
     sage = BooleanField(u'Сажа',)
     image = FileField(u'Изображение')
-    captcha = RecaptchaField(u'Капча', validators=[RecaptchaValidator()])
+    captcha = RecaptchaField(u'Капча')
 
     def validate_image(self, field):
         if self.op_post:
@@ -42,7 +42,6 @@ class MessageForm(ModelForm):
             self.message.errors = [u'Тут ничего нет!',]
             return False
         return True
-
 
     #thread = ModelFieldList(FormField(CreateThreadForm))
     @classmethod

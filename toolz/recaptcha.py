@@ -36,19 +36,14 @@ class RecaptchaValidator(object):
         Validates a reCaptcha
     '''
 
-    client_response = None
-
-    def __init__(self, message=None):
+    def __init__(self, message=None, client_response = None):
+        self.client_response = client_response
         if message is None:
             message = 'The response parameter is missing.'
         self.message = message
 
     def __call__(self, form, field):
         client_response = ''
-
-        if field.client_response is not None:
-            client_response = field.client_response
-
         if self.client_response is not None:
             client_response = self.client_response[0]
 
@@ -78,8 +73,13 @@ class RecaptchaField(Field):
     widget = RecaptchaWidget()
     recaptcha_error = None
 
-    client_response = None
-
-    def __init__(self, label='', validators=None, **kwargs):
-        validators = validators or [RecaptchaValidator()]
-        super(self.__class__, self).__init__(label, validators, **kwargs)
+    def process(self, formdata):
+        """
+            валидатор вешаем только в том случае.
+             если поле 'g-recaptcha-response' обнаружено
+        """
+        try:
+            self.validators = [RecaptchaValidator(client_response=formdata.getlist('g-recaptcha-response'))]
+        except AttributeError:
+            pass
+        super(RecaptchaField, self).process(formdata)
