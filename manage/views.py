@@ -74,6 +74,7 @@ class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
         self.db.refresh(user)
         return self.redirect(self.get_success_url())
 
+
 class DelStaffManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Staff

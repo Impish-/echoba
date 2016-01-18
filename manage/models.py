@@ -148,7 +148,7 @@ class Board(Base, SessionMixin):
     thread_bumplimit = Column(Integer, default=500, label=u'Бамплимит')
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
-    section = relationship('Section', lazy='dynamic',
+    section = relationship('Section',
                            backref=backref('boards', ))
     section_id = Column(Integer, ForeignKey('section.id'))
 
@@ -227,7 +227,10 @@ class Thread(Base, SessionMixin):
     deleted = Column(BOOLEAN, default=False)
 
     def op(self):
-        return self.messages[0]
+        try:
+            return self.messages[0]
+        except IndexError:
+            return []
 
     def messages_tail(self, session=None):
         return self.messages[1:][-self.board.thread_tail:]
@@ -237,7 +240,10 @@ class Thread(Base, SessionMixin):
         return left if left > 0 else None
 
     def link(self):
-        return '/%s/%d/' % (self.board.dir, self.op().id)
+        try:
+            return '/%s/%d/' % (self.board.dir, self.op().id)
+        except AttributeError:
+            return ''
 
     @staticmethod
     @with_session

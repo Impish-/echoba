@@ -24,6 +24,11 @@ class FormMixin(FormMixin_torgen):
         except AttributeError:
             self.object = None
 
+        try:
+            self.object_list = self.get_queryset()
+        except AttributeError:
+            pass
+
         form = self.form_class(self.request.arguments, obj=self.object)
         return self.form_valid(form) if form.validate() else self.form_invalid(form)
 
