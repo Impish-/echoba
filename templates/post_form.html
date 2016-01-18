@@ -84,6 +84,14 @@
                     {{ form_errors(message_form.poster_name) }}
                 </td>
             </tr>
+            {% if message_form.captcha %}
+                <tr>
+                    <td class="postblock">{{ message_form.captcha.label }}</td>
+                    <td>
+                        {{ message_form.captcha }}
+                    </td>
+                </tr>
+            {% endif %}
         </table>
     </form>
 </div>
