@@ -7,6 +7,7 @@ from wtforms_tornado import Form
 
 from manage.models import Thread, Message
 from toolz.bd_toolz import with_session
+from toolz.recaptcha import RecaptchaField
 
 ModelForm = model_form_factory(Form)
 
@@ -30,6 +31,7 @@ class MessageForm(ModelForm):
     op_post = False
     sage = BooleanField(u'Сажа',)
     image = FileField(u'Изображение')
+    captcha = RecaptchaField(u'Капча')
 
     def validate(self):
         if self.op_post:
@@ -48,3 +50,11 @@ class MessageForm(ModelForm):
     def get_session(cls,session):
         return session
 
+    def process(self, formdata=None, obj=None, data=None, **kwargs):
+        try:
+            board = kwargs.get('board', None)
+            if not board.captcha:
+                del(self.captcha)
+        except AttributeError:
+            pass
+        super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)

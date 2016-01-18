@@ -49,7 +49,7 @@ class ThreadView(BoardDataMixin, FormMixin, MessageAdding, TemplateHandler):
         context.update({
             'board': board,
             'thread': op_message.thread,
-            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(),
+            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(board=board),
             'form': [],
         })
         return context
@@ -83,20 +83,24 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding, FormMixin):
             filter(Thread.board_id == board.id, Thread.deleted == False)
         return super(self.__class__, self).get_queryset()
 
+    def get_board(self):
+        return self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
+
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
-        board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
+        board = self.get_board()
         board_obj = board.__dict__
+
         board_obj['threads'] = context.pop('threads')
         context.update({
             'board': board_obj,
-            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(),
+            'message_form': kwargs.get('message_form') if kwargs.get('message_form', None) else MessageForm(board=board),
         })
         return context
 
     def form_valid(self, form):
-        board = self.db.query(Board).filter(Board.dir == self.path_kwargs.get('board_dir', None)).first()
-        message_form = MessageForm(self.request.arguments)
+        board = self.get_board()
+        message_form = MessageForm(self.request.arguments, board=board)
         message_form.op_post = True
         message_form.image.data = self.request.files.get(message_form.image.name, None) is not None
         if not message_form.validate() and form.validate():
