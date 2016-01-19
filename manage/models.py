@@ -303,12 +303,21 @@ class Message(Base, SessionMixin):
             }
 
     def _formated_message(self, message):
+        def question_callback(math):
+            mess_id = math.group(1)
+            message = Message.get_message(id=int(mess_id))
+            if message is not None:
+                return '<a href="%s#%s">&gt;&gt;%s</a>' % (message.thread.link(), mess_id, mess_id)
+            return math.group(0)
+
         replaced_data = (
+            ('&amp;', r'&', 0),
             ('&lt;', r'<', 0),
             ('&gt;', r'>', 0),
             ('<br>\n', r'\n', 0),
             ('', r'\r', 0),
             ('&quot;', r'"', 0),
+            (question_callback, r'&gt;&gt;(?P<var>\d+)', 0),
             ('\g<begin><span class="unkfunc">&gt;\g<var></span>\g<end>',
              r'(?P<begin>^|<br>|\n)&gt;(?P<var>.*?)(?P<end><br>|$)', re.I),
             ('<a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>',
