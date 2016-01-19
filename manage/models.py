@@ -307,7 +307,7 @@ class Message(Base, SessionMixin):
             mess_id = math.group(1)
             message = Message.get_message(id=int(mess_id))
             if message is not None:
-                return '<a href="%s#%s">&gt;&gt;%s</a>' % (message.thread.link(), mess_id, mess_id)
+                return '<a href="%s#%s" class="ql">&gt;&gt;%s</a>' % (message.thread.link(), mess_id, mess_id)
             return math.group(0)
 
         replaced_data = (
