@@ -32,6 +32,17 @@ class EditBoardForm(AddBoardForm):
         self.name.validators = []
         super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 
+    def validate_name(self, field):
+        session = self.get_session()
+        try_get_board = session.query(Staff).filter(Board.name == field.data, Board.id != self._obj.id).first()
+        if try_get_board:
+            raise ValidationError(u'Занято другой доской')
+
+    def validate_dir(self, field):
+        session = self.get_session()
+        try_get_board = session.query(Staff).filter(Board.dir == field.data, Board.id != self._obj.id).first()
+        if try_get_board:
+            raise ValidationError(u'Занято другой доской')
 
 class StaffForm(ModelForm):
     class Meta:
