@@ -5,6 +5,23 @@ from torgen.edit import FormMixin as FormMixin_torgen
 from manage.models import Staff, Board
 
 
+class SuccessReverseMixin(object):
+    """
+    Халяльный реверсер, если ваш success_url требует аргументов,
+    а переопределять get_success_url() вам впадлу,
+    намешивайте этот миксин и Юзайте!
+        class YouBestHandler(SuccessReverseMixin, OtherMixins)
+            success_url_reverse_args = ['url_name', *args]
+            ...
+            profit
+    """
+    success_url_reverse_args = []
+
+    def get_success_url(self):
+        print self.success_url_reverse_args
+        return self.reverse_url(*self.success_url_reverse_args)
+
+
 class FormMixin(FormMixin_torgen):
     form_context_name = 'form'
     """
