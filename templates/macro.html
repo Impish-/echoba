@@ -20,7 +20,7 @@
 
         <span class="reflink">
             <a onclick="return hightlight('{{ message.id }}')" href="{{ thread_link }}#{{ message.id }}">№</a>
-            <a onclick="return insert('>>{{ message.id }}\n');" href="{{ thread_link }}#i{{ message.id }}">{{ message.id }}</a>
+            <a class="postl" href="{{ thread_link }}#i{{ message.id }}">{{ message.id }}</a>
         </span>
 
         {% if op_label %}
