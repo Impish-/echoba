@@ -36,7 +36,7 @@ store = FileSystemStore(
             base_url='/media/'
         )
 
-TEMPLATE_PATH = 'templates'
+TEMPLATE_PATH = '%s/templates' % SITE_ROOT
 
 jinja2_settings = {
             'autoescape': True,

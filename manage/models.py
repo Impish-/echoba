@@ -137,6 +137,11 @@ class Section(Base, SessionMixin):
     name = Column(String, unique=True, label=u'Название Раздела')
     # board_id = Column(Section, ForeignKey('section.id'))
 
+    @staticmethod
+    @with_session
+    def get_all(session):
+        return session.query(Section).all()
+
 
 class Board(Base, SessionMixin):
     id = Column(Integer, primary_key=True)

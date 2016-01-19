@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from sqlalchemy.orm import undefer_group, load_only
 from wtforms import BooleanField, validators, PasswordField, SelectField, StringField, SubmitField, ValidationError, \
     HiddenField, IntegerField, RadioField, SelectMultipleField, widgets, SelectMultipleField
 from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
@@ -7,7 +8,7 @@ from wtforms.widgets import HTMLString, html_params
 from wtforms_alchemy import model_form_factory, ModelFormField
 
 from wtforms_tornado import Form
-from manage.models import Staff, Board
+from manage.models import Staff, Board, Section
 from toolz.bd_toolz import with_session
 from wtforms.compat import text_type
 
@@ -19,6 +20,14 @@ ModelForm = model_form_factory(Form)
 class AddBoardForm(ModelForm):
     class Meta:
         model = Board
+
+    section_id = SelectField(u'Раздел', choices=[(0, u'<Не выбрано>')]+[(x.id, x.name) for x in Section.get_all()],
+                             default=0, coerce=int)
+
+    def validate_section_id(self, field):
+        session = self.get_session()
+        if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
+            raise ValueError(u'Неверный раздел')
 
     @classmethod
     @with_session
@@ -43,6 +52,7 @@ class EditBoardForm(AddBoardForm):
         try_get_board = session.query(Staff).filter(Board.dir == field.data, Board.id != self._obj.id).first()
         if try_get_board:
             raise ValidationError(u'Занято другой доской')
+
 
 class StaffForm(ModelForm):
     class Meta:
