@@ -2,6 +2,7 @@
 import arrow
 import time
 
+from sqlalchemy.orm import load_only
 from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
 from torgen.list import ListHandler
@@ -22,9 +23,11 @@ class MessageAdding(FormMixin):
     form_context_name = 'message_form'
 
     def make_message(self, form=None, thread_id=None):
+        board = self.get_board()
         with store_context(store):
+            messages_count = self.db.query(Message).filter(Message.board_id == board.id).count()
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
-                              thread_id=thread_id)
+                              thread_id=thread_id, board=board, id=messages_count + 1)
             form.populate_obj(message)
             message.thread_id = thread_id
             if self.request.files.get(form.image.name, None):
@@ -68,20 +71,25 @@ class MessageAdding(FormMixin):
 class ThreadView(BoardDataMixin, MessageAdding, TemplateHandler):
     template_name = 'thread.html'
 
+    def get_thread(self):
+        board = self.get_board()
+        op = self.db.query(Message).options(load_only('thread_id')) \
+            .filter(Message.board_id == board.id, Message.id == self.path_kwargs.get('op_message_id', None)).first()
+        return op.thread
+
     def get_context_data(self, **kwargs):
-        op_message = self.db.query(Message).filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
+        thread = self.get_thread()
         context = super(self.__class__, self).get_context_data(**kwargs)
         context.update({
-            'board': self.get_board(),
-            'thread': op_message.thread,
+            'board': thread.board,
+            'thread': thread,
         })
         return context
 
     def form_valid(self, form):
-        op_message = self.db.query(Message). \
-            filter(Message.id == self.path_kwargs.get('op_message_id', None)).first()
-        self.make_message(form=form, thread_id=op_message.thread.id)
-        return self.redirect(self.reverse_url('thread', self.path_kwargs.get('board_dir', None), op_message.id))
+        thread = self.get_thread()
+        self.make_message(form=form, thread_id=thread.id)
+        return self.redirect(self.reverse_url('thread', self.path_kwargs.get('board_dir', None), thread.op().id))
 
 
 class BoardView(BoardDataMixin, ListHandler, MessageAdding):
@@ -108,6 +116,7 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         return context
 
     def form_valid(self, form):
+        print 'hi'
         board = self.get_board()
         thread_form = CreateThreadForm(self.request.arguments, board=board)
         thread = self.model(board_id=board.id)

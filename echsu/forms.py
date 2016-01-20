@@ -26,7 +26,7 @@ class CreateThreadForm(ModelForm):
 class MessageForm(ModelForm):
     class Meta:
         model = Message
-        exclude = ['ip_address', 'datetime']
+        exclude = ['ip_address', 'datetime', 'id']
     sage = BooleanField(u'Сажа',)
     image = FileField(u'Изображение')
     # captcha = RecaptchaField(u'Капча')
@@ -41,7 +41,6 @@ class MessageForm(ModelForm):
             self.message.errors = [u'Тут ничего нет!',]
             raise ValueError(u'Пустое сообщение')
         return True
-
 
 
     @classmethod
