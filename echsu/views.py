@@ -116,7 +116,6 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         return context
 
     def form_valid(self, form):
-        print 'hi'
         board = self.get_board()
         thread_form = CreateThreadForm(self.request.arguments, board=board)
         thread = self.model(board_id=board.id)
