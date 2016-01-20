@@ -10,18 +10,17 @@
     {% include "post_form.html" %}
 
     {% for thread in board.threads %}
+        <hr>
         <div class="thread" id="thread{{ thread.id }}">
-            <hr>
 
-            <div class="postnode">
-                {{ post_message(
-                            message=thread.op(),
-                            op_post=1,
-                            op_label=1,
-                            thread_link=thread.link(),
-                            is_admin=current_user
-                ) }}
-            </div>
+            {{ post_message(
+                        message=thread.op(),
+                        op_post=1,
+                        op_label=1,
+                        thread_link=thread.link(),
+                        thread_id=thread.id,
+                        is_admin=current_user
+            ) }}
 
             <div class="replies">
                 {% if thread.left() %}
@@ -35,6 +34,10 @@
                     ) }}
                 {% endfor %}
             </div>
+        </div>
+        <div class="reply" id="hide-thread{{ thread.id }}" style="display: none;">
+            Тред <a href="{{ thread.link() }}">#{{ thread.id }}</a> ({{ thread.op().header }}) скрыт.
+            <a href="#" class="hidde-thread" data-thread="{{ thread.id }}">Раскрыть</a>
         </div>
     {% endfor %}
 

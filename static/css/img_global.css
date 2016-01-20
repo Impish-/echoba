@@ -24,7 +24,7 @@ margin: 0px;
 text-align: left;
 width: 600px;
 }
-.thread, .thread-bottom {
+.thread, .thread-bottom, hr {
     clear: both;
 }
 .thumb {
