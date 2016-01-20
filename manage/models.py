@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, DateTime, BigInteger, event
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, BigInteger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -13,10 +12,8 @@ from settings import store
 from toolz.base_models import SessionMixin
 from toolz.bd_toolz import with_session
 
-import echsu
 import arrow
 import re
-from toolz.recaptcha import RecaptchaField
 
 from tripcode import tripcode
 
@@ -126,16 +123,32 @@ class Staff(Base, SessionMixin):
     @with_session
     def add_mod_rights(self, board_id, session=None):
         board = Board.get_board(id=board_id)
-        print board
         self.boards.append(board)
-        print self.boards
         self.save()
         session.commit()
 
 
+bans = Table('ban_table', Base.metadata,
+             Column('id', Integer, primary_key=True),
+             Column('ban_id', Integer, ForeignKey('ban.id')),
+             Column('board_id', Integer, ForeignKey('board.id'))
+             )
+
+
+class Ban(Base, SessionMixin):
+    created_by = relationship('Staff',
+                              backref=backref('bans', lazy="subquery"))
+    staff_id = Column(Integer, ForeignKey('staff.id'))
+    created_at = Column(ArrowType, default=arrow.utcnow())
+    end = Column(ArrowType, default=arrow.utcnow())
+    ip = Column(IPAddressType)
+    boards = relationship("Board", load_on_pending=True,
+                      secondary=lambda: bans,
+                      backref=backref('ban_list', lazy='dynamic', load_on_pending=True), )
+
+
 class Section(Base, SessionMixin):
     name = Column(String, unique=True, label=u'Название Раздела')
-    # board_id = Column(Section, ForeignKey('section.id'))
 
     @staticmethod
     @with_session
@@ -156,7 +169,6 @@ class Board(Base, SessionMixin):
     section = relationship('Section',
                            backref=backref('boards', lazy="subquery"))
     section_id = Column(Integer, ForeignKey('section.id'))
-
 
     def __repr__(self):
         return "<Board('%s')>" % (self.dir)
@@ -217,7 +229,7 @@ class Thread(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
-    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.id",
+    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.gid",
                             backref=backref('thread'),
                             primaryjoin="and_(Message.deleted==False, Message.thread_id==Thread.id)")
 
@@ -260,7 +272,8 @@ class Thread(Base, SessionMixin):
 
 
 class Message(Base, SessionMixin):
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, nullable=False)
+    gid = Column(Integer, primary_key=True)
     poster_name = Column(String, label=u'Имя', nullable=True)
     email = Column(String, label=u'E-Mail', nullable=True)
     header = Column(String, label=u'Заголовок', nullable=True)
@@ -278,6 +291,10 @@ class Message(Base, SessionMixin):
     ip_address = Column(IPAddressType)
     datetime = Column(ArrowType, default=arrow.utcnow())
     deleted = Column(BOOLEAN, default=False)
+
+    board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
+    board = relationship('Board', backref=backref('messages', ))
+
 
     # image = image_attachment('BoardImage')
 
@@ -372,5 +389,5 @@ class Message(Base, SessionMixin):
 class BoardImage(Base, Image):
     __tablename__ = 'images'
 
-    message_id = Column(Integer, ForeignKey('message.id'), primary_key=True, )
+    message_gid = Column(Integer, ForeignKey('message.gid'), primary_key=True, )
     message = relationship('Message')
