@@ -1,30 +1,21 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
+
 from logging.config import fileConfig
 
-import os, sys
+import os
+import sys
+from alembic import context
+from sqlalchemy import engine_from_config, pool, MetaData
 
-#/\/\/\/\/\/
+from manage.models import Base as manage
+
 print os.getcwd()
 sys.path.append(os.getcwd())
-#/\/\/\/\/
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
 
-# Interpret the config file for Python logging.
-# This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-
-
-from sqlalchemy import engine_from_config, pool, MetaData
 
 def combine_metadata(*args):
     m = MetaData()
@@ -33,15 +24,7 @@ def combine_metadata(*args):
             t.tometadata(m)
     return m
 
-from manage.models import Base as manage_models
-
-target_metadata = combine_metadata(manage_models.metadata,)
-
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+target_metadata = combine_metadata(manage.metadata, )
 
 
 def run_migrations_offline():
@@ -58,7 +41,7 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+            url=url, target_metadata=target_metadata, literal_binds=True)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -79,19 +62,20 @@ def run_migrations_online():
                 directives[:] = []
 
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix='sqlalchemy.',
-        poolclass=pool.NullPool)
+            config.get_section(config.config_ini_section),
+            prefix='sqlalchemy.',
+            poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            process_revision_directives=process_revision_directives
+                connection=connection,
+                target_metadata=target_metadata,
+                process_revision_directives=process_revision_directives
         )
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
