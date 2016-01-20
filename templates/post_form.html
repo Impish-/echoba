@@ -2,7 +2,7 @@
 <hr>
 <div class="postarea">
     <form id="postform" method="post" enctype="multipart/form-data">
-        {{ xsrf_form_html }}
+{#        {{ xsrf_form_html }}#}
         <table class="postform">
             {% if current_user %}
                 {% for field in form %}
