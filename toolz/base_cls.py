@@ -7,19 +7,28 @@ from manage.models import Staff, Board
 
 class SuccessReverseMixin(object):
     """
-    Халяльный реверсер, если ваш success_url требует аргументов,
-    а переопределять get_success_url() вам впадлу,
-    намешивайте этот миксин и Юзайте!
-        class YouBestHandler(SuccessReverseMixin, OtherMixins)
-            success_url_reverse_args = ['url_name', *args]
-            ...
-            profit
+        Халяльный реверсер, если ваш success_url требует аргументов,
+        а переопределять get_success_url() вам впадлу,
+        намешивайте этот миксин и Юзайте!
+            class YouBestHandler(SuccessReverseMixin, OtherMixins)
+                success_url_reverse_args = ['url_name', 'id', *other_object_attributes]
+                ...
+                profit
     """
     success_url_reverse_args = []
 
     def get_success_url(self):
-        print self.success_url_reverse_args
-        return self.reverse_url(*self.success_url_reverse_args)
+        result_kwargs = []
+        try:
+            result_kwargs.append(self.success_url_reverse_args[0])
+        except IndexError:
+            return self.success_url
+        try:
+            for attr in self.success_url_reverse_args[1:]:
+                result_kwargs.append(getattr(self.object, attr))
+        except AttributeError:
+            raise AttributeError("This is witout object")
+        return self.reverse_url(*result_kwargs)
 
 
 class FormMixin(FormMixin_torgen):
@@ -83,6 +92,10 @@ class FormMixin(FormMixin_torgen):
         context_form = super(self.__class__, self).get_context_data(**self.kwargs if self.kwargs else {})
         context_form[self.form_context_name if self.form_context_name else 'form'] = form
         return self.render(context_form)
+
+
+class FormMixinReversed(SuccessReverseMixin, FormMixin):
+    pass
 
 
 class FlashMixin(object):
