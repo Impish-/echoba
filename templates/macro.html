@@ -1,21 +1,27 @@
-{% macro post_message(message, op_post=0, op_label=0, thread_link='', is_admin=None) %}
+{% macro post_message(message, op_post=0, op_label=0, thread_link='', thread_id=0, is_admin=None, default_name='') %}
     <div class="postnode" id="{{ message.id }}">
-        {% if not op_post %}
+        {% if not op_post -%}
             <table><tr><td class="doubledash">&gt;&gt;</td><td id="reply{{ message.id }}" class="reply">
-        {% endif %}
+        {%- endif %}
 
         <label for="check-post-{{ message.id }}">
             <input type="checkbox" value="{{ message.id }}" name="post[]" id="check-post-{{ message.id }}" />
-            {% if message.header %}
+            {% if message.header -%}
                 <span class="filetitle">{{ message.header }}</span>
-            {% endif %}
-            <span class="postername">{{ message.poster_name }}</span>
-            {% if message.datetime %}
+            {%- endif %}
+            <span class="postername">
+                {% if message.poster_name -%}
+                    {{ message.poster_name }}
+                {% else %}
+                    {{ default_name }}
+                {%- endif %}
+            </span>
+            {% if message.datetime -%}
                 <i>
                     запощено {{ message.datetime.format('DD.MM.YYYY HH:mm') }}
                     ({{ message.datetime.humanize(locale='ru') }})
                 </i>
-            {% endif %}
+            {%- endif %}
         </label>
 
         <span class="reflink">
@@ -23,20 +29,21 @@
             <a class="postl" href="{{ thread_link }}#i{{ message.id }}">{{ message.id }}</a>
         </span>
 
-        {% if op_label %}
+        {% if op_label -%}
             <span class="op-label">OP POST</span>
-        {% endif %}
+        {%- endif %}
 
-        {% if op_label %}
+        {% if op_label -%}
+            [<a href="#" class="hidde-thread" data-thread="{{ thread_id }}">Скрыть</a>]
             [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
-        {% endif %}
-        {% if is_admin %}
+        {%- endif %}
+        {% if is_admin -%}
             [<a href="/manage/message/del/{{ message.id }}" target="_blank">Удалить</a>]
-        {% endif %}
+        {%- endif %}
 
         <br>
 
-        {% if message.picture %}
+        {% if message.picture -%}
             {% set image = message.image_info() %}
             <span class="filesize">
                 Файл
@@ -54,21 +61,20 @@
             </a>
 
             <br>
-        {% endif %}
+        {%- endif %}
 
-        </div>
         <blockquote>
             <div class="postmessage">{{ message.message|safe }}</div>
         </blockquote>
 
-        {% if not op_post %}
+        {% if not op_post -%}
             </td></tr></table>
-        {% endif %}
+        {%- endif %}
     </div>
 {% endmacro %}
 
 {% macro form_errors(field) %}
-    {% if field.errors %}
+    {% if field.errors -%}
         <div class="errors">{{ field.errors|join(', ') }}</div>
-    {% endif %}
+    {%- endif %}
 {% endmacro %}

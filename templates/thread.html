@@ -20,14 +20,16 @@
                     message=thread.op(),
                     op_post=1,
                     thread_link=thread.link(),
-                    is_admin=current_user
+                    is_admin=current_user,
+                    default_name=board.default_name
         )}}
 
         {% for message in thread.messages[1:] %}
             {{ post_message(
                         message=message,
                         thread_link=thread.link(),
-                        is_admin=current_user
+                        is_admin=current_user,
+                        default_name=board.default_name
             ) }}
         {% endfor %}
     </div>
