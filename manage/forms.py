@@ -17,6 +17,16 @@ from toolz.fields import MultiCheckboxField
 ModelForm = model_form_factory(Form)
 
 
+class SectionForm(ModelForm):
+    class Meta:
+        model = Section
+
+    @classmethod
+    @with_session
+    def get_session(cls, session):
+        return session
+
+
 class AddBoardForm(ModelForm):
     class Meta:
         model = Board

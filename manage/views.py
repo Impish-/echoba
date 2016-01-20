@@ -5,11 +5,11 @@ from torgen.edit import FormHandler, DeleteHandler, ProcessFormHandler
 from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
-from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm
-from manage.models import Staff, Board, Message, Thread, BoardImage
+from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm
+from manage.models import Staff, Board, Message, Thread, BoardImage, Section
 import tornado
 from jinja2 import Environment, PackageLoader
-from toolz.base_cls import BaseMixin, FlashMixin, FormMixin, BoardDataMixin
+from toolz.base_cls import BaseMixin, FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
 from toolz.bd_toolz import only_admin
 from sqlalchemy_imageattach.context import store_context
 from settings import store
@@ -38,28 +38,20 @@ class LogOutHandler(BoardDataMixin, TemplateHandler):
         self.redirect('/manage')
 
 
-class StaffManageHandler(BoardDataMixin, ListHandler, FormMixin):
+class StaffManageHandler(BoardDataMixin, ListHandler, FormMixinReversed):
     template_name = 'staff.html'
     form_class = StaffAddForm
     model = Staff
     context_object_name = 'staff_list'
-
-    def post(self, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        return super(self.__class__,self).post(args, kwargs)
-
-    def get_success_url(self):
-        return self.reverse_url('staff_list')
+    success_url_reverse_args = ['staff_list']
 
 
-class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
+class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixinReversed):
     template_name = 'staff_edit.html'
     model = Staff
     context_object_name = 'user'
     form_class = StaffEditForm
-
-    def get_success_url(self):
-        return self.redirect(self.reverse_url('edit_staff', self.object.id))
+    success_url_reverse_args = ['edit_staff', 'id']
 
     def form_valid(self, form):
         user = self.object
@@ -75,10 +67,10 @@ class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixin):
         return self.redirect(self.get_success_url())
 
 
-class DelStaffManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
+class DelStaffManageHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Staff
-    success_url = '/manage/staff'
+    success_url_reverse_args = ['staff_list']
 
 
 class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
@@ -124,22 +116,39 @@ class MessageListHandler(BoardDataMixin, ListHandler):
         return self.db.query(self.model).order_by(Message.id.desc()).all()
 
 
+class SectionHandler(BoardDataMixin, ListHandler, FormMixinReversed):
+    template_name = 'section.html'
+    form_class = SectionForm
+    model = Section
+    paginate_by = 30
+    context_object_name = 'section_list'
+    success_url_reverse_args = ['section_list']
 
-class AddBoardHandler(BoardDataMixin, FormMixin, TemplateHandler):
+
+class EditSectionHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
+    template_name = 'section.html'
+    form_class = SectionForm
+    model = Section
+    success_url_reverse_args = ['section_list']
+
+
+class DelSectionHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, FlashMixin):
+    template_name = 'confirm_delete.html'
+    model = Section
+    success_url_reverse_args = ['section_list']
+
+
+class AddBoardHandler(BoardDataMixin, FormMixinReversed, TemplateHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board
-    success_url = '/manage'
-
-    def get_success_url(self):
-        return self.redirect(self.success_url)
+    success_url_reverse_args = ['board_edit', 'id']
 
 
-class EditBoardHandler(BoardDataMixin, DetailHandler, FormMixin):
+class EditBoardHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
     template_name = 'board_edit.html'
     model = Board
     context_object_name = 'user'
     form_class = EditBoardForm
+    success_url_reverse_args = ['board_edit', 'id']
 
-    def get_success_url(self):
-        return self.redirect(self.reverse_url('board_edit', self.object.id))

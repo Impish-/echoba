@@ -1,18 +1,4 @@
-{% for field in form %}
-    <div class="form-group">
-        {{ field.label(class="col-md-2 col-sm-3 control-label") }}
-        <div class="col-md-6 col-sm-6">
-            {{ field(class="form-control") }}
-        </div>
-        <div class="col-sm-3">
-            {% for err in form.errors[field.name] %}
-                <ul class="error-list">
-                    <li>{{ err }}</li>
-                </ul>
-            {% endfor %}
-        </div>
-    </div>
-{% endfor %}
+{% include 'parts/view_form.html' %}
 <div class="col-sm-6 col-md-offset-2 col-sm-offset-3 last-element-form">
     <input type="submit" value="Добавить его!" class="btn btn-default">
 </div>
