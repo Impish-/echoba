@@ -154,7 +154,7 @@ class Board(Base, SessionMixin):
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
     section = relationship('Section',
-                           backref=backref('boards', ))
+                           backref=backref('boards', lazy="subquery"))
     section_id = Column(Integer, ForeignKey('section.id'))
 
 

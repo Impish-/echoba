@@ -32,8 +32,10 @@
         <li><strong>Бордолист</strong></li>
         {% for board in board_list %}
             <li>
-                <a href="{{ reverse_url('board', board.dir ) }}">/{{ board.dir  }}/ -{{ board.name }}</a> -
-                <a href="{{ reverse_url('board_edit', board.id) }}"><small>ред</small></a>
+                <a style="display: inline-block" href="{{ reverse_url('board', board.dir ) }}">/{{ board.dir  }}/ -{{ board.name }}</a>
+                <small style="display: inline-block;">
+                    <a style="color: #d9534f" href="{{ reverse_url('board_edit', board.id) }}">редaктировать</a>
+                </small>
             </li>
         {% endfor %}
     </ul>
