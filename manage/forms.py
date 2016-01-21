@@ -31,9 +31,6 @@ class AddBoardForm(ModelForm):
     class Meta:
         model = Board
 
-    section_id = SelectField(u'Раздел', choices=[(0, u'<Не выбрано>')]+[(x.id, x.name) for x in Section.get_all()],
-                             default=0, coerce=int)
-
     def validate_section_id(self, field):
         session = self.get_session()
         if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
@@ -43,6 +40,11 @@ class AddBoardForm(ModelForm):
     @with_session
     def get_session(cls, session):
         return session
+
+    @classmethod
+    def append_field(cls, name, field):
+        setattr(cls, name, field)
+        return cls
 
 
 class EditBoardForm(AddBoardForm):
@@ -73,13 +75,15 @@ class StaffForm(ModelForm):
     def get_session(cls, session):
         return session
 
+    @classmethod
+    def append_field(cls, name, field):
+        setattr(cls, name, field)
+        return cls
+
 
 class StaffEditForm(StaffForm):
     class Meta:
         exclude = ['password',]
-
-    boards = MultiCheckboxField(u'Модерируемые доски', choices=
-                        [(x.id, x.name) for x in Board.get_all()], validators=[validators.Optional()], coerce=int)
 
     password = PasswordField(u'Пароль', [EqualTo('confirm', message=u'Не совпадают ;(')])
     confirm = PasswordField(u'Еще раз')

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 from torgen.base import TemplateHandler
 from torgen.detail import DetailHandler
-from torgen.edit import FormHandler, DeleteHandler, ProcessFormHandler
+from torgen.edit import FormHandler, DeleteHandler
 from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm
 from manage.models import Staff, Board, Message, Thread, BoardImage, Section
 import tornado
-from jinja2 import Environment, PackageLoader
-from toolz.base_cls import BaseMixin, FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
-from toolz.bd_toolz import only_admin
+from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
 from sqlalchemy_imageattach.context import store_context
 from settings import store
 
 import shutil
+
+from toolz.dynamic_form_fields import StaffDynamicForm, BoardDynamicForm
 
 
 class ManageHandler(BoardDataMixin, TemplateHandler):
@@ -41,7 +41,7 @@ class LogOutHandler(BoardDataMixin, TemplateHandler):
         self.redirect('/manage')
 
 
-class StaffManageHandler(BoardDataMixin, ListHandler, FormMixinReversed):
+class StaffManageHandler(BoardDataMixin, StaffDynamicForm, ListHandler, FormMixinReversed):
     template_name = 'staff.html'
     form_class = StaffAddForm
     model = Staff
@@ -49,7 +49,7 @@ class StaffManageHandler(BoardDataMixin, ListHandler, FormMixinReversed):
     success_url_reverse_args = ['staff_list']
 
 
-class EditStaffManageHandler(BoardDataMixin, DetailHandler, FormMixinReversed):
+class EditStaffManageHandler(BoardDataMixin, StaffDynamicForm, DetailHandler, FormMixinReversed):
     template_name = 'staff_edit.html'
     model = Staff
     context_object_name = 'user'
@@ -141,17 +141,16 @@ class DelSectionHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, Flas
     success_url_reverse_args = ['section_list']
 
 
-class AddBoardHandler(BoardDataMixin, FormMixinReversed, TemplateHandler):
+class AddBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, TemplateHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board
     success_url_reverse_args = ['board_edit', 'id']
 
 
-class EditBoardHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
+class EditBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, DetailHandler):
     template_name = 'board_edit.html'
     model = Board
     context_object_name = 'user'
     form_class = EditBoardForm
     success_url_reverse_args = ['board_edit', 'id']
-
