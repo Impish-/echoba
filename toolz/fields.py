@@ -25,5 +25,4 @@ class MultiCheckboxField(SelectMultipleField):
             yield (value, label, selected)
 
     def process(self, formdata, data=unset_value, **kwargs):
-        print formdata
         return super(MultiCheckboxField, self).process(formdata, data, **kwargs)
