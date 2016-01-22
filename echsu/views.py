@@ -34,7 +34,7 @@ class MessageAdding(FormMixin):
                 image = self.request.files[form.image.name][0]
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
-            message.before_added()
+            message.before_added(self.get_board())
             self.db.add(message)
             self.db.commit()
             self.db.refresh(message)
