@@ -15,7 +15,7 @@ from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardFor
 from manage.models import Staff, Board, Message, BoardImage, Section
 from settings import store
 from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin, FormMixin
-from toolz.bd_toolz import admin_only
+from toolz.bd_toolz import admin_only, login_required
 
 
 class ManageHandler(BoardDataMixin, TemplateHandler):
@@ -32,6 +32,7 @@ class ManageHandler(BoardDataMixin, TemplateHandler):
         self.redirect("/manage")
 
 
+@login_required
 class LogOutHandler(BoardDataMixin, TemplateHandler):
     template_name = 'manage.html'
 
@@ -132,6 +133,7 @@ class EditMessageHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
         return obj
 
 
+@login_required
 class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMixin):
     template_name = 'messages_list.html'
     model = Message
@@ -198,6 +200,7 @@ class AddBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, Templ
     form_class = AddBoardForm
     model = Board
     success_url_reverse_args = ['board_edit', 'id']
+
 
 @admin_only
 class EditBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, DetailHandler):
