@@ -17,6 +17,11 @@
 
         <table class="table table-hover">
             {% for message in messages_list %}
+                <i style="color: maroon">ip : {{ message.ip_address }}</i>
+
+                {% if message.deleted %}
+                    <b style="color: #CC1105">УДАЛЕНО</b>
+                {% endif %}
 
                 {{ post_message(
                             message=message,
