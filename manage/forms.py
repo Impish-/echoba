@@ -14,7 +14,7 @@ class MessageEdit(FormCBV):
         exclude = ['datetime', 'deleted']
         model = Message
 
-    image = FileField(u'Изображение')
+    # image = FileField(u'Изображение')
 
 
 class SectionForm(FormCBV):
