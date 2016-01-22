@@ -21,8 +21,9 @@ class ManageHandler(BoardDataMixin, TemplateHandler):
 
     def post(self):
         user = self.db.query(Staff).filter(Staff.name == self.get_argument("login")).first()
+        print user.password == self.get_argument('password', None)
         try:
-            if user.password == self.get_argument('password', None) is None:
+            if not user.password == self.get_argument('password', None):
                 return self.get()
         except AttributeError:
             return self.get()
