@@ -112,7 +112,7 @@ class EditMessageHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
     form_class = MessageEdit
     slug_url_kwarg = 'gid' #defaults to slug
     slug_field = Message.gid
-    success_url_reverse_args = ['edit_messaged', 'gid']
+    success_url_reverse_args = ['edit_message', 'gid']
 
     def get_object(self):
         obj = self.db.query(Message).filter(Message.gid == self.kwargs.get(self.slug_url_kwarg, None)).first()
