@@ -39,7 +39,8 @@
             [<a href="{{ thread_link }}" class="link-to-thread">Посмотреть тред</a>]
         {%- endif %}
         {% if is_admin -%}
-            [<a href="/manage/message/del/{{ message.id }}" target="_blank">Удалить</a>]
+            [<a href="/manage/message/del/{{ message.gid }}" target="_blank">Удалить</a>]
+            [<a href="/manage/message/edit/{{ message.gid }}" target="_blank">Редактировать</a>]
         {%- endif %}
 
         <br>

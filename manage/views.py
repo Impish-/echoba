@@ -10,7 +10,7 @@ from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
 from manage.dynamic_form_fields import StaffDynamicForm, BoardDynamicForm
-from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm
+from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm, MessageEdit
 from manage.models import Staff, Board, Message, BoardImage, Section
 from settings import store
 from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
@@ -82,7 +82,7 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
 
     def post(self, *args, **kwargs):
         with store_context(store):
-            message = self.db.query(Message).filter(Message.id==kwargs.get('id', 0)).first()
+            message = self.db.query(Message).filter(Message.id==kwargs.get('gid', 0)).first()
             if message and message.id == message.thread.op().id:
                 message.thread.deleted = True
                 messages = self.db.query(Message).filter(Message.thread_id==message.thread_id).all()
@@ -104,6 +104,18 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
                     self.db.query(BoardImage).filter(BoardImage.message_id==message.id).delete()
             self.db.commit()
             self.redirect(self.success_url)
+
+
+class EditMessageHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
+    template_name = 'edit_message.html'
+    model = Message
+    form_class = MessageEdit
+    slug_url_kwarg = 'gid' #defaults to slug
+    slug_field = Message.gid
+
+    def get_object(self):
+        obj = self.db.query(Message).filter(Message.gid == self.kwargs.get(self.slug_url_kwarg, None)).first()
+        return obj
 
 
 class MessageListHandler(BoardDataMixin, ListHandler):

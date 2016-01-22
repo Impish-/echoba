@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.orm import undefer_group, load_only
-from wtforms import  validators, PasswordField, ValidationError
+from wtforms import  validators, PasswordField, ValidationError, FileField
 from wtforms.validators import InputRequired, EqualTo
 
-from manage.models import Staff, Board, Section
+from manage.models import Staff, Board, Section, Message
 from toolz.bd_toolz import with_session
 
 from toolz.form_base import FormCBV
+
+
+class MessageEdit(FormCBV):
+    class Meta:
+        exclude = ['datetime', 'deleted']
+        model = Message
+
+    image = FileField(u'Изображение')
 
 
 class SectionForm(FormCBV):

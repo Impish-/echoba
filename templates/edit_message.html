@@ -1,0 +1,46 @@
+{% extends "parts/manage_base.html" %}
+{% block content %}
+    <div class="row">
+        <form action="{{ reverse_url('edit_message', object.id) }}" method="post" class="form-horizontal">
+            <div class="col-md-7 col-sm-6">
+
+                {% for field in form %}
+                    <div class="form-group">
+                        {{ field.label(class="col-sm-2") }}
+                        <div class="col-sm-6">
+                            {{ field(class="form-control") }}
+                        </div>
+                        <div class="col-sm-4">
+                            {% for err in field.errors %}
+                                <ul class="error-list">
+                                    <li><i style="color: red;">{{ err }}</i></li>
+                                </ul>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <input type="submit" value="Отредактировать!" class="btn btn-default">
+                А может ... <a href="{{ reverse_url('delete_message', object.id) }}" class="btn btn-danger">Удалить</a>
+            </div>
+            {% if object.picture -%}
+            {% set image = object.image_info() %}
+                <span class="filesize">
+                    Файл
+                    <a href="http://www.google.ru/searchbyimage?image_url=http://ech.su{{ image.locate }}" target="_blank" title="Искать в google">[G]</a>
+                    <a href="http://www.tineye.com/search/?url=http://ech.su{{ image.locate }}" target="_blank" title="Искать на tineye">[T]</a>
+                    :
+                    <a href="{{ image.locate }}" target="_blank">{{ image.name }}</a>
+                    - ({{ image.width }}x{{ image.height }})
+                </span>
+                <br>
+
+                <a href="{{ image.locate }}" target="_blank">
+                    <span id="thumb{{ object.gid }}"><img src="{{ object.img_thumb() }}" class="thumb"></span>
+                </a>
+
+                <br>
+            {%- endif %}
+        </form>
+    </div>
+
+{% endblock %}
