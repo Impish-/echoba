@@ -7,10 +7,10 @@ import sys
 from alembic import context
 from sqlalchemy import engine_from_config, pool, MetaData
 
+sys.path.append(os.getcwd())
+
 from manage.models import Base as manage
 
-print os.getcwd()
-sys.path.append(os.getcwd())
 
 config = context.config
 
