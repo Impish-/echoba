@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
+import shutil
+
+import tornado
+from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
 from torgen.detail import DetailHandler
-from torgen.edit import FormHandler, DeleteHandler
+from torgen.edit import DeleteHandler
 from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
+from manage.dynamic_form_fields import StaffDynamicForm, BoardDynamicForm
 from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm
-from manage.models import Staff, Board, Message, Thread, BoardImage, Section
-import tornado
-from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
-from sqlalchemy_imageattach.context import store_context
+from manage.models import Staff, Board, Message, BoardImage, Section
 from settings import store
-
-import shutil
-
-from toolz.dynamic_form_fields import StaffDynamicForm, BoardDynamicForm
+from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
 
 
 class ManageHandler(BoardDataMixin, TemplateHandler):

@@ -8,6 +8,7 @@ from toolz.fields import MultiCheckboxField
 
 class BoardDynamicForm:
     def get_form(self, form_class):
+        self.form_class.session = self.db
         sections = self.db.query(Section).all()
         self.form_class.append_field('section_id',
                                      SelectField(u'Раздел',
@@ -18,6 +19,7 @@ class BoardDynamicForm:
 
 class StaffDynamicForm:
     def get_form(self, form_class):
+        self.form_class.session = self.db
         boards = self.db.query(Board).all()
         self.form_class.append_field('boards',
                                      MultiCheckboxField(u'Модерируемые доски', choices=

@@ -1,33 +1,20 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.orm import undefer_group, load_only
-from wtforms import BooleanField, validators, PasswordField, SelectField, StringField, SubmitField, ValidationError, \
-    HiddenField, IntegerField, RadioField, SelectMultipleField, widgets, SelectMultipleField
-from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
+from wtforms import  validators, PasswordField, ValidationError
 from wtforms.validators import InputRequired, EqualTo
-from wtforms.widgets import HTMLString, html_params
-from wtforms_alchemy import model_form_factory, ModelFormField
 
-from wtforms_tornado import Form
 from manage.models import Staff, Board, Section
 from toolz.bd_toolz import with_session
-from wtforms.compat import text_type
 
-from toolz.fields import MultiCheckboxField
-
-ModelForm = model_form_factory(Form)
+from toolz.form_base import FormCBV
 
 
-class SectionForm(ModelForm):
+class SectionForm(FormCBV):
     class Meta:
         model = Section
 
-    @classmethod
-    @with_session
-    def get_session(cls, session):
-        return session
 
-
-class AddBoardForm(ModelForm):
+class AddBoardForm(FormCBV):
     class Meta:
         model = Board
 
@@ -35,16 +22,6 @@ class AddBoardForm(ModelForm):
         session = self.get_session()
         if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
             raise ValueError(u'Неверный раздел')
-
-    @classmethod
-    @with_session
-    def get_session(cls, session):
-        return session
-
-    @classmethod
-    def append_field(cls, name, field):
-        setattr(cls, name, field)
-        return cls
 
 
 class EditBoardForm(AddBoardForm):
@@ -66,19 +43,9 @@ class EditBoardForm(AddBoardForm):
             raise ValidationError(u'Занято другой доской')
 
 
-class StaffForm(ModelForm):
+class StaffForm(FormCBV):
     class Meta:
         model = Staff
-
-    @classmethod
-    @with_session
-    def get_session(cls, session):
-        return session
-
-    @classmethod
-    def append_field(cls, name, field):
-        setattr(cls, name, field)
-        return cls
 
 
 class StaffEditForm(StaffForm):
