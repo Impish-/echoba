@@ -35,6 +35,7 @@ class MessageAdding(FormMixin):
                 message.picture.from_blob(image['body'])
                 message.picture.generate_thumbnail(width=150)
             message.before_added(self.get_board())
+            message.datetime = arrow.utcnow()
             self.db.add(message)
             self.db.commit()
             self.db.refresh(message)
