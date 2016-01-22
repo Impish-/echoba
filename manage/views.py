@@ -161,7 +161,7 @@ class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMix
             query = query.filter(Message.ip_address == ip_filter)
 
         filtred_board = self.get_argument('boards', 0)
-        if filtred_board > 0:
+        if int(filtred_board) > 0:
             query = query.filter(Message.board_id == filtred_board)
 
         return query.order_by(Message.id.desc())
