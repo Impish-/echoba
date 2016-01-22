@@ -139,11 +139,19 @@ class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMix
     context_object_name = 'messages_list'
     form_class = MessagesFilters
 
+    def post(self, *args, **kwargs):
+        self.send_error(status_code=403)
+
     def get_queryset(self):
         query = self.db.query(self.model)
+        user = self.get_current_user()
 
-        if not self.get_current_user().all_boards:
+        if not user.all_boards and not user.is_admin():
             query = query.filter(Message.board_id.in_([x.id for x in self.get_current_user().boards]))
+
+        if user.is_admin():
+            all_boards = self.db.query(Board).all()
+            query = query.filter(Message.board_id.in_([x.id for x in all_boards]))
 
         query = query.join(BoardImage, BoardImage.message_gid == Message.gid) if self.get_argument('images_only', None) \
             else query
@@ -153,7 +161,6 @@ class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMix
             query = query.filter(Message.ip_address == ip_filter)
 
         filtred_board = self.get_argument('boards', 0)
-
         if filtred_board > 0:
             query = query.filter(Message.board_id == filtred_board)
 
