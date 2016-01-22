@@ -38,7 +38,7 @@ class MessageAdding(FormMixin):
             self.db.add(message)
             self.db.commit()
             self.db.refresh(message)
-            if not form.sage:
+            if not form.sage.data:
                 message.thread.bumped = int(round(time.time() * 1000))
             self.db.commit()
             return message
