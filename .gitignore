@@ -63,5 +63,6 @@ settings_local*
 .idea
 alembic.ini
 
+config/
 
 
