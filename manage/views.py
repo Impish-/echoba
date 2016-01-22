@@ -9,11 +9,12 @@ from torgen.edit import DeleteHandler
 from torgen.list import ListHandler
 from tornado.web import RequestHandler
 
-from manage.dynamic_form_fields import StaffDynamicForm, BoardDynamicForm
-from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm, MessageEdit
+from manage.dynamic_form_fields import StaffDynamicForm, BoardDynamicForm, FilterDynamicForm
+from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardForm, SectionForm, MessageEdit, \
+    MessagesFilters
 from manage.models import Staff, Board, Message, BoardImage, Section
 from settings import store
-from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin
+from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin, FormMixin
 
 
 class ManageHandler(BoardDataMixin, TemplateHandler):
@@ -125,16 +126,32 @@ class EditMessageHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
         return obj
 
 
-class MessageListHandler(BoardDataMixin, ListHandler):
+class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMixin):
     template_name = 'messages_list.html'
     model = Message
     paginate_by = 30
     context_object_name = 'messages_list'
+    form_class = MessagesFilters
 
     def get_queryset(self):
-        #Потом Фильтры запилить
-        # if self.get_current_user().all_boards:
-        return self.db.query(self.model).order_by(Message.id.desc()).all()
+        query = self.db.query(self.model)
+
+        if not self.get_current_user().all_boards:
+            query = query.filter(Message.board_id.in_([x.id for x in self.get_current_user().boards]))
+
+        query = query.join(BoardImage, BoardImage.message_gid == Message.gid) if self.get_argument('images_only', None) \
+            else query
+
+        filtered_boards = self.get_arguments('boards', None)
+
+        ip_filter = self.get_argument('poster_ip', None)
+        if ip_filter:
+            query = query.filter(Message.ip_address == ip_filter)
+
+        if filtered_boards:
+            query = query.filter(Message.board_id.in_(filtered_boards))
+
+        return query.order_by(Message.id.desc())
 
 
 class SectionHandler(BoardDataMixin, ListHandler, FormMixinReversed):

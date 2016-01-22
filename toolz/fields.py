@@ -1,6 +1,8 @@
 from wtforms import SelectMultipleField
 
 from wtforms import widgets
+from wtforms.utils import unset_value
+
 from toolz.widgets import DivWidget
 
 
@@ -18,5 +20,10 @@ class MultiCheckboxField(SelectMultipleField):
                 boards = self.obj.boards
             except AttributeError:
                 pass
+            print self.__class__.__dict__
             selected = self.coerce(value) in [x.id for x in boards]
             yield (value, label, selected)
+
+    def process(self, formdata, data=unset_value, **kwargs):
+        print formdata
+        return super(MultiCheckboxField, self).process(formdata, data, **kwargs)

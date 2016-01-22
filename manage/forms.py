@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.orm import undefer_group, load_only
-from wtforms import  validators, PasswordField, ValidationError, FileField
+from wtforms import  validators, PasswordField, ValidationError, FileField, Form, BooleanField, StringField
 from wtforms.validators import InputRequired, EqualTo
 
 from manage.models import Staff, Board, Section, Message
@@ -15,6 +15,11 @@ class MessageEdit(FormCBV):
         model = Message
 
     # image = FileField(u'Изображение')
+
+
+class MessagesFilters(FormCBV):
+    images_only = BooleanField(u'Только с картинкой',)
+    poster_ip = StringField(u'IP отправителя')
 
 
 class SectionForm(FormCBV):

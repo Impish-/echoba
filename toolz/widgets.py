@@ -11,8 +11,8 @@ class DivWidget(object):
         html = ['<%s %s>' % (self.html_tag, html_params(**kwargs))]
         for subfield in field:
             if self.prefix_label:
-                html.append('<div style="display:inline">%s %s</div>' % (subfield.label, subfield()))
+                html.append('<div style="display:inline">%s %s;&nbsp;</div>' % (subfield.label, subfield()))
             else:
-                html.append('<div style="display:inline">%s %s</div>' % (subfield(), subfield.label))
+                html.append('<div style="display:inline">%s %s;&nbsp;</div>' % (subfield(), subfield.label))
         html.append('</%s>' % self.html_tag)
         return HTMLString(''.join(html))

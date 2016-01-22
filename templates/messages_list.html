@@ -4,15 +4,16 @@
     <div>
         <h1 class="title">Список последних сообщений</h1>
 
-        {% if current_user.role.value == 'Admin' %}
-            <hr style="color: darkorange"/>
-            <p>Фильтры:</p>
-            <form method="POST" action="" class="form-horizontal">
-{#                {% include "parts/staff_add_form.html" %}#}
-            </form>
 
-            <hr style="color: darkorange"/>
-        {% endif %}
+
+        <div style="background-color: #e3e3e3">
+            <p>Фильтры:</p>
+            <form method="GET" action="" class="form-horizontal">
+                {% include "parts/view_form.html" %}
+                <input type="submit" value="Применить фильтр">
+            </form>
+        </div>
+
 
 
         <table class="table table-hover">
