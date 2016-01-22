@@ -142,14 +142,14 @@ class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMix
         query = query.join(BoardImage, BoardImage.message_gid == Message.gid) if self.get_argument('images_only', None) \
             else query
 
-        filtered_boards = self.get_arguments('boards', None)
-
         ip_filter = self.get_argument('poster_ip', None)
         if ip_filter:
             query = query.filter(Message.ip_address == ip_filter)
 
-        if filtered_boards:
-            query = query.filter(Message.board_id.in_(filtered_boards))
+        filtred_board = self.get_argument('boards', 0)
+
+        if filtred_board > 0:
+            query = query.filter(Message.board_id == filtred_board)
 
         return query.order_by(Message.id.desc())
 

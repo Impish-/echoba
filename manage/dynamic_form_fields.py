@@ -31,7 +31,7 @@ class FilterDynamicForm:
     def get_form(self, form_class):
         self.form_class.session = self.db
         self.form_class.append_field('boards',
-                                     SelectField(u'доска', choices=
+                                     SelectField(u'доска', choices= [(0, u'<Все доступные>')] +
                         [(x.id, '%s - %s'%(x.dir, x.name)) for x in self.get_current_user().boards], validators=[validators.Optional()], coerce=int))
 
         return self.form_class(**self.get_form_kwargs())
