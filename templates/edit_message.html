@@ -1,7 +1,7 @@
 {% extends "parts/manage_base.html" %}
 {% block content %}
     <div class="row">
-        <form action="{{ reverse_url('edit_message', object.id) }}" method="post" class="form-horizontal">
+        <form action="{{ reverse_url('edit_message', object.gid) }}" method="post" class="form-horizontal">
             <div class="col-md-7 col-sm-6">
 
                 {% for field in form %}
