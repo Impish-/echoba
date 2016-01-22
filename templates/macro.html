@@ -18,7 +18,8 @@
             </span>
             {% if message.datetime -%}
                 <i>
-                    запощено {{ message.datetime.format('DD.MM.YYYY HH:mm') }}
+{#                                                     хардкооод#}
+                    запощено {{ message.datetime.to('Europe/Moscow').format('DD.MM.YYYY HH:mm') }}
                     ({{ message.datetime.humanize(locale='ru') }})
                 </i>
             {%- endif %}
