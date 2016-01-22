@@ -79,6 +79,12 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Message
     success_url = '/manage/'
+    slug_url_kwarg = 'gid' #defaults to slug
+    slug_field = Message.gid
+
+    def get_object(self):
+        obj = self.db.query(Message).filter(Message.gid == self.kwargs.get(self.slug_url_kwarg, None)).first()
+        return obj
 
     def post(self, *args, **kwargs):
         with store_context(store):
