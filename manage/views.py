@@ -15,6 +15,7 @@ from manage.forms import StaffAddForm, StaffEditForm, AddBoardForm, EditBoardFor
 from manage.models import Staff, Board, Message, BoardImage, Section
 from settings import store
 from toolz.base_cls import FlashMixin, FormMixinReversed, BoardDataMixin, SuccessReverseMixin, FormMixin
+from toolz.bd_toolz import admin_only
 
 
 class ManageHandler(BoardDataMixin, TemplateHandler):
@@ -41,6 +42,7 @@ class LogOutHandler(BoardDataMixin, TemplateHandler):
         self.redirect('/manage')
 
 
+@admin_only
 class StaffManageHandler(BoardDataMixin, StaffDynamicForm, ListHandler, FormMixinReversed):
     template_name = 'staff.html'
     form_class = StaffAddForm
@@ -49,6 +51,7 @@ class StaffManageHandler(BoardDataMixin, StaffDynamicForm, ListHandler, FormMixi
     success_url_reverse_args = ['staff_list']
 
 
+@admin_only
 class EditStaffManageHandler(BoardDataMixin, StaffDynamicForm, DetailHandler, FormMixinReversed):
     template_name = 'staff_edit.html'
     model = Staff
@@ -70,12 +73,14 @@ class EditStaffManageHandler(BoardDataMixin, StaffDynamicForm, DetailHandler, Fo
         return self.redirect(self.get_success_url())
 
 
+@admin_only
 class DelStaffManageHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Staff
     success_url_reverse_args = ['staff_list']
 
 
+@admin_only
 class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Message
@@ -113,6 +118,7 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
             self.redirect(self.success_url)
 
 
+@admin_only
 class EditMessageHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
     template_name = 'edit_message.html'
     model = Message
@@ -154,6 +160,7 @@ class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMix
         return query.order_by(Message.id.desc())
 
 
+@admin_only
 class SectionHandler(BoardDataMixin, ListHandler, FormMixinReversed):
     template_name = 'section.html'
     form_class = SectionForm
@@ -163,6 +170,7 @@ class SectionHandler(BoardDataMixin, ListHandler, FormMixinReversed):
     success_url_reverse_args = ['section_list']
 
 
+@admin_only
 class EditSectionHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
     template_name = 'section.html'
     form_class = SectionForm
@@ -170,19 +178,21 @@ class EditSectionHandler(BoardDataMixin, FormMixinReversed, DetailHandler):
     success_url_reverse_args = ['section_list']
 
 
+@admin_only
 class DelSectionHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, FlashMixin):
     template_name = 'confirm_delete.html'
     model = Section
     success_url_reverse_args = ['section_list']
 
 
+@admin_only
 class AddBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, TemplateHandler):
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board
     success_url_reverse_args = ['board_edit', 'id']
 
-
+@admin_only
 class EditBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, DetailHandler):
     template_name = 'board_edit.html'
     model = Board

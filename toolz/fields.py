@@ -20,7 +20,6 @@ class MultiCheckboxField(SelectMultipleField):
                 boards = self.obj.boards
             except AttributeError:
                 pass
-            print self.__class__.__dict__
             selected = self.coerce(value) in [x.id for x in boards]
             yield (value, label, selected)
 

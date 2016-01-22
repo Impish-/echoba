@@ -49,7 +49,6 @@ class Staff(Base, SessionMixin):
     def __repr__(self):
         return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
 
-    @declared_attr
     def is_admin(self):
         return self.role == 'adm'
 
