@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 from sqlalchemy.orm import undefer_group, load_only
 from wtforms import  validators, PasswordField, ValidationError, FileField, Form, BooleanField, StringField
 from wtforms.validators import InputRequired, EqualTo
@@ -36,6 +37,23 @@ class AddBoardForm(FormCBV):
         if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
             raise ValueError(u'Неверный раздел')
 
+    def validate_available_from(self, field):
+        time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
+        if not time:
+            raise ValidationError(u'Формат "ЧЧ:MM"')
+        if int(time.group('hour')) not in range(0, 24):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+        if int(time.group('min')) not in range(0, 60):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+
+    def validate_available_until(self, field):
+        time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
+        if not time:
+            raise ValidationError(u'Формат "ЧЧ:MM"')
+        if int(time.group('hour')) not in range(0, 24):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+        if int(time.group('min')) not in range(0, 60):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
 
 class EditBoardForm(AddBoardForm):
     def process(self, formdata=None, obj=None, data=None, **kwargs):

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}/{{ board.dir }}/ - {{ board.name }}{% endblock %}
+
+{% block content %}
+{#    <div class="logo">#}
+{#        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>#}
+{#    </div>#}
+
+    {{ start.humanize(locale="ru") }}
+
+{% endblock %}

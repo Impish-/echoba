@@ -6,6 +6,7 @@ from sqlalchemy.orm import load_only
 from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
 from torgen.list import ListHandler
+from tornado import gen
 
 from echsu.forms import MessageForm, CreateThreadForm
 from manage.models import Board, Message, Thread
@@ -57,6 +58,26 @@ class MessageAdding(FormMixin):
             pass
         form = self.form_class(**self.get_form_kwargs())
         return form
+
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        board = self.get_board()
+
+
+        s_hour, s_min = board.available_from.split(':')
+        e_hour, e_min = board.available_until.split(':')
+        now = arrow.utcnow().to('Europe/Moscow')
+        start = arrow.utcnow().to('Europe/Moscow').replace(hour=int(s_hour), minute=int(s_min))
+        end = arrow.utcnow().to('Europe/Moscow').replace(hour=int(e_hour), minute=int(e_min))
+
+        if now < start:
+            self.template_name = 'timer.html'
+            return self.render({'board': board, 'start': start, 'end': end})
+
+
+        return super(MessageAdding, self).get(args, kwargs)
 
     def post(self, *args, **kwargs):
         self.form_class.image_attached = self.request.files.get('image', None) is not None

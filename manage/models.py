@@ -170,7 +170,7 @@ class Board(Base, SessionMixin):
     section_id = Column(Integer, ForeignKey('section.id'))
 
     available_from = Column(String, label=u'(Часы доступа(мск)) Доступна с ', nullable=True)
-    available_unlil = Column(String, label=u'(Часы доступа(мск)) Доступна до ', nullable=True)
+    available_until = Column(String, label=u'(Часы доступа(мск)) Доступна до ', nullable=True)
 
     def __repr__(self):
         return "<Board('%s')>" % (self.dir)
