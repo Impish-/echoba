@@ -325,8 +325,21 @@ class Message(Base, SessionMixin):
             }
 
     @staticmethod
+    def _safe_string(text):
+        replaced_data = (
+            ('&amp;', r'&', 0),
+            ('&lt;', r'<', 0),
+            ('&gt;', r'>', 0)
+        )
+        for (r, p, f) in replaced_data:
+            text = re.sub(p, r, text, flags=f)
+        return text
+
+    @staticmethod
     @with_session
     def _formated_message(message, board, session=None):
+        message = Message._safe_string(message)
+
         def question_callback(math):
             mess_id = math.group('var')
             board_id = board.id
@@ -344,9 +357,6 @@ class Message(Base, SessionMixin):
             return math.group(0)
 
         replaced_data = (
-            ('&amp;', r'&', 0),
-            ('&lt;', r'<', 0),
-            ('&gt;', r'>', 0),
             ('<br>\n', r'\n', 0),
             ('', r'\r', 0),
             ('&quot;', r'"', 0),
@@ -379,7 +389,9 @@ class Message(Base, SessionMixin):
     def before_added(self, board):
         self.message = Message._formated_message(self.message, board)
         if len(self.poster_name) > 1 and self.poster_name[0] in (u'#', u'!'):
-            self.poster_name = u'!' + tripcode(self.poster_name[1:])
+            self.poster_name = u'<span class="postertrip">!%s</span>' % tripcode(self.poster_name[1:])
+        else:
+            self.poster_name = Message._safe_string(self.poster_name)
 
     @staticmethod
     @with_session
