@@ -175,6 +175,24 @@ class Board(Base, SessionMixin):
     def __repr__(self):
         return "<Board('%s')>" % (self.dir)
 
+    def get_time_arrow(self, name=None):
+        try:
+            hour, min = self.available_from.split(':') if name == 'start' else self.available_until.split(':')
+            return arrow.utcnow().to('Europe/Moscow').replace(hour=int(hour), minute=int(min))
+        except AttributeError:
+            return None
+
+    def good_time(self):
+        now = arrow.utcnow().to('Europe/Moscow')
+        start = self.get_time_arrow(name='start')
+        end = self.get_time_arrow(name='end')
+        try:
+            if start <= now > end:
+                return True
+        except TypeError:
+            return True
+        return False
+
     @with_session
     def add_moderator(self, staff_id, session=None):
         self.staff.append(session.query(Staff).get(staff_id))

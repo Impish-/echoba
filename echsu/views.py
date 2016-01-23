@@ -61,15 +61,11 @@ class MessageAdding(FormMixin):
 
     def prepare(self,**kwargs):
         board = self.get_board()
-        s_hour, s_min = board.available_from.split(':')
-        e_hour, e_min = board.available_from.split(':')
-        now = arrow.utcnow().to('Europe/Moscow')
-        start = arrow.utcnow().to('Europe/Moscow').replace(hour=int(s_hour), minute=int(s_min))
-        end = arrow.utcnow().to('Europe/Moscow').replace(hour=int(e_hour), minute=int(e_min))
-
-        if start > now < end:
+        if not board.good_time():
             self.template_name = 'timer.html'
-            self.render({'start': start, 'board': board})
+            self.render({'board': board,
+                         'start': board.get_time_arrow(name='start')})
+
         return super(MessageAdding, self).prepare(**kwargs)
 
     def post(self, *args, **kwargs):

@@ -3,10 +3,14 @@
 {% block title %}/{{ board.dir }}/ - {{ board.name }}{% endblock %}
 
 {% block content %}
-{#    <div class="logo">#}
-{#        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>#}
-{#    </div>#}
+    <div class="logo">
+        <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>
+    </div>
 
-    {{ start.humanize(locale="ru") }}
+    <div style="align-content: center; padding-top: 50px" align="center">
+        <div>{{ start.humanize(locale="ru") }}</div>
+        <img src="/static/images/ulitka.jpg">
+    </div>
+
 
 {% endblock %}

@@ -46,6 +46,7 @@ class AddBoardForm(FormCBV):
         if int(time.group('min')) not in range(0, 60):
             raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
 
+
     def validate_available_until(self, field):
         time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
         if not time:

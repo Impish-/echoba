@@ -2,16 +2,17 @@
 {% macro print_navbar(list) -%}
     <div class="navbar">
         {% for section in sections %}
-            [
-            {% for board_item in section.boards -%}
-                <a href="/{{ board_item.dir }}/" title="{{ board_item.name }}">{{ board_item.dir }}</a>
-                {% if not loop.last %}
-                    /
-                {% endif %}
-            {%- endfor %}
-            ]
+            {% if section.boards %}
+                [
+                {% for board_item in section.boards -%}
+                    <a href="/{{ board_item.dir }}/" title="{{ board_item.name }}">{{ board_item.dir }}</a>
+                    {% if not loop.last %}
+                        /
+                    {% endif %}
+                {%- endfor %}
+                ]
+            {% endif %}
         {% endfor %}
-
     </div>
 {%- endmacro %}
 <html lang="en">
