@@ -59,25 +59,18 @@ class MessageAdding(FormMixin):
         form = self.form_class(**self.get_form_kwargs())
         return form
 
-    @gen.coroutine
-    def get(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
+    def prepare(self,**kwargs):
         board = self.get_board()
-
-
         s_hour, s_min = board.available_from.split(':')
-        e_hour, e_min = board.available_until.split(':')
+        e_hour, e_min = board.available_from.split(':')
         now = arrow.utcnow().to('Europe/Moscow')
         start = arrow.utcnow().to('Europe/Moscow').replace(hour=int(s_hour), minute=int(s_min))
         end = arrow.utcnow().to('Europe/Moscow').replace(hour=int(e_hour), minute=int(e_min))
 
-        if now < start:
+        if start > now < end:
             self.template_name = 'timer.html'
-            return self.render({'board': board, 'start': start, 'end': end})
-
-
-        return super(MessageAdding, self).get(args, kwargs)
+            self.render({'start': start, 'board': board})
+        return super(MessageAdding, self).prepare(**kwargs)
 
     def post(self, *args, **kwargs):
         self.form_class.image_attached = self.request.files.get('image', None) is not None
