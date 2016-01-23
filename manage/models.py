@@ -344,12 +344,23 @@ class Message(Base, SessionMixin):
                 'height': self.picture.original.height
             }
 
-    def _formated_message(self, message):
+    @staticmethod
+    @with_session
+    def _formated_message(message, board, session=None):
         def question_callback(math):
-            mess_id = math.group(1)
-            message = Message.get_message(id=int(mess_id))
+            mess_id = math.group('var')
+            board_id = board.id
+            prefix = ''
+            try:
+                tmp_board = session.query(Board).filter(Board.dir==math.group('board')).first()
+                if tmp_board is not None:
+                    board_id = tmp_board.id
+                    prefix = math.group('board') + '/'
+            except:
+                pass
+            message = session.query(Message).filter(Message.id==mess_id, Message.board_id==board_id).first()
             if message is not None:
-                return '<a href="%s#%s" class="ql">&gt;&gt;%s</a>' % (message.thread.link(), mess_id, mess_id)
+                return '<a href="%s#%s" class="ql">&gt;&gt;%s%s</a>' % (message.thread.link(), mess_id, prefix, mess_id)
             return math.group(0)
 
         replaced_data = (
@@ -360,10 +371,11 @@ class Message(Base, SessionMixin):
             ('', r'\r', 0),
             ('&quot;', r'"', 0),
             (question_callback, r'&gt;&gt;(?P<var>\d+)', 0),
+            (question_callback, r'&gt;&gt;(?P<board>[a-zA-Z0-9]+)/(?P<var>\d+)', 0),
             ('\g<begin><span class="unkfunc">&gt;\g<var></span>\g<end>',
              r'(?P<begin>^|<br>|\n)&gt;(?P<var>.*?)(?P<end><br>|$)', re.I),
-            ('<a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>',
-             r'^(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
+            ('\g<begin><a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>',
+             r'(?P<begin>^|\s+|\n|\r)(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
             ('<b>\g<var></b>', r'\[b](?P<var>.*?)\[/b]', re.I),
             ('<b>\g<var></b>', r'\*\*(?P<var>.*?)\*\*', re.I),
             ('<b>\g<var></b>', r'__(?P<var>.*?)__', re.I),
@@ -384,8 +396,8 @@ class Message(Base, SessionMixin):
             message = re.sub(p, r, message, flags=f)
         return message
 
-    def before_added(self):
-        self.message = self._formated_message(self.message)
+    def before_added(self, board):
+        self.message = Message._formated_message(self.message, board)
         if len(self.poster_name) > 1 and self.poster_name[0] in (u'#', u'!'):
             self.poster_name = u'!' + tripcode(self.poster_name[1:])
 
