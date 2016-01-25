@@ -365,7 +365,7 @@ class Message(Base, SessionMixin):
             ('\g<begin><span class="unkfunc">&gt;\g<var></span>\g<end>',
              r'(?P<begin>^|<br>|\n)&gt;(?P<var>.*?)(?P<end><br>|$)', re.I),
             ('\g<begin><a href="\g<protocol>\g<var>">\g<protocol>\g<var></a>',
-             r'(?P<begin>^|\s+|\n|\r)(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
+             r'(?P<begin>^|[^a-zA-Z0-9])(?P<protocol>http://|https://|ftp://)(?P<var>[^(\s<|\[)]*)', re.I),
             ('<b>\g<var></b>', r'\[b](?P<var>.*?)\[/b]', re.I),
             ('<b>\g<var></b>', r'\*\*(?P<var>.*?)\*\*', re.I),
             ('<b>\g<var></b>', r'__(?P<var>.*?)__', re.I),

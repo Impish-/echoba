@@ -7,7 +7,7 @@
         <label for="check-post-{{ message.id }}">
             <input type="checkbox" value="{{ message.id }}" name="post[]" id="check-post-{{ message.id }}" />
             {% if message.header -%}
-                <span class="filetitle">{{ message.header }}</span>
+                <span class="filetitle">{{ message.header|escape }}</span>
             {%- endif %}
             <span class="postername">
                 {% if message.poster_name -%}
