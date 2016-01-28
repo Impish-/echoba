@@ -33,35 +33,3 @@ def with_session(fn):
             raise
         session.close()
     return go
-
-
-def admin_only(cls, methods=['post', 'get']):
-    def decorator(fn):
-        def tmp(self, *args, **kw):
-                                    #self.current_user.is_admin()
-            if self.current_user and self.current_user.is_admin():
-                return fn(self, *args, **kw)
-            else:
-                self.send_error(status_code=403)
-        return tmp
-
-    for method in methods:
-        setattr(cls, method, decorator(getattr(cls, method)))
-        setattr(cls, method, decorator(getattr(cls, method)))
-    return cls
-
-
-def login_required(cls, methods=['post', 'get']):
-    def decorator(fn):
-        def tmp(self, *args, **kw):
-                                    #self.current_user.is_admin()
-            if self.current_user:
-                return fn(self, *args, **kw)
-            else:
-                self.send_error(status_code=403)
-        return tmp
-
-    for method in methods:
-        setattr(cls, method, decorator(getattr(cls, method)))
-        setattr(cls, method, decorator(getattr(cls, method)))
-    return cls
