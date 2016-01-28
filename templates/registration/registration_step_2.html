@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div align="center">
+        <h1>Шок!!! Сенсация!!1</h1>
+        <h2>Открыта регистрация, на анонимной имиджборде!!</h2>
+        <div>
+            <b>Спецформа:</b>
+            <form action="{{ reverse_url('reg2', key) }}" method="post">
+                {% for field in form %}
+                    <div>
+                        {{ field.label }}{{ field }}
+                        {% if field.errors %}
+                            <ul style="display: inline-block">
+                                {% for error in field.errors %}
+                                    <li style="color: maroon">{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+{% endblock %}

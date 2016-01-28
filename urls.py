@@ -3,7 +3,7 @@ from tornado import web
 import os
 from tornado.web import URLSpec as url
 
-from echsu.views import MainPageView, ThreadView
+from echsu.views import MainPageView, ThreadView, RegisterModerator, RegisterBoard
 
 from echsu.views import BoardView
 from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, EditStaffManageHandler, \
@@ -33,6 +33,9 @@ urls = [
     url(r"/logout", LogOutHandler, name='logout'),
 
   #    (r"/ws", WebSocket),
+
+    url(r"/registration/", RegisterModerator, name='reg1'),
+    url(r"/registration/activate/(?P<key>.*)", RegisterBoard, name='reg2'),
 
     url(r"/static/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "static")}),
     url(r"/media/(.*)", web.StaticFileHandler, {"path": os.path.join(os.path.dirname(__file__), "media")}),

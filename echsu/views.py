@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import smtplib
+
 import arrow
 import time
 
@@ -8,9 +10,11 @@ from torgen.base import TemplateHandler
 from torgen.list import ListHandler
 from tornado import gen
 
-from echsu.forms import MessageForm, CreateThreadForm
-from manage.models import Board, Message, Thread
+from echsu.forms import MessageForm, CreateThreadForm, RegForm1, RegBoard
+from manage.dynamic_form_fields import BoardDynamicForm
+from manage.models import Board, Message, Thread, Staff, RegisterRequest
 from settings import store
+from settings_local import email_settings
 from toolz.base_cls import BoardDataMixin, FormMixin
 from toolz.recaptcha import RecaptchaField
 
@@ -60,8 +64,12 @@ class MessageAdding(FormMixin):
         form = self.form_class(**self.get_form_kwargs())
         return form
 
-    def prepare(self,**kwargs):
+    def prepare(self, **kwargs):
         board = self.get_board()
+        try:
+            assert board is not None
+        except AssertionError:
+            self.send_error(status_code=404)
         if not board.good_time():
             self.template_name = 'timer.html'
             self.render({'board': board,
@@ -112,10 +120,6 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
 
     def get_queryset(self):
         board = self.get_board()
-        try:
-            assert board is not None
-        except AssertionError:
-            self.send_error(status_code=404)
         self.paginate_by = board.threads_on_page
         self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()). \
             filter(Thread.board_id == board.id, Thread.deleted == False)
@@ -140,3 +144,59 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
 
     def get_success_url(self):
         return self.reverse_url('board', self.get_board().dir)
+
+
+class RegisterModerator(BoardDataMixin, TemplateHandler, FormMixin):
+    """
+        Не ну а чо? Анонимный имиджборд же!
+    """
+    form_class = RegForm1
+    model = Staff
+    template_name = 'registration/registration_step_1.html'
+
+    def form_valid(self, form):
+        super(RegisterModerator, self).form_valid(form)
+        rr = RegisterRequest(staff=self.object)
+        self.db.add(rr)
+        self.db.commit()
+        self.db.refresh(rr)
+
+        toaddr = form.email.data
+        subj = 'Notification from system'
+        link = 'https://ech.su%s' % (self.reverse_url('reg2', rr.hash))
+        msg_txt = u'Для того чтобы создать доску пройди по ссылке:\n\n ' + link + \
+                  u'\n\nАккаунт модератора, будет доступен после создания доски!'  #
+        msg = u"From: %s\nTo: %s\nSubject: %s\n\n%s" % (email_settings['from'], toaddr, subj, msg_txt)
+        server = smtplib.SMTP(email_settings['smtp'])
+        server.starttls()
+        server.login(email_settings['username'], email_settings['password'])
+        server.sendmail(email_settings['from'], toaddr, msg.encode('utf-8'))
+        server.quit()
+
+        self.template_name = '/registration/step1_success.html'
+        self.render({'email': form.email.data})
+
+
+class RegisterBoard(BoardDataMixin, TemplateHandler, BoardDynamicForm, FormMixin):
+    """
+        Чем больше сделают другие, тем меньше далать самому!
+    """
+    form_class = RegBoard
+    model = Board
+    template_name = 'registration/registration_step_2.html'
+    success_url = '/'
+
+    def get_request(self):
+        return self.db.query(RegisterRequest).filter(RegisterRequest.hash == self.path_kwargs.get('key', None)).first()
+
+    def prepare(self):
+        valid_request = self.get_request()
+        if not valid_request:
+            raise self.send_error(status_code=403)
+
+    def form_valid(self, form):
+        request = self.get_request()
+        request.staff.active = True
+        self.db.query(RegisterRequest.id == request.id).delete()
+        self.db.commit()
+        return super(RegisterBoard, self).form_valid(form)
