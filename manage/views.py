@@ -98,6 +98,9 @@ class DelMessageManageHandler(BoardDataMixin, DeleteHandler, FlashMixin):
     def post(self, *args, **kwargs):
         with store_context(store):
             message = self.db.query(Message).filter(Message.gid == kwargs.get('gid', 0)).first()
+            if message is None:
+                pass
+
             if message and message.id == message.thread.op().id:
                 message.thread.deleted = True
                 messages = self.db.query(Message).filter(Message.thread_id == message.thread_id).all()

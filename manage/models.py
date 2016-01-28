@@ -265,14 +265,13 @@ class Thread(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
-    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.gid",
-                            backref=backref('thread'),
+    messages = relationship("Message", lazy='subquery', order_by="Message.gid",
+                            passive_deletes=True, backref=backref('thread', cascade="all,delete", single_parent=True),
                             primaryjoin="and_(Message.deleted==False, Message.thread_id==Thread.id)")
 
-    board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-
+    board_id = Column(Integer, ForeignKey('board.id'))
     board = relationship('Board', lazy='subquery', cascade='all',
-                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan'))
+                         backref=backref('threads', lazy='dynamic'))
 
     bumped = Column(BigInteger)
     deleted = Column(BOOLEAN, default=False)
@@ -361,7 +360,6 @@ class Message(Base, SessionMixin):
             }
 
     @staticmethod
-    @with_session
     def _formated_message(message, board, session=None):
         def question_callback(math):
             mess_id = math.group('var')

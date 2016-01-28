@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import random
 import smtplib
+import string
+import urllib
 
 import arrow
 import time
@@ -15,6 +18,7 @@ from manage.dynamic_form_fields import BoardDynamicForm
 from manage.models import Board, Message, Thread, Staff, RegisterRequest
 from settings import store
 from settings_local import email_settings
+from toolz.get_images.bing import get_images
 from toolz.base_cls import BoardDataMixin, FormMixin
 from toolz.recaptcha import RecaptchaField
 
@@ -34,13 +38,25 @@ class MessageAdding(FormMixin):
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                               thread_id=thread_id, board=board, id=messages_count + 1)
             form.populate_obj(message)
-            message.thread_id = thread_id
-            if self.request.files.get(form.image.name, None):
-                image = self.request.files[form.image.name][0]
-                message.picture.from_blob(image['body'])
-                message.picture.generate_thumbnail(width=150)
-            message.before_added(self.get_board())
+            image = None
+            try:
+                if self.request.files.get(form.image.name, None):
+                    image = self.request.files[form.image.name][0]
+                    image = image['body']
+                elif form.picrandom.data:
+                    images = get_images(form.message.data if form.message.data
+                                        else ''.join(random.choice(string.ascii_lowercase) for x in range(2)))
+                    url = random.choice(images['d']['results'])['MediaUrl']
+                    image = urllib.urlopen(url).read()
+                if image is not None:
+                    message.picture.from_blob(image)
+                    message.picture.generate_thumbnail(width=150)
+            except:
+                self.db.rollback()
+                return None
+            message.before_added(self.get_board(), session=self.db)
             message.datetime = arrow.utcnow()
+            message.thread_id = thread_id
             self.db.add(message)
             self.db.commit()
             self.db.refresh(message)
@@ -74,7 +90,6 @@ class MessageAdding(FormMixin):
             self.template_name = 'timer.html'
             self.render({'board': board,
                          'start': board.get_time_arrow(name='start')})
-
         return super(MessageAdding, self).prepare(**kwargs)
 
     def post(self, *args, **kwargs):
@@ -121,8 +136,8 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
     def get_queryset(self):
         board = self.get_board()
         self.paginate_by = board.threads_on_page
-        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()). \
-            filter(Thread.board_id == board.id, Thread.deleted == False)
+        self.queryset = self.db.query(self.model).join(Message).\
+            filter(Thread.board_id == board.id, Thread.deleted == False).order_by(Thread.bumped.desc())
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):
@@ -139,7 +154,10 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         self.db.add(thread)
         self.db.commit()
         self.db.refresh(thread)
-        self.make_message(form=form, thread_id=thread.id)
+        try:
+            self.make_message(form=form, thread_id=thread.id)
+        except:
+            pass
         self.redirect(self.get_success_url())
 
     def get_success_url(self):

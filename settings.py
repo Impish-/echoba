@@ -66,3 +66,6 @@ settings = dict(
 #     'password': '',
 #     'smtp': 'smtp.yandex.ru:587'
 # }
+
+
+#bing_api_key = ''
