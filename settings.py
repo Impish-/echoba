@@ -58,3 +58,11 @@ settings = dict(
             static_path=STATIC_PATH,
             template_loader=jinja2loader
         )
+
+# to settings_local
+# email_settings = {
+#     'from': 'Ech.su! <noreply@ech.su>',
+#     'username': 'noreply@ech.su',
+#     'password': '',
+#     'smtp': 'smtp.yandex.ru:587'
+# }
