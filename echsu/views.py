@@ -57,11 +57,9 @@ class MessageAdding(FormMixin):
             except IndexError:
                 self.db.rollback()
                 if form.op_post:
-                    print 'asasasasa'
-                     #Ексли Оп-пост то отдаем картинку из локальной папки с пикчами (ну а хули?)
+                     #Если Оп-пост то отдаем картинку из локальной папки с пикчами (ну а хули?)
                     image = random.choice(os.listdir('%s/images/randpics' % STATIC_PATH))
-                    image = open('%s/images/randpics/%s' % (STATIC_PATH, image), 'rb').read()
-                    message.picture.from_blob(image)
+                    message.picture.from_blob(open('%s/images/randpics/%s' % (STATIC_PATH, image), 'rb').read())
                     message.picture.generate_thumbnail(width=150)
 
             message.before_added(self.get_board())
