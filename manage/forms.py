@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from sqlalchemy.orm import undefer_group, load_only
-from wtforms import  validators, PasswordField, ValidationError, FileField, Form, BooleanField, StringField
+from wtforms import  validators, PasswordField, ValidationError, FileField, Form, BooleanField, StringField, HiddenField
 from wtforms.validators import InputRequired, EqualTo
 
 from manage.models import Staff, Board, Section, Message
@@ -14,6 +14,8 @@ class MessageEdit(FormCBV):
     class Meta:
         exclude = ['datetime', 'deleted']
         model = Message
+
+    id = HiddenField('')
 
     # image = FileField(u'Изображение')
 
@@ -34,7 +36,7 @@ class AddBoardForm(FormCBV):
 
     def validate_section_id(self, field):
         session = self.get_session()
-        if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
+        if field.data not in [0] + [x.id for x in session.query(Section).options(load_only("id")).all()]:
             raise ValueError(u'Неверный раздел')
 
     def validate_available_from(self, field):
@@ -46,7 +48,6 @@ class AddBoardForm(FormCBV):
         if int(time.group('min')) not in range(0, 60):
             raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
 
-
     def validate_available_until(self, field):
         time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
         if not time:
@@ -55,6 +56,7 @@ class AddBoardForm(FormCBV):
             raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
         if int(time.group('min')) not in range(0, 60):
             raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+
 
 class EditBoardForm(AddBoardForm):
     def process(self, formdata=None, obj=None, data=None, **kwargs):
@@ -100,7 +102,10 @@ class StaffEditForm(StaffForm):
 
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         #TODO: подумать как иначе
-        self.boards.set_object(obj)
+        try:
+            self.boards.set_object(obj)
+        except AttributeError:
+            pass
         self.name.validators = []
         super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 
