@@ -7,6 +7,7 @@ import urllib
 import arrow
 import time
 
+import os
 from sqlalchemy.orm import load_only
 from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
@@ -16,7 +17,7 @@ from tornado import gen
 from echsu.forms import MessageForm, CreateThreadForm, RegForm1, RegBoard
 from manage.dynamic_form_fields import BoardDynamicForm
 from manage.models import Board, Message, Thread, Staff, RegisterRequest
-from settings import store
+from settings import store, STATIC_PATH
 from settings_local import email_settings
 from toolz.get_images.bing import get_images
 from toolz.base_cls import BoardDataMixin, FormMixin
@@ -44,17 +45,26 @@ class MessageAdding(FormMixin):
                     image = self.request.files[form.image.name][0]
                     image = image['body']
                 elif form.picrandom.data:
-                    images = get_images(form.message.data if form.message.data
-                                        else ''.join(random.choice(string.ascii_lowercase) for x in range(2)))
+                    kw = lambda m: " ".join([random.choice(m.split(' ')), random.choice(m.split(' '))])
+                    key_words = kw(form.message.data) if form.message.data\
+                                        else ''.join(random.choice(string.ascii_lowercase) for x in range(2))
+                    images = get_images(key_words)
                     url = random.choice(images['d']['results'])['MediaUrl']
                     image = urllib.urlopen(url).read()
-                if image is not None:
+                    if image is not None:
+                        message.picture.from_blob(image)
+                        message.picture.generate_thumbnail(width=150)
+            except IndexError:
+                self.db.rollback()
+                if form.op_post:
+                    print 'asasasasa'
+                     #Ексли Оп-пост то отдаем картинку из локальной папки с пикчами (ну а хули?)
+                    image = random.choice(os.listdir('%s/images/randpics' % STATIC_PATH))
+                    image = open('%s/images/randpics/%s' % (STATIC_PATH, image), 'rb').read()
                     message.picture.from_blob(image)
                     message.picture.generate_thumbnail(width=150)
-            except:
-                self.db.rollback()
-                return None
-            message.before_added(self.get_board(), session=self.db)
+
+            message.before_added(self.get_board())
             message.datetime = arrow.utcnow()
             message.thread_id = thread_id
             self.db.add(message)

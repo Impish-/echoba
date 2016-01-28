@@ -360,6 +360,7 @@ class Message(Base, SessionMixin):
             }
 
     @staticmethod
+    @with_session
     def _formated_message(message, board, session=None):
         def question_callback(math):
             mess_id = math.group('var')

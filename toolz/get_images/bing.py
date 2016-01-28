@@ -8,7 +8,7 @@ from settings_local import bing_api_key
 
 def get_images(query=""):
     queryBingFor = "'" + query + "'" # the apostrophe's required as that is the format the API Url expects.
-    quoted_query = urllib.quote(queryBingFor)
+    quoted_query = urllib.quote(queryBingFor.encode('utf-8'))
     rootURL = "https://api.datamarket.azure.com/Bing/Search/v1/Image"
     searchURL = rootURL + "?$format=json&$top=20&Query=" + quoted_query
     password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()

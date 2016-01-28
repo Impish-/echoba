@@ -44,6 +44,7 @@ class CreateThreadForm(FormCBV):
 
 
 class MessageForm(FormCBV):
+    image_attached = False
     class Meta:
         model = Message
         exclude = ['ip_address', 'datetime', 'id']
@@ -51,14 +52,17 @@ class MessageForm(FormCBV):
     image = FileField(u'Изображение')
     picrandom = BooleanField(u'Случайное изображение',)
 
+    def validate_message(self, field):
+        print 'validate message'
+        if len(field.data.replace(' ','')) < 1:
+             raise ValueError(u'Пустое сообщение')
+
     def validate_image(self, field):
         if self.op_post:
-
             if (not self.image_attached) and (not self.picrandom.data):
                 self.image.errors = [u'Для создания треда, прицепи картинку',]
                 return False
-
-        if (not self.image_attached) and (not self.picrandom) and len(self.message.data) < 1:
+        if not (self.image_attached and self.picrandom) and len(self.message.data) < 1:
             self.message.errors = [u'Тут ничего нет!',]
             raise ValueError(u'Пустое сообщение')
         return True
