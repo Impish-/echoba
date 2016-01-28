@@ -221,8 +221,10 @@ class RegisterBoard(BoardDataMixin, TemplateHandler, BoardDynamicForm, FormMixin
             raise self.send_error(status_code=403)
 
     def form_valid(self, form):
+        super(RegisterBoard, self).form_valid(form)
         request = self.get_request()
         request.staff.active = True
+        request.staff.boards.append(self.object)
         self.db.query(RegisterRequest.id == request.id).delete()
         self.db.commit()
-        return super(RegisterBoard, self).form_valid(form)
+        return self.redirect(self.get_success_url())

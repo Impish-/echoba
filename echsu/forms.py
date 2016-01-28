@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import re
 from wtforms import RadioField, BooleanField, HiddenField, FormField, FileField, ValidationError, PasswordField
 from wtforms import validators
 from wtforms.validators import InputRequired, EqualTo
@@ -35,6 +35,24 @@ class RegForm1(FormCBV):
 class RegBoard(FormCBV):
     class Meta:
         model = Board
+
+    def validate_available_from(self, field):
+        time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
+        if not time:
+            raise ValidationError(u'Формат "ЧЧ:MM"')
+        if int(time.group('hour')) not in range(0, 24):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+        if int(time.group('min')) not in range(0, 60):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+
+    def validate_available_until(self, field):
+        time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
+        if not time:
+            raise ValidationError(u'Формат "ЧЧ:MM"')
+        if int(time.group('hour')) not in range(0, 24):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+        if int(time.group('min')) not in range(0, 60):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
 
 
 class CreateThreadForm(FormCBV):
