@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import random
+import string
+
 from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, BigInteger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -26,6 +29,14 @@ mod_rights = Table('association', Base.metadata,
                    )
 
 
+class RegisterRequest(Base, SessionMixin):
+    hash = Column(String(60), default=''.join(random.choice(
+            string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(60)))
+
+    staff_id = Column(Integer, ForeignKey('staff.id'))
+    staff = relationship('Staff')
+
+
 class Staff(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, label=u'Юзернэйм')
@@ -39,12 +50,14 @@ class Staff(Base, SessionMixin):
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                              ]), nullable=False, label=u'Роль'
+                              ]), nullable=False, label=u'Роль', default=u'mod'
                   )
     all_boards = Column(BOOLEAN, default=False, label=u'Модератор всех досок')
     boards = relationship("Board", load_on_pending=True,
                           secondary=lambda: mod_rights,
                           backref=backref('staff', lazy='dynamic', load_on_pending=True), )
+
+    active = Column(BOOLEAN, default=False, label=u'Авктивирован', nullable=True)
 
     def __repr__(self):
         return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
@@ -126,6 +139,9 @@ class Staff(Base, SessionMixin):
         self.save()
         session.commit()
 
+    def check_moderate(self, board_id):
+        return int(board_id) in [x.id for x in self.boards]
+
 
 bans = Table('ban_table', Base.metadata,
              Column('id', Integer, primary_key=True),
@@ -179,7 +195,7 @@ class Board(Base, SessionMixin):
         try:
             hour, min = self.available_from.split(':') if name == 'start' else self.available_until.split(':')
             return arrow.utcnow().to('Europe/Moscow').replace(hour=int(hour), minute=int(min))
-        except AttributeError:
+        except (AttributeError, ValueError):
             return None
 
     def good_time(self):
