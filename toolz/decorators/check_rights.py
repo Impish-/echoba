@@ -37,14 +37,9 @@ def can_moderate(cls, method='prepare'):
                     mes = self.db.query(Message).filter(Message.gid == message_id).first()
                     board_id = mes.board.id
 
-            print(board_id)
-            print(self.current_user.boards)
             can_moderate = not ((self.current_user.check_moderate(board_id) or self.current_user.all_boards
                      or (not self.current_user.is_admin)))
-            print can_moderate
-
             if can_moderate:
-                print 'sd'
                 self.send_error(status_code=403)
         return closure
     setattr(cls, method, decorator(getattr(cls, method)))
