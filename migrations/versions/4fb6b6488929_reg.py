@@ -29,7 +29,7 @@ def upgrade():
     ### end Alembic commands ###
 
     conn = op.get_bind()
-    conn.execute(text("""UPDATE stuff SET active=True"""))
+    conn.execute(text("""UPDATE staff SET active=True"""))
 
 
 def downgrade():
