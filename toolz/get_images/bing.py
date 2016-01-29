@@ -3,6 +3,8 @@ import json
 import urllib
 import urllib2
 
+import re
+
 from settings_local import bing_api_key
 
 
@@ -16,4 +18,5 @@ def get_images(query=""):
     handler = urllib2.HTTPBasicAuthHandler(password_mgr)
     opener = urllib2.build_opener(handler)
     urllib2.install_opener(opener)
-    return json.loads(urllib2.urlopen(searchURL).read())
+    images = json.loads(urllib2.urlopen(searchURL).read())
+    return [x['MediaUrl'] for x in images['d']['results'] if re.match(r'.*\.(jpg|jpeg|png|gif)$', x['MediaUrl']) is not None]

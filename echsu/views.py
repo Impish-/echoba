@@ -51,7 +51,7 @@ class MessageAdding(FormMixin):
                     key_words = kw(form.message.data) if form.message.data\
                                         else ''.join(random.choice(string.ascii_lowercase) for x in range(2))
                     images = get_images(key_words)
-                    url = random.choice(images['d']['results'])['MediaUrl']
+                    url = random.choice(images)
                     image = urllib.urlopen(url).read()
                     if image is not None:
                         message.picture.from_blob(image)
