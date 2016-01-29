@@ -8,31 +8,34 @@
     </div>
     <h4>Персонал:</h4>
     <ul class="nav nav-pills nav-stacked">
-        <li><a href="{{ reverse_url('manage') }}">Mod - чатик?))</a></li>
-        <li><a href="#">Банхаммер - лог</a></li>
-        {% if current_user.role.value == 'Admin' %}
+        <li><a href="{{ reverse_url('manage') }}">Первая</a></li>
+
+        {% if current_user.is_admin() %}
+            <li><a href="#">Банхаммер - лог</a></li>
             <li><a href="#">Лог активности персонала</a></li>
             <li><a href="{{ reverse_url('staff_list') }}">Управление персоналом</a></li>
         {% endif %}
     </ul>
 
-    <h4>Управление сайтиком целиком:</h4>
-    <ul class="nav nav-pills nav-stacked">
-        <li><a href="#">Настройка главной страницы</a></li>
-        <li><a href="#">Настройка стилей</a></li>
-        <li><a href="#">Красивые Трипкоды(для неймфагов)</a></li>
-        <li><a href="#">какие-нибудь еще настройки(походу насобираются)</a></li>
-    </ul>
-
+    {% if current_user.is_admin() %}
+        <h4>Управление сайтиком целиком:</h4>
+        <ul class="nav nav-pills nav-stacked">
+            <li><a href="#">Настройка главной страницы</a></li>
+            <li><a href="#">Настройка стилей</a></li>
+            <li><a href="#">Красивые Трипкоды(для неймфагов)</a></li>
+            <li><a href="#">какие-нибудь еще настройки(походу насобираются)</a></li>
+        </ul>
+    {% endif %}
     <h4>Управление Бордами:</h4>
     <ul class="nav nav-pills nav-stacked">
-        <li><a href="{{ reverse_url('section_list') }}">Разделы</a></li>
+
+        {% if current_user.is_admin() %}<li><a href="{{ reverse_url('section_list') }}">Разделы</a></li>{% endif %}
         <li><a href="{{ reverse_url('message_list') }}">Последние сообщения</a></li>
         <li><a href="{{ reverse_url('board_add') }}">Создать доску</a> </li>
-        <li><strong>Бордолист</strong></li>
-        {% for board in board_list %}
+        <li><strong>Твои доски</strong></li>
+        {% for board in current_user.get_boards() %}
             <li>
-                <a style="display: inline-block" href="{{ reverse_url('board', board.dir ) }}">/{{ board.dir  }}/ -{{ board.name }}</a>
+                <a style="display: inline-block" href="{{ reverse_url('board', board.dir ) }}">/{{ board.dir  }}/</a>
                 <small style="display: inline-block;">
                     <a style="color: #d9534f" href="{{ reverse_url('board_edit', board.id) }}">редaктировать</a>
                 </small>

@@ -8,6 +8,7 @@ from manage.models import Staff, Board, Section, Message
 from toolz.bd_toolz import with_session
 
 from toolz.form_base import FormCBV
+from toolz.recaptcha import RecaptchaValidator, RecaptchaField
 
 
 class MessageEdit(FormCBV):
@@ -16,6 +17,7 @@ class MessageEdit(FormCBV):
         model = Message
 
     id = HiddenField('')
+    captcha = RecaptchaField(validators=[RecaptchaValidator()])
 
     # image = FileField(u'Изображение')
 
@@ -36,7 +38,10 @@ class AddBoardForm(FormCBV):
 
     def validate_section_id(self, field):
         session = self.get_session()
-        if field.data not in [0] + [x.id for x in session.query(Section).options(load_only("id")).all()]:
+        field.data = field.data if field.data > 0 else None
+        if field.data is None:
+            return
+        if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
             raise ValueError(u'Неверный раздел')
 
     def validate_available_from(self, field):
@@ -62,7 +67,7 @@ class EditBoardForm(AddBoardForm):
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         self.dir.validators = []
         self.name.validators = []
-        super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
+        super(EditBoardForm, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 
     def validate_name(self, field):
         session = self.get_session()

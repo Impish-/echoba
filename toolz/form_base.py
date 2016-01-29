@@ -9,13 +9,13 @@ ModelForm = model_form_factory(Form)
 
 class FormCBV(ModelForm):
     session = None
+
     @classmethod
     @with_session
     def get_session(cls, session):
         if cls.session:
             return cls.session
         return session
-
 
     @classmethod
     def append_field(cls, name, field):

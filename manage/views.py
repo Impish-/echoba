@@ -202,7 +202,8 @@ class AddBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, Templ
     template_name = 'add_board.html'
     form_class = AddBoardForm
     model = Board
-    success_url_reverse_args = ['board_edit', 'id']
+    # success_url_reverse_args = ['board_edit', 'id']
+    success_url_reverse_args = ['manage']
 
     def form_valid(self, form):
         super(AddBoardHandler, self).form_valid(form)

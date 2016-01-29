@@ -140,7 +140,13 @@ class Staff(Base, SessionMixin):
         session.commit()
 
     def check_moderate(self, board_id):
-        return int(board_id) in [x.id for x in self.boards]
+        return int(board_id) in [x.id for x in self.boards] or self.all_boards or self.is_admin()
+
+    @with_session
+    def get_boards(self, session=None):
+        if self.is_admin() or self.all_boards:
+            return session.query(Board).all()
+        return self.boards
 
 
 bans = Table('ban_table', Base.metadata,
