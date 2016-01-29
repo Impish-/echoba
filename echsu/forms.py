@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from sqlalchemy.orm import load_only
 from wtforms import RadioField, BooleanField, HiddenField, FormField, FileField, ValidationError, PasswordField
 from wtforms import validators
 from wtforms.validators import InputRequired, EqualTo
@@ -7,7 +8,7 @@ from wtforms_alchemy import model_form_factory
 from wtforms_components import  EmailField
 from wtforms_tornado import Form
 
-from manage.models import Thread, Message, Staff, Board
+from manage.models import Thread, Message, Staff, Board, Section
 from toolz.form_base import FormCBV
 from toolz.recaptcha import RecaptchaField, RecaptchaValidator
 
@@ -79,7 +80,6 @@ class MessageForm(FormCBV):
     picrandom = BooleanField(u'Случайное изображение',)
 
     def validate_message(self, field):
-        print len(field.data.replace(' ',''))
         if len(field.data.replace(' ','')) < 3:
              raise ValueError(u'Пустое сообщение')
 
