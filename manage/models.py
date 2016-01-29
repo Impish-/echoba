@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_imageattach.context import store_context
 from sqlalchemy_imageattach.entity import image_attachment, Image
-from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType, ArrowType
+from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType, ArrowType, EmailType
 
 from settings import store
 from toolz.base_models import SessionMixin
@@ -40,6 +40,7 @@ class RegisterRequest(Base, SessionMixin):
 class Staff(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, label=u'Юзернэйм')
+    email = Column(EmailType, unique=True, label=u'Email')
     password = Column(PasswordType(
             schemes=[
                 'pbkdf2_sha512',

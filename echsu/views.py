@@ -39,12 +39,14 @@ class MessageAdding(FormMixin):
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                               thread_id=thread_id, board=board, id=messages_count + 1)
             form.populate_obj(message)
-            image = None
-            try:
-                if self.request.files.get(form.image.name, None):
-                    image = self.request.files[form.image.name][0]
-                    image = image['body']
-                elif form.picrandom.data:
+
+            if self.request.files.get(form.image.name, None):
+                image = self.request.files[form.image.name][0]
+                image = image['body']
+                message.picture.from_blob(image)
+                message.picture.generate_thumbnail(width=150)
+            elif form.picrandom.data:
+                try:
                     kw = lambda m: " ".join([random.choice(m.split(' ')), random.choice(m.split(' '))])
                     key_words = kw(form.message.data) if form.message.data\
                                         else ''.join(random.choice(string.ascii_lowercase) for x in range(2))
@@ -54,13 +56,13 @@ class MessageAdding(FormMixin):
                     if image is not None:
                         message.picture.from_blob(image)
                         message.picture.generate_thumbnail(width=150)
-            except IndexError:
-                self.db.rollback()
-                if form.op_post:
-                     #Если Оп-пост то отдаем картинку из локальной папки с пикчами (ну а хули?)
-                    image = random.choice(os.listdir('%s/images/randpics' % STATIC_PATH))
-                    message.picture.from_blob(open('%s/images/randpics/%s' % (STATIC_PATH, image), 'rb').read())
-                    message.picture.generate_thumbnail(width=150)
+                except IndexError:
+                    self.db.rollback()
+                    if form.op_post:
+                         #Если Оп-пост то отдаем картинку из локальной папки с пикчами (ну а хули?)
+                        image = random.choice(os.listdir('%s/images/randpics' % STATIC_PATH))
+                        message.picture.from_blob(open('%s/images/randpics/%s' % (STATIC_PATH, image), 'rb').read())
+                        message.picture.generate_thumbnail(width=150)
 
             message.before_added(self.get_board())
             message.datetime = arrow.utcnow()

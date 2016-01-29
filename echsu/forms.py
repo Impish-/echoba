@@ -27,7 +27,6 @@ class RegForm1(FormCBV):
                               ]
                              )
     confirm = PasswordField(u'Еще раз')
-
     email = EmailField(u'E-mail', [InputRequired(message=u'Обязательно!'),])
     captcha = RecaptchaField(validators=[RecaptchaValidator()])
 
@@ -35,6 +34,14 @@ class RegForm1(FormCBV):
 class RegBoard(FormCBV):
     class Meta:
         model = Board
+
+    def validate_section_id(self, field):
+        session = self.get_session()
+        field.data = field.data if field.data > 0 else None
+        if field.data is None:
+            return
+        if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
+            raise ValueError(u'Неверный раздел')
 
     def validate_available_from(self, field):
         time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
@@ -63,6 +70,7 @@ class CreateThreadForm(FormCBV):
 
 class MessageForm(FormCBV):
     image_attached = False
+
     class Meta:
         model = Message
         exclude = ['ip_address', 'datetime', 'id']
@@ -71,8 +79,8 @@ class MessageForm(FormCBV):
     picrandom = BooleanField(u'Случайное изображение',)
 
     def validate_message(self, field):
-        print 'validate message'
-        if len(field.data.replace(' ','')) < 1:
+        print len(field.data.replace(' ',''))
+        if len(field.data.replace(' ','')) < 3:
              raise ValueError(u'Пустое сообщение')
 
     def validate_image(self, field):
