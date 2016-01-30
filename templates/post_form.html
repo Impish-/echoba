@@ -30,7 +30,8 @@
                 <td>
                     {{ message_form.poster_name(
                                                 maxlength="75",
-                                                size="28"
+                                                size="28",
+                                                autocomplete="off"
                     ) }}
                     {{ form_errors(message_form.poster_name) }}
                 </td>
@@ -40,7 +41,8 @@
                 <td>
                     {{ message_form.email(
                                         maxlength="75",
-                                        size="28"
+                                        size="28",
+                                        autocomplete="off"
                     ) }}
                     {{ form_errors(message_form.email) }}
                 </td>
@@ -50,7 +52,8 @@
                 <td>
                     {{ message_form.header(
                                             maxlength="75",
-                                            size="35"
+                                            size="35",
+                                            autocomplete="off"
                     ) }}
                     <input type="submit" value="Отправить">
                     {{ form_errors(message_form.header) }}
@@ -80,7 +83,8 @@
                 <td class="postblock">{{ message_form.password.label }}</td>
                 <td>
                     {{ message_form.password(
-                                            size="8"
+                                            size="8",
+                                            autocomplete="off"
                     ) }}
                     (для удаления поста)
                     {{ form_errors(message_form.poster_name) }}
