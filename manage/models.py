@@ -2,6 +2,7 @@
 import random
 import string
 
+from datetime import timedelta
 from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, BigInteger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -201,18 +202,33 @@ class Board(Base, SessionMixin):
     def get_time_arrow(self, name=None):
         try:
             hour, min = self.available_from.split(':') if name == 'start' else self.available_until.split(':')
-            return arrow.utcnow().to('Europe/Moscow').replace(hour=int(hour), minute=int(min))
+            result = arrow.utcnow().to('Europe/Moscow').replace(hour=int(hour), minute=int(min))
+            return result
         except (AttributeError, ValueError):
             return None
+
+    def timer(self):
+        now = arrow.utcnow().to('Europe/Moscow')
+        start = self.get_time_arrow(name='start')
+        end = self.get_time_arrow(name='end')
+        # try:
+        if end < start:
+                end.ceil('day')
+        if start < now:
+            start = self.get_time_arrow(name='start')
+        return start.humanize(locale="ru")
 
     def good_time(self):
         now = arrow.utcnow().to('Europe/Moscow')
         start = self.get_time_arrow(name='start')
         end = self.get_time_arrow(name='end')
         try:
-            if start <= now > end:
+            if end < start < now:
+                end = end.ceil('day')
+            if start <= now < end:
                 return True
         except TypeError:
+            print 'good_time error'
             return True
         return False
 

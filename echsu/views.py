@@ -97,7 +97,7 @@ class MessageAdding(FormMixin):
             if not board.good_time():
                 self.template_name = 'timer.html'
                 self.render({'board': board,
-                             'start': board.get_time_arrow(name='start')})
+                             'start': board.timer()})
         except AssertionError:
             self.send_error(status_code=404)
         return super(MessageAdding, self).prepare(**kwargs)
