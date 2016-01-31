@@ -12,7 +12,7 @@ class BoardDynamicForm:
         sections = self.db.query(Section).all()
         self.form_class.append_field('section_id',
                                      SelectField(u'Раздел',
-                                                 choices=[(0, u'<Не выбрано>')]+[(x.id, x.name) for x in sections],
+                                                 choices=[(0, u'<Скрытая>')]+[(x.id, x.name) for x in sections],
                                                  default=0, coerce=int))
         return self.form_class(**self.get_form_kwargs())
 

@@ -77,10 +77,11 @@ class RecaptchaField(Field):
     widget = RecaptchaWidget()
     recaptcha_error = None
 
-    def process(self, formdata):
+    def process(self, formdata, **kwargs):
         """
             валидатор вешаем только в том случае.
              если поле 'g-recaptcha-response' обнаружено
+
         """
         try:
             self.validators = [RecaptchaValidator(client_response=formdata.getlist('g-recaptcha-response'))]

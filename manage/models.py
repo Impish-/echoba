@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import random
+import string
+
 from sqlalchemy import String, Integer, ForeignKey, BOOLEAN, Table, UnicodeText, BigInteger
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_defaults import Column
@@ -6,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy_imageattach.context import store_context
 from sqlalchemy_imageattach.entity import image_attachment, Image
-from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType, ArrowType
+from sqlalchemy_utils import PasswordType, ChoiceType, IPAddressType, ArrowType, EmailType
 
 from settings import store
 from toolz.base_models import SessionMixin
@@ -26,9 +29,18 @@ mod_rights = Table('association', Base.metadata,
                    )
 
 
+class RegisterRequest(Base, SessionMixin):
+    hash = Column(String(60), default=''.join(random.choice(
+            string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(60)))
+
+    staff_id = Column(Integer, ForeignKey('staff.id'))
+    staff = relationship('Staff', backref=backref('hash', cascade="all, delete"))
+
+
 class Staff(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, label=u'Юзернэйм')
+    email = Column(EmailType, unique=True, label=u'Email')
     password = Column(PasswordType(
             schemes=[
                 'pbkdf2_sha512',
@@ -39,12 +51,14 @@ class Staff(Base, SessionMixin):
     )
     role = Column(ChoiceType([('adm', u'Admin'),
                               ('mod', u'Moderator'),
-                              ]), nullable=False, label=u'Роль'
+                              ]), nullable=False, label=u'Роль', default=u'mod'
                   )
     all_boards = Column(BOOLEAN, default=False, label=u'Модератор всех досок')
     boards = relationship("Board", load_on_pending=True,
                           secondary=lambda: mod_rights,
                           backref=backref('staff', lazy='dynamic', load_on_pending=True), )
+
+    active = Column(BOOLEAN, default=False, label=u'Авктивирован', nullable=True)
 
     def __repr__(self):
         return "<User '%s' - (%s)(id='%d')>" % (self.name, self.role, self.id)
@@ -126,6 +140,15 @@ class Staff(Base, SessionMixin):
         self.save()
         session.commit()
 
+    def check_moderate(self, board_id):
+        return int(board_id) in [x.id for x in self.boards] or self.all_boards or self.is_admin()
+
+    @with_session
+    def get_boards(self, session=None):
+        if self.is_admin() or self.all_boards:
+            return session.query(Board).all()
+        return self.boards
+
 
 bans = Table('ban_table', Base.metadata,
              Column('id', Integer, primary_key=True),
@@ -169,8 +192,29 @@ class Board(Base, SessionMixin):
                            backref=backref('boards', lazy="subquery"))
     section_id = Column(Integer, ForeignKey('section.id'))
 
+    available_from = Column(String, label=u'(Часы доступа(мск)) Доступна с ', nullable=True)
+    available_until = Column(String, label=u'(Часы доступа(мск)) Доступна до ', nullable=True)
+
     def __repr__(self):
         return "<Board('%s')>" % (self.dir)
+
+    def get_time_arrow(self, name=None):
+        try:
+            hour, min = self.available_from.split(':') if name == 'start' else self.available_until.split(':')
+            return arrow.utcnow().to('Europe/Moscow').replace(hour=int(hour), minute=int(min))
+        except (AttributeError, ValueError):
+            return None
+
+    def good_time(self):
+        now = arrow.utcnow().to('Europe/Moscow')
+        start = self.get_time_arrow(name='start')
+        end = self.get_time_arrow(name='end')
+        try:
+            if start <= now > end:
+                return True
+        except TypeError:
+            return True
+        return False
 
     @with_session
     def add_moderator(self, staff_id, session=None):
@@ -228,14 +272,13 @@ class Thread(Base, SessionMixin):
     id = Column(Integer, primary_key=True)
     sticky = Column(BOOLEAN, label=u'Прикреплен', default=False)
     closed = Column(BOOLEAN, label=u'Закрыт', default=False)
-    messages = relationship("Message", lazy='subquery', cascade='all, delete-orphan', order_by="Message.gid",
-                            backref=backref('thread'),
+    messages = relationship("Message", lazy='subquery', order_by="Message.gid",
+                            passive_deletes=True, backref=backref('thread', cascade="all,delete", single_parent=True),
                             primaryjoin="and_(Message.deleted==False, Message.thread_id==Thread.id)")
 
-    board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-
+    board_id = Column(Integer, ForeignKey('board.id'))
     board = relationship('Board', lazy='subquery', cascade='all',
-                         backref=backref('threads', lazy='dynamic', cascade='all, delete-orphan'))
+                         backref=backref('threads', lazy='dynamic', cascade="all, delete"))
 
     bumped = Column(BigInteger)
     deleted = Column(BOOLEAN, default=False)
@@ -292,7 +335,7 @@ class Message(Base, SessionMixin):
     deleted = Column(BOOLEAN, default=False)
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-    board = relationship('Board', backref=backref('messages', ))
+    board = relationship('Board', backref=backref('messages', cascade="all, delete"))
 
 
     # image = image_attachment('BoardImage')

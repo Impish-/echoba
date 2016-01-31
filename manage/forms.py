@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
+import re
 from sqlalchemy.orm import undefer_group, load_only
-from wtforms import  validators, PasswordField, ValidationError, FileField, Form, BooleanField, StringField
+from wtforms import  validators, PasswordField, ValidationError, FileField, Form, BooleanField, StringField, HiddenField
 from wtforms.validators import InputRequired, EqualTo
 
 from manage.models import Staff, Board, Section, Message
 from toolz.bd_toolz import with_session
 
 from toolz.form_base import FormCBV
+from toolz.recaptcha import RecaptchaValidator, RecaptchaField
 
 
 class MessageEdit(FormCBV):
     class Meta:
         exclude = ['datetime', 'deleted']
         model = Message
+
+    id = HiddenField('')
+    captcha = RecaptchaField(validators=[RecaptchaValidator()])
 
     # image = FileField(u'Изображение')
 
@@ -33,15 +38,36 @@ class AddBoardForm(FormCBV):
 
     def validate_section_id(self, field):
         session = self.get_session()
+        field.data = field.data if field.data > 0 else None
+        if field.data is None:
+            return
         if field.data not in [x.id for x in session.query(Section).options(load_only("id")).all()]:
             raise ValueError(u'Неверный раздел')
+
+    def validate_available_from(self, field):
+        time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
+        if not time:
+            raise ValidationError(u'Формат "ЧЧ:MM"')
+        if int(time.group('hour')) not in range(0, 24):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+        if int(time.group('min')) not in range(0, 60):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+
+    def validate_available_until(self, field):
+        time = re.match(r'(?P<hour>\d{1,2})\:(?P<min>\d{2})', field.data)
+        if not time:
+            raise ValidationError(u'Формат "ЧЧ:MM"')
+        if int(time.group('hour')) not in range(0, 24):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
+        if int(time.group('min')) not in range(0, 60):
+            raise ValidationError(u'Неверное время! Формат "ЧЧ:ММ"')
 
 
 class EditBoardForm(AddBoardForm):
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         self.dir.validators = []
         self.name.validators = []
-        super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
+        super(EditBoardForm, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 
     def validate_name(self, field):
         session = self.get_session()
@@ -81,7 +107,10 @@ class StaffEditForm(StaffForm):
 
     def process(self, formdata=None, obj=None, data=None, **kwargs):
         #TODO: подумать как иначе
-        self.boards.set_object(obj)
+        try:
+            self.boards.set_object(obj)
+        except AttributeError:
+            pass
         self.name.validators = []
         super(self.__class__, self).process(formdata=formdata, obj=obj, data=data, **kwargs)
 

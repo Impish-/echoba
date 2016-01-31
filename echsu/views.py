@@ -1,15 +1,25 @@
 # -*- coding: utf-8 -*-
+import random
+import smtplib
+import string
+import urllib
+
 import arrow
 import time
 
+import os
 from sqlalchemy.orm import load_only
 from sqlalchemy_imageattach.context import store_context
 from torgen.base import TemplateHandler
 from torgen.list import ListHandler
+from tornado import gen
 
-from echsu.forms import MessageForm, CreateThreadForm
-from manage.models import Board, Message, Thread
-from settings import store
+from echsu.forms import MessageForm, CreateThreadForm, RegForm1, RegBoard
+from manage.dynamic_form_fields import BoardDynamicForm
+from manage.models import Board, Message, Thread, Staff, RegisterRequest
+from settings import store, STATIC_PATH
+from settings_local import email_settings
+from toolz.get_images.bing import get_images
 from toolz.base_cls import BoardDataMixin, FormMixin
 from toolz.recaptcha import RecaptchaField
 
@@ -29,13 +39,34 @@ class MessageAdding(FormMixin):
             message = Message(ip_address=self.request.headers.get("X-Real-IP") or self.request.remote_ip,
                               thread_id=thread_id, board=board, id=messages_count + 1)
             form.populate_obj(message)
-            message.thread_id = thread_id
+
             if self.request.files.get(form.image.name, None):
                 image = self.request.files[form.image.name][0]
-                message.picture.from_blob(image['body'])
+                image = image['body']
+                message.picture.from_blob(image)
                 message.picture.generate_thumbnail(width=150)
+            elif form.picrandom.data:
+                try:
+                    kw = lambda m: " ".join([random.choice(m.split(' ')), random.choice(m.split(' '))])
+                    key_words = kw(form.message.data) if form.message.data\
+                                        else ''.join(random.choice(string.ascii_lowercase) for x in range(2))
+                    images = get_images(key_words)
+                    url = random.choice(images)
+                    image = urllib.urlopen(url).read()
+                    if image is not None:
+                        message.picture.from_blob(image)
+                        message.picture.generate_thumbnail(width=150)
+                except IndexError:
+                    self.db.rollback()
+                    if form.op_post:
+                         #Если Оп-пост то отдаем картинку из локальной папки с пикчами (ну а хули?)
+                        image = random.choice(os.listdir('%s/images/randpics' % STATIC_PATH))
+                        message.picture.from_blob(open('%s/images/randpics/%s' % (STATIC_PATH, image), 'rb').read())
+                        message.picture.generate_thumbnail(width=150)
+
             message.before_added(self.get_board())
             message.datetime = arrow.utcnow()
+            message.thread_id = thread_id
             self.db.add(message)
             self.db.commit()
             self.db.refresh(message)
@@ -58,6 +89,18 @@ class MessageAdding(FormMixin):
             pass
         form = self.form_class(**self.get_form_kwargs())
         return form
+
+    def prepare(self, **kwargs):
+        board = self.get_board()
+        try:
+            assert board is not None
+        except AssertionError:
+            self.send_error(status_code=404)
+        if not board.good_time():
+            self.template_name = 'timer.html'
+            self.render({'board': board,
+                         'start': board.get_time_arrow(name='start')})
+        return super(MessageAdding, self).prepare(**kwargs)
 
     def post(self, *args, **kwargs):
         self.form_class.image_attached = self.request.files.get('image', None) is not None
@@ -102,13 +145,9 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
 
     def get_queryset(self):
         board = self.get_board()
-        try:
-            assert board is not None
-        except AssertionError:
-            self.send_error(status_code=404)
         self.paginate_by = board.threads_on_page
-        self.queryset = self.db.query(self.model).order_by(Thread.bumped.desc()). \
-            filter(Thread.board_id == board.id, Thread.deleted == False)
+        self.queryset = self.db.query(self.model).join(Message).\
+            filter(Thread.board_id == board.id, Thread.deleted == False).order_by(Thread.bumped.desc())
         return super(self.__class__, self).get_queryset()
 
     def get_context_data(self, **kwargs):
@@ -125,8 +164,73 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         self.db.add(thread)
         self.db.commit()
         self.db.refresh(thread)
-        self.make_message(form=form, thread_id=thread.id)
+        try:
+            self.make_message(form=form, thread_id=thread.id)
+        except:
+            pass
         self.redirect(self.get_success_url())
 
     def get_success_url(self):
         return self.reverse_url('board', self.get_board().dir)
+
+
+class RegisterModerator(BoardDataMixin, TemplateHandler, FormMixin):
+    """
+        Не ну а чо? Анонимный имиджборд же!
+    """
+    form_class = RegForm1
+    model = Staff
+    template_name = 'registration/registration_step_1.html'
+
+    def form_valid(self, form):
+        super(RegisterModerator, self).form_valid(form)
+        rr = RegisterRequest(staff=self.object)
+        self.db.add(rr)
+        self.db.commit()
+        self.db.refresh(rr)
+
+        toaddr = form.email.data
+        subj = 'Notification from system'
+        link = 'https://ech.su%s' % (self.reverse_url('reg2', rr.hash))
+        msg_txt = u'Для того чтобы создать доску пройди по ссылке:\n\n ' + link + \
+                  u'\n\nАккаунт модератора, будет доступен после создания доски!'  #
+        msg = u"From: %s\nTo: %s\nSubject: %s\n\n%s" % (email_settings['from'], toaddr, subj, msg_txt)
+        server = smtplib.SMTP(email_settings['smtp'])
+        server.starttls()
+        server.login(email_settings['username'], email_settings['password'])
+        try:
+            server.sendmail(email_settings['from'], toaddr, msg.encode('utf-8'))
+        except smtplib.SMTPDataError:
+            pass
+
+        server.quit()
+
+        self.template_name = '/registration/step1_success.html'
+        self.render({'email': form.email.data})
+
+
+class RegisterBoard(BoardDataMixin, TemplateHandler, BoardDynamicForm, FormMixin):
+    """
+        Чем больше сделают другие, тем меньше далать самому!
+    """
+    form_class = RegBoard
+    model = Board
+    template_name = 'registration/registration_step_2.html'
+    success_url = '/'
+
+    def get_request(self):
+        return self.db.query(RegisterRequest).filter(RegisterRequest.hash == self.path_kwargs.get('key', None)).first()
+
+    def prepare(self):
+        valid_request = self.get_request()
+        if not valid_request:
+            raise self.send_error(status_code=403)
+
+    def form_valid(self, form):
+        super(RegisterBoard, self).form_valid(form)
+        request = self.get_request()
+        request.staff.active = True
+        request.staff.boards.append(self.object)
+        self.db.query(RegisterRequest.id == request.id).delete()
+        self.db.commit()
+        return self.redirect(self.get_success_url())
