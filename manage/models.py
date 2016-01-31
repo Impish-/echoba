@@ -213,7 +213,7 @@ class Board(Base, SessionMixin):
         end = self.get_time_arrow(name='end')
         # try:
         if end < start:
-                end.ceil('day')
+               return end.ceil('day').humanize(locale="ru")
         if start < now:
             start = self.get_time_arrow(name='start')
         return start.humanize(locale="ru")
