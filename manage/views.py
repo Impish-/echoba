@@ -229,3 +229,7 @@ class DeleteBoardHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, Fla
     template_name = 'confirm_delete.html'
     model = Board
     success_url_reverse_args = ['manage']
+
+    def post(self, *args, **kwargs):
+        with store_context(store):
+            return super(DeleteBoardHandler, self).post(*args, **kwargs)
