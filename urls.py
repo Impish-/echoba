@@ -25,7 +25,7 @@ urls = [
 
     url(r"/manage/board/add/?", AddBoardHandler, name='board_add'),
     url(r"/manage/board/edit/(?P<id>\w+)/?", EditBoardHandler, name='board_edit'),
-    # url(r"/manage/board/del/(?P<id>\w+)/?", DeleteBoardHandler, name='board_delete'),
+    url(r"/manage/board/del/(?P<id>\w+)/?", DeleteBoardHandler, name='board_delete'),
 
     url(r"/manage/section_list/?", SectionHandler, name='section_list'),
     url(r"/manage/section_list/edit/(?P<id>\w+)/?", EditSectionHandler, name='edit_section'),
