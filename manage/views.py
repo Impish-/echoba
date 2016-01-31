@@ -169,7 +169,7 @@ class MessageListHandler(BoardDataMixin, FilterDynamicForm, ListHandler, FormMix
         filtred_board = self.get_argument('boards', 0)
         if int(filtred_board) > 0:
             query = query.filter(Message.board_id == filtred_board)
-        return query.order_by(Message.id.desc())
+        return query.order_by(Message.gid.desc())
 
 
 @admin_only
