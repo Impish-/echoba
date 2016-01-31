@@ -94,12 +94,12 @@ class MessageAdding(FormMixin):
         board = self.get_board()
         try:
             assert board is not None
+            if not board.good_time():
+                self.template_name = 'timer.html'
+                self.render({'board': board,
+                             'start': board.get_time_arrow(name='start')})
         except AssertionError:
             self.send_error(status_code=404)
-        if not board.good_time():
-            self.template_name = 'timer.html'
-            self.render({'board': board,
-                         'start': board.get_time_arrow(name='start')})
         return super(MessageAdding, self).prepare(**kwargs)
 
     def post(self, *args, **kwargs):
