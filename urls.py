@@ -8,7 +8,7 @@ from echsu.views import MainPageView, ThreadView, RegisterModerator, RegisterBoa
 from echsu.views import BoardView
 from manage.views import  LogOutHandler, ManageHandler, StaffManageHandler, EditStaffManageHandler, \
     DelStaffManageHandler, AddBoardHandler, DelMessageManageHandler, EditBoardHandler, MessageListHandler, \
-    SectionHandler, EditSectionHandler, DelSectionHandler, EditMessageHandler
+    SectionHandler, EditSectionHandler, DelSectionHandler, EditMessageHandler, DeleteBoardHandler
 
 urls = [
     url(r"/?$", MainPageView, name='main_page'),
@@ -25,6 +25,7 @@ urls = [
 
     url(r"/manage/board/add/?", AddBoardHandler, name='board_add'),
     url(r"/manage/board/edit/(?P<id>\w+)/?", EditBoardHandler, name='board_edit'),
+    # url(r"/manage/board/del/(?P<id>\w+)/?", DeleteBoardHandler, name='board_delete'),
 
     url(r"/manage/section_list/?", SectionHandler, name='section_list'),
     url(r"/manage/section_list/edit/(?P<id>\w+)/?", EditSectionHandler, name='edit_section'),

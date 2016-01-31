@@ -34,7 +34,7 @@ class RegisterRequest(Base, SessionMixin):
             string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(60)))
 
     staff_id = Column(Integer, ForeignKey('staff.id'))
-    staff = relationship('Staff')
+    staff = relationship('Staff', backref=backref('hash', cascade="all, delete"))
 
 
 class Staff(Base, SessionMixin):
@@ -278,7 +278,7 @@ class Thread(Base, SessionMixin):
 
     board_id = Column(Integer, ForeignKey('board.id'))
     board = relationship('Board', lazy='subquery', cascade='all',
-                         backref=backref('threads', lazy='dynamic'))
+                         backref=backref('threads', lazy='dynamic', cascade="all, delete"))
 
     bumped = Column(BigInteger)
     deleted = Column(BOOLEAN, default=False)
@@ -335,7 +335,7 @@ class Message(Base, SessionMixin):
     deleted = Column(BOOLEAN, default=False)
 
     board_id = Column(Integer, ForeignKey('board.id'), primary_key=True)
-    board = relationship('Board', backref=backref('messages', ))
+    board = relationship('Board', backref=backref('messages', cascade="all, delete"))
 
 
     # image = image_attachment('BoardImage')

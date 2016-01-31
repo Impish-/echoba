@@ -5,7 +5,6 @@ from wtforms import RadioField, BooleanField, HiddenField, FormField, FileField,
 from wtforms import validators
 from wtforms.validators import InputRequired, EqualTo
 from wtforms_alchemy import model_form_factory
-from wtforms_components import  EmailField
 from wtforms_tornado import Form
 
 from manage.models import Thread, Message, Staff, Board, Section
@@ -18,7 +17,7 @@ ModelForm = model_form_factory(Form)
 class RegForm1(FormCBV):
     class Meta:
         model = Staff
-        only = ['name']
+        only = ['name', 'email']
 
     password = PasswordField(u'Пароль',
                              [validators.Length(min=6, max=25, message=u'от 6 до 25 Символов!'),
@@ -28,7 +27,6 @@ class RegForm1(FormCBV):
                               ]
                              )
     confirm = PasswordField(u'Еще раз')
-    email = EmailField(u'E-mail', [InputRequired(message=u'Обязательно!'),])
     captcha = RecaptchaField(validators=[RecaptchaValidator()])
 
 

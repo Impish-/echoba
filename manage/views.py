@@ -221,3 +221,11 @@ class EditBoardHandler(BoardDataMixin, BoardDynamicForm, FormMixinReversed, Deta
     context_object_name = 'user'
     form_class = EditBoardForm
     success_url_reverse_args = ['board_edit', 'id']
+
+
+@login_required
+@can_moderate
+class DeleteBoardHandler(BoardDataMixin, SuccessReverseMixin, DeleteHandler, FlashMixin):
+    template_name = 'confirm_delete.html'
+    model = Board
+    success_url_reverse_args = ['manage']

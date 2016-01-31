@@ -198,7 +198,11 @@ class RegisterModerator(BoardDataMixin, TemplateHandler, FormMixin):
         server = smtplib.SMTP(email_settings['smtp'])
         server.starttls()
         server.login(email_settings['username'], email_settings['password'])
-        server.sendmail(email_settings['from'], toaddr, msg.encode('utf-8'))
+        try:
+            server.sendmail(email_settings['from'], toaddr, msg.encode('utf-8'))
+        except smtplib.SMTPDataError:
+            pass
+
         server.quit()
 
         self.template_name = '/registration/step1_success.html'
