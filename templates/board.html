@@ -2,6 +2,8 @@
 {% from 'macro.html' import post_message %}
 
 {% block title %}/{{ board.dir }}/ - {{ board.name }} - {% endblock %}
+{% block desc %}Имиджборд {{ board.name }}{% endblock %}
+{% block keywords %}{{ board.name }}{% endblock %}
 
 {% block content %}
     <h1 class="logo">
