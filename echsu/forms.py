@@ -34,6 +34,11 @@ class RegBoard(FormCBV):
     class Meta:
         model = Board
 
+    def validate_dir(self, field):
+        print field
+        if re.match(r'^[a-zA-Z0-9-]+$', field.data) is None:
+            raise ValidationError('a-zA-Z0-9')
+
     def validate_section_id(self, field):
         session = self.get_session()
         field.data = field.data if field.data > 0 else None
