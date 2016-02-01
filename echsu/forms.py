@@ -35,7 +35,6 @@ class RegBoard(FormCBV):
         model = Board
 
     def validate_dir(self, field):
-        print field
         if re.match(r'^[a-zA-Z0-9-]+$', field.data) is None:
             raise ValidationError('a-zA-Z0-9')
 
