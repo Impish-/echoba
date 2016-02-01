@@ -16,7 +16,7 @@ from tornado import gen
 
 from echsu.forms import MessageForm, CreateThreadForm, RegForm1, RegBoard
 from manage.dynamic_form_fields import BoardDynamicForm
-from manage.models import Board, Message, Thread, Staff, RegisterRequest
+from manage.models import Board, Message, Thread, Staff, RegisterRequest, Section
 from settings import store, STATIC_PATH
 from settings_local import email_settings
 from toolz.get_images.bing import get_images
@@ -97,7 +97,8 @@ class MessageAdding(FormMixin):
             if not board.good_time():
                 self.template_name = 'timer.html'
                 self.render({'board': board,
-                             'start': board.timer()})
+                             'start': board.timer(),
+                             'sections': self.db.query(Section).all()})
         except AssertionError:
             self.send_error(status_code=404)
         return super(MessageAdding, self).prepare(**kwargs)
