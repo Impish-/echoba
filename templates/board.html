@@ -4,9 +4,9 @@
 {% block title %}/{{ board.dir }}/ - {{ board.name }} -{% endblock %}
 
 {% block content %}
-    <div class="logo">
+    <h1 class="logo">
         <a href="/{{ board.dir }}/">/{{ board.dir }}/ - {{ board.name }}</a>
-    </div>
+    </h1>
     {% include "post_form.html" %}
 
     {% for thread in board.threads %}
