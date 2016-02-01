@@ -36,6 +36,10 @@ class AddBoardForm(FormCBV):
     class Meta:
         model = Board
 
+    def validate_dir(self, field):
+        if re.match(r'^[a-zA-Z0-9-]+$', field.data) is None:
+            raise ValidationError('a-zA-Z0-9')
+
     def validate_section_id(self, field):
         session = self.get_session()
         field.data = field.data if field.data > 0 else None
@@ -76,6 +80,8 @@ class EditBoardForm(AddBoardForm):
             raise ValidationError(u'Занято другой доской')
 
     def validate_dir(self, field):
+        if re.match(r'^[a-zA-Z0-9-]+$', field.data) is None:
+            raise ValidationError('a-zA-Z0-9')
         session = self.get_session()
         try_get_board = session.query(Staff).filter(Board.dir == field.data, Board.id != self._obj.id).first()
         if try_get_board:
