@@ -190,7 +190,7 @@ class Board(Base, SessionMixin):
     thread_tail = Column(Integer, default=5, label=u'Хвост треда(сообщений на странице)')
     captcha = Column(BOOLEAN, default=False, label=u'Капча')
     section = relationship('Section',
-                           backref=backref('boards', lazy="subquery"))
+                           backref=backref('boards', lazy="subquery", order_by="Message.gid",))
     section_id = Column(Integer, ForeignKey('section.id'))
 
     available_from = Column(String, label=u'(Часы доступа(мск)) Доступна с ', nullable=True)
