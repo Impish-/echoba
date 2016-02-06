@@ -129,8 +129,8 @@ class BaseMixin(object):
     def get_context_data(self, **kwargs):
 
         kwargs.update({
-            'board_list': self.db.query(Board).order_by(Board.dir).all(),
-            'sections' : self.db.query(Section).order_by(Section.id).all()
+            #'board_list': self.db.query(Board).order_by(Board.dir).all(),
+            'sections': self.db.query(Section).order_by(Section.id).all()
         })
 
         kwargs['current_user'] = self.get_current_user()
