@@ -155,7 +155,6 @@ class BoardView(BoardDataMixin, ListHandler, MessageAdding):
         context = super(self.__class__, self).get_context_data(**kwargs)
         context['board'] = self.get_board().__dict__
         context['board']['threads'] = context.pop('threads')
-        context['board_view'] = True
         return context
 
     def form_valid(self, form):

@@ -1,4 +1,4 @@
-{% macro post_message(message, op_post=0, op_label=0, thread_link='', thread_id=0, is_admin=None, default_name='') %}
+{% macro post_message(message, op_post=0, op_label=0, thread_link='', thread_id=0, is_admin=None, default_name='', board_view=False) %}
     <div class="postnode" id="{{ message.id }}">
         {% if not op_post -%}
             <table><tr><td class="doubledash">&gt;&gt;</td><td id="reply{{ message.id }}" class="reply">
@@ -67,11 +67,11 @@
 
         <blockquote>
 
-            {% if message.need_cut() and board_view %}
+            {% if message.need_cut() and board_view%}
                 <div class="postmessage cut_message" id="messgae_cut{{ message.id }}">{{ message.message_cut()|safe }}</div>
                 <a class="toggle_message" data-message="{{ message.id }}" href="#">Показать полностью</a>
             {% endif %}
-            <div style="{% if board_view  %}display: none{% endif %}" class="postmessage full_message" id="messgae_full{{ message.id }}">{{ message.message|safe }}</div>
+            <div style="{% if board_view %}display: none{% endif %}" class="postmessage full_message" id="messgae_full{{ message.id }}">{{ message.message|safe }}</div>
         </blockquote>
 
         {% if not op_post -%}

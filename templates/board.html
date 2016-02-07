@@ -21,7 +21,8 @@
                         thread_link=thread.link(),
                         thread_id=thread.id,
                         is_admin=current_user.check_moderate(board.id) if current_user else None,
-                        default_name=board.default_name
+                        default_name=board.default_name,
+                        board_view = True
             ) }}
 
             <div class="replies">
@@ -33,7 +34,8 @@
                             message=message,
                             thread_link=thread.link(),
                             is_admin=current_user.check_moderate(board.id) if current_user else None,
-                            default_name=board.default_name
+                            default_name=board.default_name,
+                            board_view = True
                     ) }}
                 {% endfor %}
             </div>
