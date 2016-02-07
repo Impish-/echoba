@@ -116,7 +116,22 @@ echModules.board = (function(modules_obj) {
             return false;
         }
     };
+    //hard!!!
+    var toggle_message = function(elem) {
+        var cssClass = elem.target.getAttribute('class');
+        if (cssClass && cssClass.indexOf('toggle_message') >= 0) {
+            elem.preventDefault();
+            var message = elem.target.dataset.message;
+            function toggle(el) {
+                el.style.display = (el.style.display == 'none') ? 'block' : 'none';
+            };
+            toggle(document.getElementById('messgae_cut' + message));
+            toggle(document.getElementById('messgae_full' + message));
+            toggle(elem.target)
+        };
+    };
 
+    document.addEventListener('click', toggle_message);
     document.addEventListener('click', click_to_hide);
 
     var init = function() {

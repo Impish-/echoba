@@ -66,7 +66,11 @@
         {%- endif %}
 
         <blockquote>
-            <div class="postmessage">{{ message.message|safe }}</div>
+            {% if message.need_cut() %}
+                <div class="postmessage cut_message" id="messgae_cut{{ message.id }}">{{ message.message_cut()|safe }}</div>
+                <a class="toggle_message" data-message="{{ message.id }}" href="#">Показать полностью</a>
+            {% endif %}
+            <div style="display: none" class="postmessage full_message" id="messgae_full{{ message.id }}">{{ message.message|safe }}</div>
         </blockquote>
 
         {% if not op_post -%}

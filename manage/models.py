@@ -369,6 +369,13 @@ class Message(Base, SessionMixin):
             except NoResultFound:
                 return None
 
+    def message_cut(self):
+        words = self.message.replace('\n', ' ').split(' ')
+        return ' '.join(words[:220])
+
+    def need_cut(self):
+        return len(self.message.replace('\n', ' ').split(' ')) > 220
+
     def image_info(self):
         '''
             Полноразмерное изображение
