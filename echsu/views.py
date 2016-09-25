@@ -126,10 +126,13 @@ class ThreadView(BoardDataMixin, MessageAdding, TemplateHandler):
     def get_context_data(self, **kwargs):
         thread = self.get_thread()
         context = super(self.__class__, self).get_context_data(**kwargs)
-        context.update({
-            'board': thread.board,
-            'thread': thread,
-        })
+        try:
+            context.update({
+                'board': thread.board,
+                'thread': thread,
+            })
+        except:
+            self.send_error(status_code=404)
         return context
 
     def form_valid(self, form):
